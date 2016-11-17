@@ -400,29 +400,28 @@ uint32_t ulAddressToLookup;
     return eReturn;
 }
 
-/*-----------------------------------------------------------*/
+/* 搜索缓存表 */
 
 static eARPLookupResult_t prvCacheLookup( uint32_t ulAddressToLookup, MACAddress_t * const pxMACAddress )
 {
 BaseType_t x;
 eARPLookupResult_t eReturn = eARPCacheMiss;
 
-    /* Loop through each entry in the ARP cache. */
+    /* 遍历缓存表 */
     for( x = 0; x < ipconfigARP_CACHE_ENTRIES; x++ )
     {
-        /* Does this row in the ARP cache table hold an entry for the IP address
-        being queried? */
+        /* 判断IP地址 */
         if( xARPCache[ x ].ulIPAddress == ulAddressToLookup )
         {
-            /* A matching valid entry was found. */
+            /* 发现匹配项 */
             if( xARPCache[ x ].ucValid == ( uint8_t ) pdFALSE )
             {
-                /* This entry is waiting an ARP reply, so is not valid. */
+                /* 此项正在等待ARP回复 */
                 eReturn = eCantSendPacket;
             }
             else
             {
-                /* A valid entry was found. */
+                /* 发现有效项 */
                 memcpy( pxMACAddress->ucBytes, xARPCache[ x ].xMACAddress.ucBytes, sizeof( MACAddress_t ) );
                 eReturn = eARPCacheHit;
             }
@@ -439,26 +438,23 @@ void vARPAgeCache( void )
 BaseType_t x;
 TickType_t xTimeNow;
 
-    /* Loop through each entry in the ARP cache. */
+    /* 遍历缓存表 */
     for( x = 0; x < ipconfigARP_CACHE_ENTRIES; x++ )
     {
-        /* If the entry is valid (its age is greater than zero). */
+        /* 生命未到期 */
         if( xARPCache[ x ].ucAge > 0U )
         {
-            /* Decrement the age value of the entry in this ARP cache table row.
-            When the age reaches zero it is no longer considered valid. */
+            /* 递减生命 */
             ( xARPCache[ x ].ucAge )--;
 
-            /* If the entry is not yet valid, then it is waiting an ARP
-            reply, and the ARP request should be retransmitted. */
+            /* 如若正在等待ARP回复，重发ARP请求 */
             if( xARPCache[ x ].ucValid == ( uint8_t ) pdFALSE )
             {
                 FreeRTOS_OutputARPRequest( xARPCache[ x ].ulIPAddress );
             }
             else if( xARPCache[ x ].ucAge <= ( uint8_t ) arpMAX_ARP_AGE_BEFORE_NEW_ARP_REQUEST )
             {
-                /* This entry will get removed soon.  See if the MAC address is
-                still valid to prevent this happening. */
+                /* 如若生命小于阈值，也要发送ARP请求 */
                 iptraceARP_TABLE_ENTRY_WILL_EXPIRE( xARPCache[ x ].ulIPAddress );
                 FreeRTOS_OutputARPRequest( xARPCache[ x ].ulIPAddress );
             }
@@ -469,7 +465,7 @@ TickType_t xTimeNow;
 
             if( xARPCache[ x ].ucAge == 0u )
             {
-                /* The entry is no longer valid.  Wipe it out. */
+                /* 生命到期，清除掉 */
                 iptraceARP_TABLE_ENTRY_EXPIRED( xARPCache[ x ].ulIPAddress );
                 xARPCache[ x ].ulIPAddress = 0UL;
             }
@@ -477,7 +473,7 @@ TickType_t xTimeNow;
     }
 
     xTimeNow = xTaskGetTickCount ();
-
+    /* 发送免费ARP请求 */
     if( ( xLastGratuitousARPTime == ( TickType_t ) 0 ) || ( ( xTimeNow - xLastGratuitousARPTime ) > ( TickType_t ) arpGRATUITOUS_ARP_PERIOD ) )
     {
         FreeRTOS_OutputARPRequest( *ipLOCAL_IP_ADDRESS_POINTER );
@@ -488,28 +484,27 @@ TickType_t xTimeNow;
 
 void vARPSendGratuitous( void )
 {
-    /* Setting xLastGratuitousARPTime to 0 will force a gratuitous ARP the next
-    time vARPAgeCache() is called. */
+    /* 将计数器清零可以促使免费ARP的产生 */
     xLastGratuitousARPTime = ( TickType_t ) 0;
 
-    /* Let the IP-task call vARPAgeCache(). */
+    /* 迫使IP任务调用vARPAgeCache().已完成免费ARP的发送 */
     xSendEventToIPTask( eARPTimerEvent );
 }
 
-/*-----------------------------------------------------------*/
+/* 发送ARP请求 */
 void FreeRTOS_OutputARPRequest( uint32_t ulIPAddress )
 {
 NetworkBufferDescriptor_t *pxNetworkBuffer;
 
-    /* This is called from the context of the IP event task, so a block time
-    must not be used. */
+    /* 获取一块内存 */
     pxNetworkBuffer = pxGetNetworkBufferWithDescriptor( sizeof( ARPPacket_t ), ( TickType_t ) 0 );
 
     if( pxNetworkBuffer != NULL )
     {
+        /* 填充ARP数据 */
         pxNetworkBuffer->ulIPAddress = ulIPAddress;
         vARPGenerateRequestPacket( pxNetworkBuffer );
-
+        /* 如果定义了最小包大小，则进行数据的填充 */
         #if defined( ipconfigETHERNET_MINIMUM_PACKET_BYTES )
         {
             if( pxNetworkBuffer->xDataLength < ( size_t ) ipconfigETHERNET_MINIMUM_PACKET_BYTES )
@@ -525,11 +520,11 @@ NetworkBufferDescriptor_t *pxNetworkBuffer;
             }
         }
         #endif
-
+        /* 发送ARP请求随后释放内存 */
         xNetworkInterfaceOutput( pxNetworkBuffer, pdTRUE );
     }
 }
-
+/* 产生ARP请求包 */
 void vARPGenerateRequestPacket( NetworkBufferDescriptor_t * const pxNetworkBuffer )
 {
 ARPPacket_t *pxARPPacket;
@@ -558,13 +553,13 @@ ARPPacket_t *pxARPPacket;
 
     iptraceCREATING_ARP_REQUEST( pxNetworkBuffer->ulIPAddress );
 }
-/*-----------------------------------------------------------*/
+/* 清除ARP缓存表 */
 
 void FreeRTOS_ClearARP( void )
 {
     memset( xARPCache, '\0', sizeof( xARPCache ) );
 }
-/*-----------------------------------------------------------*/
+/* 打印ARP缓存表 */
 
 #if( ipconfigHAS_PRINTF != 0 ) || ( ipconfigHAS_DEBUG_PRINTF != 0 )
 
