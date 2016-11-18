@@ -1736,36 +1736,32 @@ uint32_t ulAckNr = FreeRTOS_ntohl( pxTCPHeader->ulAckNr );
     {
         pxTCPWindow->tx.ulCurrentSequenceNumber = pxTCPWindow->tx.ulFINSequenceNumber;
         pxTCPHeader->ucTCPFlags = ipTCP_FLAG_ACK | ipTCP_FLAG_FIN;
-
-        /* And wait for the final ACK. */
+        /* 等待最后的应答 */
         vTCPStateChange( pxSocket, eLAST_ACK );
     }
     else
     {
         /* Our FIN has been ACK'd, the outgoing sequence number is now fixed. */
+        /* 我们的FIN已经被应答了， */
         pxTCPWindow->tx.ulCurrentSequenceNumber = pxTCPWindow->tx.ulFINSequenceNumber + 1u;
         if( pxSocket->u.xTCP.bits.bFinRecv == pdFALSE_UNSIGNED )
         {
-            /* We have sent out a FIN but the peer hasn't replied with a FIN
-            yet. Do nothing for the moment. */
+            /* 我们已经发送了FIN，但是对方并没有回复一个FIN，现在什么也不做 */
             pxTCPHeader->ucTCPFlags = 0u;
         }
         else
         {
             if( pxSocket->u.xTCP.bits.bFinLast == pdFALSE_UNSIGNED )
             {
-                /* This is the third of the three-way hand shake: the last
-                ACK. */
+                /* 这是三步握手的第三步：最后的应答 */
                 pxTCPHeader->ucTCPFlags = ipTCP_FLAG_ACK;
             }
             else
             {
-                /* The other party started the closure, so we just wait for the
-                last ACK. */
+                /* 对方开始关闭，所以我们只是等待最后的ACK */
                 pxTCPHeader->ucTCPFlags = 0u;
             }
-
-            /* And wait for the user to close this socket. */
+            /* 等待用户关闭本套接字 */
             vTCPStateChange( pxSocket, eCLOSE_WAIT );
         }
     }
@@ -1792,7 +1788,7 @@ uint32_t ulAckNr = FreeRTOS_ntohl( pxTCPHeader->ulAckNr );
     return xSendLength;
 }
 /*-----------------------------------------------------------*/
-
+/* 设置时间戳 */
 #if ipconfigUSE_TCP_TIMESTAMPS == 1
 
     static UBaseType_t prvTCPSetTimeStamp( BaseType_t lOffset, FreeRTOS_Socket_t *pxSocket, TCPHeader_t *pxTCPHeader )
@@ -1815,45 +1811,25 @@ uint32_t ulAckNr = FreeRTOS_ntohl( pxTCPHeader->ulAckNr );
 
 #endif
 /*-----------------------------------------------------------*/
-
-/*
- * prvCheckRxData(): called from prvTCPHandleState()
- *
- * The first thing that will be done is find the TCP payload data
- * and check the length of this data.
- */
+/* prvCheckRxData()在prvTCPHandleState()中被调用，第一件要做的事是找到TCP负荷数据并检查数据长度 */
 static BaseType_t prvCheckRxData( NetworkBufferDescriptor_t *pxNetworkBuffer, uint8_t **ppucRecvData )
 {
 TCPPacket_t *pxTCPPacket = ( TCPPacket_t * ) ( pxNetworkBuffer->pucEthernetBuffer );
 TCPHeader_t *pxTCPHeader = &( pxTCPPacket->xTCPHeader );
 int32_t lLength, lTCPHeaderLength, lReceiveLength, lUrgentLength;
-
-    /* Determine the length and the offset of the user-data sent to this
-    node.
-
-    The size of the TCP header is given in a multiple of 4-byte words (single
-    byte, needs no ntoh() translation).  A shift-right 2: is the same as
-    (offset >> 4) * 4. */
+    /* 决定被发送到此节点上的数据的长度和偏移，TCP数据头是需要乘以4的， */
     lTCPHeaderLength = ( BaseType_t ) ( ( pxTCPHeader->ucTCPOffset & VALID_BITS_IN_TCP_OFFSET_BYTE ) >> 2 );
-
-    /* Let pucRecvData point to the first byte received. */
+    /* 使得pucRecvData指向接收到的第一个字节 */
     *ppucRecvData = pxNetworkBuffer->pucEthernetBuffer + ipSIZE_OF_ETH_HEADER + ipSIZE_OF_IPv4_HEADER + lTCPHeaderLength;
-
-    /* Calculate lReceiveLength - the length of the TCP data received.  This is
-    equal to the total packet length minus:
-    ( LinkLayer length (14) + IP header length (20) + size of TCP header(20 +) ).*/
+    /* 计算接收到的数据长度-等同于包长度减去 ( LinkLayer length (14) + IP header length (20) + size of TCP header(20 +) )*/
     lReceiveLength = ( ( int32_t ) pxNetworkBuffer->xDataLength ) - ( int32_t ) ipSIZE_OF_ETH_HEADER;
     lLength =  ( int32_t )FreeRTOS_htons( pxTCPPacket->xIPHeader.usLength );
-
     if( lReceiveLength > lLength )
     {
-        /* More bytes were received than the reported length, often because of
-        padding bytes at the end. */
+        /* 数据超出太多一般是因为填充字节 */
         lReceiveLength = lLength;
     }
-
-    /* Subtract the size of the TCP and IP headers and the actual data size is
-    known. */
+    /* 减去TCP和IP的头的长度就会得到真实的数据长度 */
     if( lReceiveLength > ( lTCPHeaderLength + ( int32_t ) ipSIZE_OF_IPv4_HEADER ) )
     {
         lReceiveLength -= ( lTCPHeaderLength + ( int32_t ) ipSIZE_OF_IPv4_HEADER );
@@ -1869,9 +1845,12 @@ int32_t lLength, lTCPHeaderLength, lReceiveLength, lUrgentLength;
     pointer points to the sequence number of the octet following the urgent
     data.  This field is only be interpreted in segments with the URG control
     bit set. */
+    /* 紧急指针：
+        
+    */
     if( ( pxTCPHeader->ucTCPFlags & ipTCP_FLAG_URG ) != 0u )
     {
-        /* Although we ignore the urgent data, we have to skip it. */
+        /* 虽然我们忽略紧急数据，我们不得不跳过他 */
         lUrgentLength = ( int32_t ) FreeRTOS_htons( pxTCPHeader->usUrgent );
         *ppucRecvData += lUrgentLength;
         lReceiveLength -= FreeRTOS_min_int32( lReceiveLength, lUrgentLength );
