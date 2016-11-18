@@ -1457,38 +1457,30 @@ int32_t lStreamPos;
 
     if( ( *ppxNetworkBuffer ) != NULL )
     {
-        /* A network buffer descriptor was already supplied */
+        /* 网络缓冲描述符早已经创建了 */
         pucEthernetBuffer = ( *ppxNetworkBuffer )->pucEthernetBuffer;
     }
     else
     {
-        /* For now let it point to the last packet header */
+        /* 现在，让他指向上一个包的头 */
         pucEthernetBuffer = pxSocket->u.xTCP.xPacket.u.ucLastPacket;
     }
-
     pxTCPPacket = ( TCPPacket_t * ) ( pucEthernetBuffer );
     pxTCPWindow = &pxSocket->u.xTCP.xTCPWindow;
     lDataLen = 0;
     lStreamPos = 0;
     pxTCPPacket->xTCPHeader.ucTCPFlags |= ipTCP_FLAG_ACK;
-
     if( pxSocket->u.xTCP.txStream != NULL )
     {
-        /* ulTCPWindowTxGet will return the amount of data which may be sent
-        along with the position in the txStream.
-        Why check for MSS > 1 ?
-        Because some TCP-stacks (like uIP) use it for flow-control. */
+        /* ulTCPWindowTxGet将会返回被发送数据的大小和在发送流中的位置，为什么检查MSS大于1？因为一些TCP协议栈用此来进行流控 */
         if( pxSocket->u.xTCP.usCurMSS > 1u )
         {
             lDataLen = ( int32_t ) ulTCPWindowTxGet( pxTCPWindow, pxSocket->u.xTCP.ulWindowSize, &lStreamPos );
         }
-
         if( lDataLen > 0 )
         {
-            /* Check if the current network buffer is big enough, if not,
-            resize it. */
+            /* 检查当前的缓存是否足够大，如果不，重新设定它 */
             pxNewBuffer = prvTCPBufferResize( pxSocket, *ppxNetworkBuffer, lDataLen, uxOptionsLength );
-
             if( pxNewBuffer != NULL )
             {
                 *ppxNetworkBuffer = pxNewBuffer;
@@ -1514,9 +1506,7 @@ int32_t lStreamPos;
                     }
                 }
                 #endif
-
-                /* If the owner of the socket requests a closure, add the FIN
-                flag to the last packet. */
+                /* 如果用户需要关闭，添加FIN标志 */
                 if( ( pxSocket->u.xTCP.bits.bCloseRequested != pdFALSE_UNSIGNED ) && ( pxSocket->u.xTCP.bits.bFinSent == pdFALSE_UNSIGNED ) )
                 {
                     ulDistance = ( uint32_t ) uxStreamBufferDistance( pxSocket->u.xTCP.txStream, ( size_t ) lStreamPos, pxSocket->u.xTCP.txStream->uxHead );
@@ -1535,9 +1525,7 @@ int32_t lStreamPos;
                                 uxTail, uxMid, uxHead ) );
                         }
                         #endif
-                        /* Although the socket sends a FIN, it will stay in
-                        ESTABLISHED until all current data has been received or
-                        delivered. */
+                        /* 虽然套接字发送了一个FIN，但是他会一直停留在ESTABLISHED状态直到数据被发送会被接收 */
                         pxTCPPacket->xTCPHeader.ucTCPFlags |= ipTCP_FLAG_FIN;
                         pxTCPWindow->tx.ulFINSequenceNumber = pxTCPWindow->ulOurSequenceNumber + ( uint32_t ) lDataLen;
                         pxSocket->u.xTCP.bits.bFinSent = pdTRUE_UNSIGNED;
@@ -1553,7 +1541,7 @@ int32_t lStreamPos;
 
     if( ( lDataLen >= 0 ) && ( pxSocket->u.xTCP.ucTCPState == eESTABLISHED ) )
     {
-        /* See if the socket owner wants to shutdown this connection. */
+        /* 看看用户是否要关闭该连接 */
         if( ( pxSocket->u.xTCP.bits.bUserShutdown != pdFALSE_UNSIGNED ) &&
             ( xTCPWindowTxDone( pxTCPWindow ) != pdFALSE ) )
         {
@@ -1577,8 +1565,7 @@ int32_t lStreamPos;
             }
             if( ( lDataLen == 0 ) && ( pxSocket->u.xTCP.bits.bWinChange == pdFALSE_UNSIGNED ) )
             {
-                /* If there is no data to be sent, and no window-update message,
-                we might want to send a keep-alive message. */
+                /* 如果没有数据要发送，并且没有窗口更新信息，我们可能想发送保活信息 */
                 TickType_t xAge = xTaskGetTickCount( ) - pxSocket->u.xTCP.xLastAliveTime;
                 TickType_t xMax;
                 xMax = ( ( TickType_t ) ipconfigTCP_KEEP_ALIVE_INTERVAL * configTICK_RATE_HZ );
@@ -1602,9 +1589,7 @@ int32_t lStreamPos;
         }
         #endif /* ipconfigTCP_KEEP_ALIVE */
     }
-
-    /* Anything to send, a change of the advertised window size, or maybe send a
-    keep-alive message? */
+    /* 任何数据的发送，窗口大小的广播，或者是发送一个保活信号？ */
     if( ( lDataLen > 0 ) ||
         ( pxSocket->u.xTCP.bits.bWinChange != pdFALSE_UNSIGNED ) ||
         ( pxSocket->u.xTCP.bits.bSendKeepAlive != pdFALSE_UNSIGNED ) )
@@ -1637,22 +1622,16 @@ int32_t lStreamPos;
 
     return lDataLen;
 }
-/*-----------------------------------------------------------*/
-
-/*
- * Calculate after how much time this socket needs to be checked again.
- */
+/* 计算该套接字再次检查需要多长时间 */
 static TickType_t prvTCPNextTimeout ( FreeRTOS_Socket_t *pxSocket )
 {
 TickType_t ulDelayMs = ( TickType_t ) 20000;
-
     if( pxSocket->u.xTCP.ucTCPState == eCONNECT_SYN )
     {
-        /* The socket is actively connecting to a peer. */
+        /* 套接字主动连接到对方 */
         if( pxSocket->u.xTCP.bits.bConnPrepared )
         {
-            /* Ethernet address has been found, use progressive timeout for
-            active connect(). */
+            /* 以太网地址已经被发现，对此连接激活连接超时 */
             if( pxSocket->u.xTCP.ucRepCount < 3u )
             {
                 ulDelayMs = ( 3000UL << ( pxSocket->u.xTCP.ucRepCount - 1u ) );
@@ -1665,9 +1644,9 @@ TickType_t ulDelayMs = ( TickType_t ) 20000;
         else
         {
             /* Still in the ARP phase: check every half second. */
+            /* 依然在ARP阶段，每半秒检查 */
             ulDelayMs = 500UL;
         }
-
         FreeRTOS_debug_printf( ( "Connect[%lxip:%u]: next timeout %u: %lu ms\n",
             pxSocket->u.xTCP.ulRemoteIP, pxSocket->u.xTCP.usRemotePort,
             pxSocket->u.xTCP.ucRepCount, ulDelayMs ) );
@@ -1675,7 +1654,7 @@ TickType_t ulDelayMs = ( TickType_t ) 20000;
     }
     else if( pxSocket->u.xTCP.usTimeout == 0u )
     {
-        /* Let the sliding window mechanism decide what time-out is appropriate. */
+        /* 让滑动窗口机制决定多少超时是合适的 */
         BaseType_t xResult = xTCPWindowTxHasData( &pxSocket->u.xTCP.xTCPWindow, pxSocket->u.xTCP.ulWindowSize, &ulDelayMs );
         if( ulDelayMs == 0u )
         {
@@ -1683,7 +1662,7 @@ TickType_t ulDelayMs = ( TickType_t ) 20000;
         }
         else
         {
-            /* ulDelayMs contains the time to wait before a re-transmission. */
+            /* ulDelayMs包含了重传所需的时间 */
         }
         pxSocket->u.xTCP.usTimeout = ( uint16_t )pdMS_TO_MIN_TICKS( ulDelayMs );
     }
@@ -1702,43 +1681,29 @@ static void prvTCPAddTxData( FreeRTOS_Socket_t *pxSocket )
 {
 int32_t lCount, lLength;
 
-    /* A txStream has been created already, see if the socket has new data for
-    the sliding window.
-
-    uxStreamBufferMidSpace() returns the distance between rxHead and rxMid.  It contains new
-    Tx data which has not been passed to the sliding window yet.  The oldest
-    data not-yet-confirmed can be found at rxTail. */
+    /* 发送流已经创建，看看滑动窗口是否有新的数据 
+    uxStreamBufferMidSpace()返回rxHead和rxMid的距离，它包括新的没有被传递给滑动窗口的数据。老的没被确认的数据在rxTail
+    */
     lLength = ( int32_t ) uxStreamBufferMidSpace( pxSocket->u.xTCP.txStream );
 
     if( lLength > 0 )
     {
-        /* All data between txMid and rxHead will now be passed to the sliding
-        window manager, so it can start transmitting them.
-
-        Hand over the new data to the sliding window handler.  It will be
-        split-up in chunks of 1460 bytes each (or less, depending on
-        ipconfigTCP_MSS). */
+        /* 
+        介于txMid和rxHead之间的数据会被传送到滑动窗口，然后可以开始传递。
+        交出新的数据到滑动窗口的句柄，他将会分成1460的段（取决于ipconfigTCP_MSS）
+        */
         lCount = lTCPWindowTxAdd(   &pxSocket->u.xTCP.xTCPWindow,
                                 ( uint32_t ) lLength,
                                 ( int32_t ) pxSocket->u.xTCP.txStream->uxMid,
                                 ( int32_t ) pxSocket->u.xTCP.txStream->LENGTH );
-
-        /* Move the rxMid pointer forward up to rxHead. */
+        /* 移动rxMid向前到达rxHead */
         if( lCount > 0 )
         {
             vStreamBufferMoveMid( pxSocket->u.xTCP.txStream, ( size_t ) lCount );
         }
     }
 }
-/*-----------------------------------------------------------*/
-
-/*
- * prvTCPHandleFin() will be called to handle socket closure
- * The Closure starts when either a FIN has been received and accepted,
- * Or when the socket has sent a FIN flag to the peer
- * Before being called, it has been checked that both reception and transmission
- * are complete.
- */
+/* prvTCPHandleFin()用来掌管套接字的关闭，关闭开始于FIN的接收或者是FIN的发送，在被调用之前，接收和发送的检查已经完成 */
 static BaseType_t prvTCPHandleFin( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t *pxNetworkBuffer )
 {
 TCPPacket_t *pxTCPPacket = ( TCPPacket_t * ) ( pxNetworkBuffer->pucEthernetBuffer );
@@ -1754,13 +1719,13 @@ uint32_t ulAckNr = FreeRTOS_ntohl( pxTCPHeader->ulAckNr );
     }
     if( pxSocket->u.xTCP.bits.bFinSent == pdFALSE_UNSIGNED )
     {
-        /* We haven't yet replied with a FIN, do so now. */
+        /* 我们还没有回复FIN，现在就做 */
         pxTCPWindow->tx.ulFINSequenceNumber = pxTCPWindow->tx.ulCurrentSequenceNumber;
         pxSocket->u.xTCP.bits.bFinSent = pdTRUE_UNSIGNED;
     }
     else
     {
-        /* We did send a FIN already, see if it's ACK'd. */
+        /* 我们确实是发送了FIN，看看是否收到应答 */
         if( ulAckNr == pxTCPWindow->tx.ulFINSequenceNumber + 1u )
         {
             pxSocket->u.xTCP.bits.bFinAcked = pdTRUE_UNSIGNED;
