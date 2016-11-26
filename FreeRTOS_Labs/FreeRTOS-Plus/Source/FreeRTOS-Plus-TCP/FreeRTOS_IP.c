@@ -293,31 +293,27 @@ struct freertos_sockaddr xAddress;
                 xAddress.sin_port = FreeRTOS_ntohs( pxSocket->usLocalPort );
                 pxSocket->usLocalPort = 0u;
                 vSocketBind( pxSocket, &xAddress, sizeof( xAddress ), pdFALSE );
-
-                /* Before 'eSocketBindEvent' was sent it was tested that
-                ( xEventGroup != NULL ) so it can be used now to wake up the
-                user. */
+                /*2016--11--25--17--35--57(ZJYC):eSocketBindEvent被发送之前，
+                ( xEventGroup != NULL )已被测试，所以他可以被用于唤醒用户*/ 
                 pxSocket->xEventBits |= eSOCKET_BOUND;
                 vSocketWakeUpUser( pxSocket );
                 break;
-
             case eSocketCloseEvent :
-                /* The user API FreeRTOS_closesocket() has sent a message to the
-                IP-task to actually close a socket. This is handled in
-                vSocketClose().  As the socket gets closed, there is no way to
-                report back to the API, so the API won't wait for the result */
+                /*2016--11--25--17--39--54(ZJYC):用户API-FreeRTOS_closesocket
+                    已经发送了消息到IP-Task去关闭一个套接字，这有vSocketClose()
+                    实现，当套接字关闭以后，没有东西反馈给这个API，所有API不用
+                    等待结果*/ 
                 vSocketClose( ( FreeRTOS_Socket_t * ) ( xReceivedEvent.pvData ) );
                 break;
 
             case eStackTxEvent :
-                /* The network stack has generated a packet to send.  A
-                pointer to the generated buffer is located in the pvData
-                member of the received event structure. */
+                /*2016--11--25--17--43--07(ZJYC):协议栈已经产生了要被发送的包
+                时间结构体中的pvData存储该产生的指针*/ 
                 vProcessGeneratedUDPPacket( ( NetworkBufferDescriptor_t * ) ( xReceivedEvent.pvData ) );
                 break;
 
             case eDHCPEvent:
-                /* The DHCP state machine needs processing. */
+                /*2016--11--26--10--24--50(ZJYC):DHCP状态机需要执行    */ 
                 #if( ipconfigUSE_DHCP == 1 )
                 {
                     vDHCPProcess( pdFALSE );
@@ -326,9 +322,9 @@ struct freertos_sockaddr xAddress;
                 break;
 
             case eSocketSelectEvent :
-                /* FreeRTOS_select() has got unblocked by a socket event,
-                vSocketSelect() will check which sockets actually have an event
-                and update the socket field xSocketBits. */
+                /*2016--11--26--10--25--20(ZJYC):FreeRTOS_select()已经通过套接字事件
+                解锁了，vSocketSelect()会检查哪一个套接字有事件并更新该套接字的
+                xSocketBits区域*/ 
                 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
                 {
                     vSocketSelect( ( SocketSelect_t * ) ( xReceivedEvent.pvData ) );
@@ -339,6 +335,8 @@ struct freertos_sockaddr xAddress;
             case eSocketSignalEvent :
                 #if( ipconfigSUPPORT_SIGNALS != 0 )
                 {
+                    /*2016--11--26--10--27--24(ZJYC):某些任务想通知这个套接字的用户
+                    ，来中断*/ 
                     /* Some task wants to signal the user of this socket in
                     order to interrupt a call to recv() or a call to select(). */
                     FreeRTOS_SignalSocket( ( Socket_t ) xReceivedEvent.pvData );
@@ -349,18 +347,16 @@ struct freertos_sockaddr xAddress;
             case eTCPTimerEvent :
                 #if( ipconfigUSE_TCP == 1 )
                 {
-                    /* Simply mark the TCP timer as expired so it gets processed
-                    the next time prvCheckNetworkTimers() is called. */
+                    /*2016--11--26--10--29--23(ZJYC):简单的按需标记TCP定时器
+                    使得定时器可以在下一次调用prvCheckNetworkTimers()时得以运行*/ 
                     xTCPTimer.bExpired = pdTRUE_UNSIGNED;
                 }
                 #endif /* ipconfigUSE_TCP */
                 break;
 
             case eTCPAcceptEvent:
-                /* The API FreeRTOS_accept() was called, the IP-task will now
-                check if the listening socket (communicated in pvData) actually
-                received a new connection. */
-                #if( ipconfigUSE_TCP == 1 )
+                /*2016--11--26--10--30--58(ZJYC):API FreeRTOS_accept()被调用，IP-Task会
+                检查监听套接字是否真的收到了新的连接*/ 
                 {
                     pxSocket = ( FreeRTOS_Socket_t * ) ( xReceivedEvent.pvData );
 
@@ -374,8 +370,8 @@ struct freertos_sockaddr xAddress;
                 break;
 
             case eTCPNetStat:
-                /* FreeRTOS_netstat() was called to have the IP-task print an
-                overview of all sockets and their connections */
+                /*2016--11--26--12--25--10(ZJYC):FreeRTOS_netstat()被调用来打印全部套接字
+                以及其连接的信息*/ 
                 #if( ( ipconfigUSE_TCP == 1 ) && ( ipconfigHAS_PRINTF == 1 ) )
                 {
                     vTCPNetStat();
@@ -384,14 +380,14 @@ struct freertos_sockaddr xAddress;
                 break;
 
             default :
-                /* Should not get here. */
+                /*2016--11--26--12--26--06(ZJYC):不应该执行到这里    */ 
                 break;
         }
 
         if( xNetworkDownEventPending != pdFALSE )
         {
-            /* A network down event could not be posted to the network event
-            queue because the queue was full.  Try posting again. */
+            /*2016--11--26--12--26--28(ZJYC):掉网事件因队列满而不能被发送到
+            事件队列，在这里再次尝试    */ 
             FreeRTOS_NetworkDown();
         }
     }
@@ -419,33 +415,27 @@ static void prvHandleEthernetPacket( NetworkBufferDescriptor_t *pxBuffer )
 {
     #if( ipconfigUSE_LINKED_RX_MESSAGES == 0 )
     {
-        /* When ipconfigUSE_LINKED_RX_MESSAGES is not set to 0 then only one
-        buffer will be sent at a time.  This is the default way for +TCP to pass
-        messages from the MAC to the TCP/IP stack. */
+        /*2016--11--26--12--27--56(ZJYC):i如果pconfigUSE_LINKED_RX_MESSAGES不为0，
+        则一次只能发送一个缓冲，这是TCP从MAC向协议栈传递数据的默认方式*/ 
         prvProcessEthernetPacket( pxBuffer );
     }
     #else /* ipconfigUSE_LINKED_RX_MESSAGES */
     {
     NetworkBufferDescriptor_t *pxNextBuffer;
 
-        /* An optimisation that is useful when there is high network traffic.
-        Instead of passing received packets into the IP task one at a time the
-        network interface can chain received packets together and pass them into
-        the IP task in one go.  The packets are chained using the pxNextBuffer
-        member.  The loop below walks through the chain processing each packet
-        in the chain in turn. */
+        /*2016--11--26--12--29--37(ZJYC):当网络拥挤时，优化算法是有用的，不是
+        每次都传递数据包到IP-Task，网络接口可以接受一系列数据包并以此将其传递给
+        IP-Task。数据使用pxNextBuffer的成员来连接住，如下的代码遍历每一个数据包
+        并处理之*/ 
         do
         {
-            /* Store a pointer to the buffer after pxBuffer for use later on. */
+            /*2016--11--26--12--33--26(ZJYC):存储一指向该缓冲的指针以便后续使用    */ 
             pxNextBuffer = pxBuffer->pxNextBuffer;
-
-            /* Make it NULL to avoid using it later on. */
+            /*2016--11--26--12--34--46(ZJYC):置位0以防后续使用    */ 
             pxBuffer->pxNextBuffer = NULL;
-
             prvProcessEthernetPacket( pxBuffer );
             pxBuffer = pxNextBuffer;
-
-        /* While there is another packet in the chain. */
+            /*2016--11--26--12--35--25(ZJYC):循环解决*/ 
         } while( pxBuffer != NULL );
     }
     #endif /* ipconfigUSE_LINKED_RX_MESSAGES */
@@ -455,11 +445,8 @@ static void prvHandleEthernetPacket( NetworkBufferDescriptor_t *pxBuffer )
 static TickType_t prvCalculateSleepTime( void )
 {
 TickType_t xMaximumSleepTime;
-
-    /* Start with the maximum sleep time, then check this against the remaining
-    time in any other timers that are active. */
+    /*2016--11--26--12--36--04(ZJYC):从最大睡眠时间开始，然后一次对比其他激活的定时器    */ 
     xMaximumSleepTime = ipconfigMAX_IP_TASK_SLEEP_TIME;
-
     if( xARPTimer.bActive != pdFALSE_UNSIGNED )
     {
         if( xARPTimer.ulRemainingTime < xMaximumSleepTime )
@@ -467,7 +454,6 @@ TickType_t xMaximumSleepTime;
             xMaximumSleepTime = xARPTimer.ulReloadTime;
         }
     }
-
     #if( ipconfigUSE_DHCP == 1 )
     {
         if( xDHCPTimer.bActive != pdFALSE_UNSIGNED )
@@ -479,7 +465,6 @@ TickType_t xMaximumSleepTime;
         }
     }
     #endif /* ipconfigUSE_DHCP */
-
     #if( ipconfigUSE_TCP == 1 )
     {
         if( xTCPTimer.ulRemainingTime < xMaximumSleepTime )
@@ -488,7 +473,6 @@ TickType_t xMaximumSleepTime;
         }
     }
     #endif
-
     #if( ipconfigDNS_USE_CALLBACKS != 0 )
     {
         if( xDNSTimer.bActive != pdFALSE )
@@ -500,53 +484,47 @@ TickType_t xMaximumSleepTime;
         }
     }
     #endif
-
     return xMaximumSleepTime;
 }
 /*-----------------------------------------------------------*/
 
 static void prvCheckNetworkTimers( void )
 {
-    /* Is it time for ARP processing? */
+    /*2016--11--26--12--37--16(ZJYC):是ARP处理的时间了吗    */ 
     if( prvIPTimerCheck( &xARPTimer ) != pdFALSE )
     {
         xSendEventToIPTask( eARPTimerEvent );
     }
-
     #if( ipconfigUSE_DHCP == 1 )
     {
-        /* Is it time for DHCP processing? */
+        /*2016--11--26--12--37--36(ZJYC):是DHCP处理的时间了吗    */ 
         if( prvIPTimerCheck( &xDHCPTimer ) != pdFALSE )
         {
             xSendEventToIPTask( eDHCPEvent );
         }
     }
     #endif /* ipconfigUSE_DHCP */
-
     #if( ipconfigDNS_USE_CALLBACKS != 0 )
     {
     extern void vDNSCheckCallBack( void *pvSearchID );
-
-        /* Is it time for DNS processing? */
+        /*2016--11--26--12--37--58(ZJYC):是DNS处理的时候了吗    */ 
         if( prvIPTimerCheck( &xDNSTimer ) != pdFALSE )
         {
             vDNSCheckCallBack( NULL );
         }
     }
     #endif /* ipconfigDNS_USE_CALLBACKS */
-
     #if( ipconfigUSE_TCP == 1 )
     {
     BaseType_t xWillSleep;
-    /* xStart keeps a copy of the last time this function was active,
-    and during every call it will be updated with xTaskGetTickCount()
-    '0' means: not yet initialised (although later '0' might be returned
-    by xTaskGetTickCount(), which is no problem). */
+    /*2016--11--26--12--38--17(ZJYC):复制上一次本定时器激活的事件，
+    每次调用，他都会被更新xTaskGetTickCount()。0表示到目前为止还
+    没初始化（虽然，后边xTaskGetTickCount()也会返回0，但这是没问
+    题的）*/ 
     static TickType_t xStart = ( TickType_t ) 0;
     TickType_t xTimeNow, xNextTime;
     BaseType_t xCheckTCPSockets;
     extern uint32_t ulNextInitialSequenceNumber;
-
         if( uxQueueMessagesWaiting( xNetworkEventQueue ) == 0u )
         {
             xWillSleep = pdTRUE;
@@ -555,34 +533,25 @@ static void prvCheckNetworkTimers( void )
         {
             xWillSleep = pdFALSE;
         }
-
         xTimeNow = xTaskGetTickCount();
-
         if( xStart != ( TickType_t ) 0 )
         {
-            /* It is advised to increment the Initial Sequence Number every 4
-            microseconds which makes 250 times per ms.  This will make it harder
-            for a third party to 'guess' our sequence number and 'take over'
-            a TCP connection */
+            /*2016--11--26--12--40--58(ZJYC):建议每四个微妙增加一次序列号，即
+            每ms增加250，这将使得第三方很难猜测我们的序列号*/ 
             ulNextInitialSequenceNumber += ipINITIAL_SEQUENCE_NUMBER_FACTOR * ( ( xTimeNow - xStart ) * portTICK_PERIOD_MS );
         }
-
         xStart = xTimeNow;
-
-        /* Sockets need to be checked if the TCP timer has expired. */
+        /*2016--11--26--12--44--04(ZJYC):如果TCP定时时间到了，套接字需要被检查    */ 
         xCheckTCPSockets = prvIPTimerCheck( &xTCPTimer );
-
-        /* Sockets will also be checked if there are TCP messages but the
-        message queue is empty (indicated by xWillSleep being true). */
+        /*2016--11--26--12--44--35(ZJYC):如果有TCP消息但消息队列是空的，
+        （暗示xWillSleep为真）    */ 
         if( ( xProcessedTCPMessage != pdFALSE ) && ( xWillSleep != pdFALSE ) )
         {
             xCheckTCPSockets = pdTRUE;
         }
-
         if( xCheckTCPSockets != pdFALSE )
         {
-            /* Attend to the sockets, returning the period after which the
-            check must be repeated. */
+            /*2016--11--26--12--46--03(ZJYC):返回下次重复检查的时间    */ 
             xNextTime = xTCPTimerCheck( xWillSleep );
             prvIPTimerStart( &xTCPTimer, xNextTime );
             xProcessedTCPMessage = 0;
@@ -596,7 +565,6 @@ static void prvIPTimerStart( IPTimer_t *pxTimer, TickType_t xTime )
 {
     vTaskSetTimeOutState( &pxTimer->xTimeOut );
     pxTimer->ulRemainingTime = xTime;
-
     if( xTime == ( TickType_t ) 0 )
     {
         pxTimer->bExpired = pdTRUE_UNSIGNED;
@@ -605,7 +573,6 @@ static void prvIPTimerStart( IPTimer_t *pxTimer, TickType_t xTime )
     {
         pxTimer->bExpired = pdFALSE_UNSIGNED;
     }
-
     pxTimer->bActive = pdTRUE_UNSIGNED;
 }
 /*-----------------------------------------------------------*/
@@ -623,13 +590,13 @@ BaseType_t xReturn;
 
     if( pxTimer->bActive == pdFALSE_UNSIGNED )
     {
-        /* The timer is not enabled. */
+        /*2016--11--26--12--50--22(ZJYC):定时器被启动    */ 
         xReturn = pdFALSE;
     }
     else
     {
-        /* The timer might have set the bExpired flag already, if not, check the
-        value of xTimeOut against ulRemainingTime. */
+        /*2016--11--26--12--50--36(ZJYC):定时器早就置位bExpired了，如果没有，
+        对比xTimeOut和ulRemainingTime*/ 
         if( ( pxTimer->bExpired != pdFALSE_UNSIGNED ) ||
             ( xTaskCheckForTimeOut( &( pxTimer->xTimeOut ), &( pxTimer->ulRemainingTime ) ) != pdFALSE ) )
         {
@@ -650,16 +617,15 @@ void FreeRTOS_NetworkDown( void )
 {
 static const IPStackEvent_t xNetworkDownEvent = { eNetworkDownEvent, NULL };
 const TickType_t xDontBlock = ( TickType_t ) 0;
-
-    /* Simply send the network task the appropriate event. */
+    /*2016--11--26--12--51--58(ZJYC):简单的发送正确的事件    */ 
     if( xSendEventStructToIPTask( &xNetworkDownEvent, xDontBlock ) != pdPASS )
     {
-        /* Could not send the message, so it is still pending. */
+        /*2016--11--26--12--52--32(ZJYC):不能发送消息，依旧等待    */ 
         xNetworkDownEventPending = pdTRUE;
     }
     else
     {
-        /* Message was sent so it is not pending. */
+        /*2016--11--26--12--53--04(ZJYC):消息已被发出，所以不用在等待了    */ 
         xNetworkDownEventPending = pdFALSE;
     }
 
@@ -671,8 +637,7 @@ BaseType_t FreeRTOS_NetworkDownFromISR( void )
 {
 static const IPStackEvent_t xNetworkDownEvent = { eNetworkDownEvent, NULL };
 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-    /* Simply send the network task the appropriate event. */
+    /*2016--11--26--13--13--14(ZJYC):简单的发送正确的事件    */ 
     if( xQueueSendToBackFromISR( xNetworkEventQueue, &xNetworkDownEvent, &xHigherPriorityTaskWoken ) != pdPASS )
     {
         xNetworkDownEventPending = pdTRUE;
@@ -692,7 +657,7 @@ void *FreeRTOS_GetUDPPayloadBuffer( size_t xRequestedSizeBytes, TickType_t xBloc
 {
 NetworkBufferDescriptor_t *pxNetworkBuffer;
 void *pvReturn;
-
+    /*2016--11--26--13--15--50(ZJYC):？？？？？    */ 
     /* Cap the block time.  The reason for this is explained where
     ipconfigUDP_MAX_SEND_BLOCK_TIME_TICKS is defined (assuming an official
     FreeRTOSIPConfig.h header file is being used). */
@@ -700,13 +665,12 @@ void *pvReturn;
     {
         xBlockTimeTicks = ipconfigUDP_MAX_SEND_BLOCK_TIME_TICKS;
     }
-
-    /* Obtain a network buffer with the required amount of storage. */
+    /*2016--11--26--13--17--17(ZJYC):根据需要的存储量获取网络缓存    */ 
     pxNetworkBuffer = pxGetNetworkBufferWithDescriptor( sizeof( UDPPacket_t ) + xRequestedSizeBytes, xBlockTimeTicks );
 
     if( pxNetworkBuffer != NULL )
     {
-        /* Leave space for the UPD header. */
+        /*2016--11--26--13--17--57(ZJYC):返回UDP头的空间    */ 
         pvReturn = ( void * ) &( pxNetworkBuffer->pucEthernetBuffer[ ipUDP_PAYLOAD_OFFSET_IPv4 ] );
     }
     else
@@ -722,10 +686,8 @@ NetworkBufferDescriptor_t *pxDuplicateNetworkBufferWithDescriptor( NetworkBuffer
     BaseType_t xNewLength )
 {
 NetworkBufferDescriptor_t * pxNewBuffer;
-
-    /* This function is only used when 'ipconfigZERO_COPY_TX_DRIVER' is set to 1.
-    The transmit routine wants to have ownership of the network buffer
-    descriptor, because it will pass the buffer straight to DMA. */
+    /*2016--11--26--13--38--35(ZJYC):本函数只有ipconfigZERO_COPY_TX_DRIVER置1时才可使用
+    发送流程需要拥有网络缓冲的描述符的领导权，因为他将会把缓冲直接传送到DMA*/ 
     pxNewBuffer = pxGetNetworkBufferWithDescriptor( ( size_t ) xNewLength, ( TickType_t ) 0 );
 
     if( pxNewBuffer != NULL )
@@ -753,15 +715,13 @@ NetworkBufferDescriptor_t * pxNewBuffer;
         }
         else
         {
-            /* Obtain the network buffer from the zero copy pointer. */
+            /*2016--11--26--13--40--39(ZJYC):从0复制指针中获取网络缓冲    */ 
             pucBuffer = ( uint8_t * ) pvBuffer;
-
-            /* The input here is a pointer to a payload buffer.  Subtract the
-            size of the header in the network buffer, usually 8 + 2 bytes. */
+            /*2016--11--26--13--41--12(ZJYC):这里输入的是指向载荷缓冲的指针
+            减掉头部的大小，通常是8 + 2*/ 
             pucBuffer -= ipBUFFER_PADDING;
-
-            /* Here a pointer was placed to the network descriptor.  As a
-            pointer is dereferenced, make sure it is well aligned. */
+            /*2016--11--26--13--42--32(ZJYC):这里一个指针被放入网络描述符
+            因为指针被间接引用，要确保对齐*/ 
             if( ( ( ( uint32_t ) pucBuffer ) & ( sizeof( pucBuffer ) - ( size_t ) 1 ) ) == ( uint32_t ) 0 )
             {
                 pxResult = * ( ( NetworkBufferDescriptor_t ** ) pucBuffer );
@@ -771,7 +731,6 @@ NetworkBufferDescriptor_t * pxNewBuffer;
                 pxResult = NULL;
             }
         }
-
         return pxResult;
     }
 
@@ -789,18 +748,16 @@ NetworkBufferDescriptor_t *pxResult;
     }
     else
     {
-        /* Obtain the network buffer from the zero copy pointer. */
+        /*2016--11--26--13--44--44(ZJYC):从0复制指针获取网络缓冲    */ 
         pucBuffer = ( uint8_t * ) pvBuffer;
-
-        /* The input here is a pointer to a payload buffer.  Subtract
-        the total size of a UDP/IP header plus the size of the header in
-        the network buffer, usually 8 + 2 bytes. */
+        /*2016--11--26--13--45--15(ZJYC):这里输入的是指向载荷缓冲的指针
+            减掉头部的大小，通常是8 + 2    */ 
         pucBuffer -= ( sizeof( UDPPacket_t ) + ipBUFFER_PADDING );
-
-        /* Here a pointer was placed to the network descriptor,
-        As a pointer is dereferenced, make sure it is well aligned */
+        /*2016--11--26--13--45--58(ZJYC): 这里一个指针被放入网络描述符
+            因为指针被间接引用，要确保对齐   */ 
         if( ( ( ( uint32_t ) pucBuffer ) & ( sizeof( pucBuffer ) - 1 ) ) == 0 )
         {
+            /*2016--11--26--13--46--25(ZJYC):如下的陈述可能会触发警告    */ 
             /* The following statement may trigger a:
             warning: cast increases required alignment of target type [-Wcast-align].
             It has been confirmed though that the alignment is suitable. */
@@ -829,76 +786,62 @@ void FreeRTOS_ReleaseUDPPayloadBuffer( void *pvBuffer )
 BaseType_t FreeRTOS_IPInit( const uint8_t ucIPAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucNetMask[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucGatewayAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucDNSServerAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucMACAddress[ ipMAC_ADDRESS_LENGTH_BYTES ] )
 {
 BaseType_t xReturn = pdFALSE;
-
-    /* This function should only be called once. */
+    /*2016--11--26--13--48--01(ZJYC):这个函数只能被调用一次    */ 
     configASSERT( xIPIsNetworkTaskReady() == pdFALSE );
     configASSERT( xNetworkEventQueue == NULL );
     configASSERT( xIPTaskHandle == NULL );
-
-    /* Check structure packing is correct. */
+    /*2016--11--26--13--48--21(ZJYC):检查结构体是否正确    */ 
     configASSERT( sizeof( EthernetHeader_t ) == ipEXPECTED_EthernetHeader_t_SIZE );
     configASSERT( sizeof( ARPHeader_t ) == ipEXPECTED_ARPHeader_t_SIZE );
     configASSERT( sizeof( IPHeader_t ) == ipEXPECTED_IPHeader_t_SIZE );
     configASSERT( sizeof( ICMPHeader_t ) == ipEXPECTED_ICMPHeader_t_SIZE );
     configASSERT( sizeof( UDPHeader_t ) == ipEXPECTED_UDPHeader_t_SIZE );
-
-    /* Attempt to create the queue used to communicate with the IP task. */
+    /*2016--11--26--13--48--54(ZJYC):尝试建立后期与IP-Task交流的队列    */ 
     xNetworkEventQueue = xQueueCreate( ( UBaseType_t ) ipconfigEVENT_QUEUE_LENGTH, ( UBaseType_t ) sizeof( IPStackEvent_t ) );
     configASSERT( xNetworkEventQueue );
-
     if( xNetworkEventQueue != NULL )
     {
         #if ( configQUEUE_REGISTRY_SIZE > 0 )
         {
-            /* A queue registry is normally used to assist a kernel aware
-            debugger.  If one is in use then it will be helpful for the debugger
-            to show information about the network event queue. */
+            /*2016--11--26--13--49--28(ZJYC):队列的注册通常用于支持内核调试*/ 
             vQueueAddToRegistry( xNetworkEventQueue, "NetEvnt" );
         }
         #endif /* configQUEUE_REGISTRY_SIZE */
 
         if( xNetworkBuffersInitialise() == pdPASS )
         {
-            /* Store the local IP and MAC address. */
+            /*2016--11--26--13--50--37(ZJYC):保存本地IP和MAC地址    */ 
             xNetworkAddressing.ulDefaultIPAddress = FreeRTOS_inet_addr_quick( ucIPAddress[ 0 ], ucIPAddress[ 1 ], ucIPAddress[ 2 ], ucIPAddress[ 3 ] );
             xNetworkAddressing.ulNetMask = FreeRTOS_inet_addr_quick( ucNetMask[ 0 ], ucNetMask[ 1 ], ucNetMask[ 2 ], ucNetMask[ 3 ] );
             xNetworkAddressing.ulGatewayAddress = FreeRTOS_inet_addr_quick( ucGatewayAddress[ 0 ], ucGatewayAddress[ 1 ], ucGatewayAddress[ 2 ], ucGatewayAddress[ 3 ] );
             xNetworkAddressing.ulDNSServerAddress = FreeRTOS_inet_addr_quick( ucDNSServerAddress[ 0 ], ucDNSServerAddress[ 1 ], ucDNSServerAddress[ 2 ], ucDNSServerAddress[ 3 ] );
             xNetworkAddressing.ulBroadcastAddress = ( xNetworkAddressing.ulDefaultIPAddress & xNetworkAddressing.ulNetMask ) |  ~xNetworkAddressing.ulNetMask;
-
             memcpy( &xDefaultAddressing, &xNetworkAddressing, sizeof( xDefaultAddressing ) );
-
             #if ipconfigUSE_DHCP == 1
             {
-                /* The IP address is not set until DHCP completes. */
+                /*2016--11--26--13--51--04(ZJYC):IP地址直到DHCP完成才会建立    */ 
                 *ipLOCAL_IP_ADDRESS_POINTER = 0x00UL;
             }
             #else
             {
-                /* The IP address is set from the value passed in. */
+                /*2016--11--26--13--51--36(ZJYC):IP地址通过传入的参数来确定    */ 
                 *ipLOCAL_IP_ADDRESS_POINTER = xNetworkAddressing.ulDefaultIPAddress;
-
-                /* Added to prevent ARP flood to gateway.  Ensure the
-                gateway is on the same subnet as the IP address. */
+                /*2016--11--26--13--52--09(ZJYC):添加用于防止针对网关的ARP洪水，
+                确保网关在同一子网下*/ 
                 configASSERT( ( ( *ipLOCAL_IP_ADDRESS_POINTER ) & xNetworkAddressing.ulNetMask ) == ( xNetworkAddressing.ulGatewayAddress & xNetworkAddressing.ulNetMask ) );
             }
             #endif /* ipconfigUSE_DHCP == 1 */
-
-            /* The MAC address is stored in the start of the default packet
-            header fragment, which is used when sending UDP packets. */
+            /*2016--11--26--14--15--58(ZJYC):MAC地址被存储在默认的包头片段，这在发送UDP包时用到    */ 
             memcpy( ( void * ) ipLOCAL_MAC_ADDRESS, ( void * ) ucMACAddress, ( size_t ) ipMAC_ADDRESS_LENGTH_BYTES );
-
-            /* Prepare the sockets interface. */
+            /*2016--11--26--14--17--08(ZJYC):准备套接字接口    */ 
             vNetworkSocketsInit();
-
-            /* Create the task that processes Ethernet and stack events. */
+            /*2016--11--26--14--17--57(ZJYC):创建处理以太网和协议栈事件的任务    */ 
             xReturn = xTaskCreate( prvIPTask, "IP-task", ( uint16_t ) ipconfigIP_TASK_STACK_SIZE_WORDS, NULL, ( UBaseType_t ) ipconfigIP_TASK_PRIORITY, &xIPTaskHandle );
         }
         else
         {
             FreeRTOS_debug_printf( ( "FreeRTOS_IPInit: xNetworkBuffersInitialise() failed\n") );
-
-            /* Clean up. */
+            /*2016--11--26--14--18--30(ZJYC):清理干净    */ 
             vQueueDelete( xNetworkEventQueue );
             xNetworkEventQueue = NULL;
         }
@@ -914,23 +857,19 @@ BaseType_t xReturn = pdFALSE;
 
 void FreeRTOS_GetAddressConfiguration( uint32_t *pulIPAddress, uint32_t *pulNetMask, uint32_t *pulGatewayAddress, uint32_t *pulDNSServerAddress )
 {
-    /* Return the address configuration to the caller. */
-
+    /*2016--11--26--14--18--46(ZJYC):返回地址配置信息给调用者    */ 
     if( pulIPAddress != NULL )
     {
         *pulIPAddress = *ipLOCAL_IP_ADDRESS_POINTER;
     }
-
     if( pulNetMask != NULL )
     {
         *pulNetMask = xNetworkAddressing.ulNetMask;
     }
-
     if( pulGatewayAddress != NULL )
     {
         *pulGatewayAddress = xNetworkAddressing.ulGatewayAddress;
     }
-
     if( pulDNSServerAddress != NULL )
     {
         *pulDNSServerAddress = xNetworkAddressing.ulDNSServerAddress;
@@ -940,23 +879,19 @@ void FreeRTOS_GetAddressConfiguration( uint32_t *pulIPAddress, uint32_t *pulNetM
 
 void FreeRTOS_SetAddressConfiguration( const uint32_t *pulIPAddress, const uint32_t *pulNetMask, const uint32_t *pulGatewayAddress, const uint32_t *pulDNSServerAddress )
 {
-    /* Update the address configuration. */
-
+    /*2016--11--26--14--19--13(ZJYC):更新地址配置信息    */ 
     if( pulIPAddress != NULL )
     {
         *ipLOCAL_IP_ADDRESS_POINTER = *pulIPAddress;
     }
-
     if( pulNetMask != NULL )
     {
         xNetworkAddressing.ulNetMask = *pulNetMask;
     }
-
     if( pulGatewayAddress != NULL )
     {
         xNetworkAddressing.ulGatewayAddress = *pulGatewayAddress;
     }
-
     if( pulDNSServerAddress != NULL )
     {
         xNetworkAddressing.ulDNSServerAddress = *pulDNSServerAddress;
@@ -983,28 +918,24 @@ void FreeRTOS_SetAddressConfiguration( const uint32_t *pulIPAddress, const uint3
             {
                 pxICMPHeader = ( ICMPHeader_t * ) &( pxNetworkBuffer->pucEthernetBuffer[ ipIP_PAYLOAD_OFFSET ] );
                 usSequenceNumber++;
-
-                /* Fill in the basic header information. */
+                /*2016--11--26--14--21--18(ZJYC):填充基本头部信息    */ 
                 pxICMPHeader->ucTypeOfMessage = ipICMP_ECHO_REQUEST;
                 pxICMPHeader->ucTypeOfService = 0;
                 pxICMPHeader->usIdentifier = usSequenceNumber;
                 pxICMPHeader->usSequenceNumber = usSequenceNumber;
-
-                /* Find the start of the data. */
+                /*2016--11--26--14--21--36(ZJYC):找到数据的开始    */ 
                 pucChar = ( uint8_t * ) pxICMPHeader;
                 pucChar += sizeof( ICMPHeader_t );
-
+                /*2016--11--26--14--28--40(ZJYC):    */ 
                 /* Just memset the data to a fixed value. */
                 memset( ( void * ) pucChar, ( int ) ipECHO_DATA_FILL_BYTE, xNumberOfBytesToSend );
-
-                /* The message is complete, IP and checksum's are handled by
-                vProcessGeneratedUDPPacket */
+                /*2016--11--26--14--28--46(ZJYC):信息发送完成，IP和校验由
+                vProcessGeneratedUDPPacket掌握*/ 
                 pxNetworkBuffer->pucEthernetBuffer[ ipSOCKET_OPTIONS_OFFSET ] = FREERTOS_SO_UDPCKSUM_OUT;
                 pxNetworkBuffer->ulIPAddress = ulIPAddress;
                 pxNetworkBuffer->usPort = ipPACKET_CONTAINS_ICMP_DATA;
                 pxNetworkBuffer->xDataLength = xNumberOfBytesToSend + sizeof( ICMPHeader_t );
-
-                /* Send to the stack. */
+                /*2016--11--26--14--30--37(ZJYC):发送给协议栈    */ 
                 xStackTxEvent.pvData = pxNetworkBuffer;
 
                 if( xSendEventStructToIPTask( &xStackTxEvent, xBlockTimeTicks) != pdPASS )
@@ -1048,55 +979,48 @@ BaseType_t xReturn, xSendMessage;
 
     if( ( xIPIsNetworkTaskReady() == pdFALSE ) && ( pxEvent->eEventType != eNetworkDownEvent ) )
     {
-        /* Only allow eNetworkDownEvent events if the IP task is not ready
-        yet.  Not going to attempt to send the message so the send failed. */
+        /*2016--11--26--14--31--54(ZJYC):如果IP-Task没准备好，则只允许eNetworkDownEvent
+        通过。不去尝试发送消息，所以返回失败*/ 
         xReturn = pdFAIL;
     }
     else
     {
         xSendMessage = pdTRUE;
-
         #if( ipconfigUSE_TCP == 1 )
         {
             if( pxEvent->eEventType == eTCPTimerEvent )
             {
-                /* TCP timer events are sent to wake the timer task when
-                xTCPTimer has expired, but there is no point sending them if the
-                IP task is already awake processing other message. */
+                /*2016--11--26--14--34--20(ZJYC):当定时器到期时，TCP定时器事件唤醒
+                定时器任务，但是如果IP-Task已经被唤醒了，再发送就没有意义了    */ 
                 xTCPTimer.bExpired = pdTRUE_UNSIGNED;
-
                 if( uxQueueMessagesWaiting( xNetworkEventQueue ) != 0u )
                 {
-                    /* Not actually going to send the message but this is not a
-                    failure as the message didn't need to be sent. */
+                    /*2016--11--26--14--38--45(ZJYC):并不是真正的要去发送信息，但这也不算是失败，
+                    因为信息不需要发送*/ 
                     xSendMessage = pdFALSE;
                 }
             }
         }
         #endif /* ipconfigUSE_TCP */
-
         if( xSendMessage != pdFALSE )
         {
-            /* The IP task cannot block itself while waiting for itself to
-            respond. */
+            /*2016--11--26--14--42--29(ZJYC):IP-Task在等待自身的回复时不能阻塞自己    */ 
             if( ( xIsCallingFromIPTask() == pdTRUE ) && ( xTimeout > ( TickType_t ) 0 ) )
             {
                 xTimeout = ( TickType_t ) 0;
             }
-
             xReturn = xQueueSendToBack( xNetworkEventQueue, pxEvent, xTimeout );
-
             if( xReturn == pdFAIL )
             {
-                /* A message should have been sent to the IP task, but wasn't. */
+                /*2016--11--26--14--43--51(ZJYC):一个消息应当被发送但是他没有    */ 
                 FreeRTOS_debug_printf( ( "xSendEventStructToIPTask: CAN NOT ADD %d\n", pxEvent->eEventType ) );
                 iptraceSTACK_TX_EVENT_LOST( pxEvent->eEventType );
             }
         }
         else
         {
-            /* It was not necessary to send the message to process the event so
-            even though the message was not sent the call was successful. */
+            /*2016--11--26--14--44--59(ZJYC):没有必要去发送消息来处理事件，
+            即使即使消息没有被发送，调用依然是成功的*/ 
             xReturn = pdPASS;
         }
     }
@@ -1109,31 +1033,28 @@ eFrameProcessingResult_t eConsiderFrameForProcessing( const uint8_t * const pucE
 {
 eFrameProcessingResult_t eReturn;
 const EthernetHeader_t *pxEthernetHeader;
-
     pxEthernetHeader = ( const EthernetHeader_t * ) pucEthernetBuffer;
-
     if( memcmp( ( void * ) ipLOCAL_MAC_ADDRESS, ( void * ) &( pxEthernetHeader->xDestinationAddress ), sizeof( MACAddress_t ) ) == 0 )
     {
-        /* The packet was directed to this node directly - process it. */
+        /*2016--11--26--14--49--10(ZJYC):包直接指向此节点--处理它    */ 
         eReturn = eProcessBuffer;
     }
     else if( memcmp( ( void * ) xBroadcastMACAddress.ucBytes, ( void * ) pxEthernetHeader->xDestinationAddress.ucBytes, sizeof( MACAddress_t ) ) == 0 )
     {
-        /* The packet was a broadcast - process it. */
+        /*2016--11--26--14--50--48(ZJYC):包是一个广播包--处理它    */ 
         eReturn = eProcessBuffer;
     }
     else
 #if( ipconfigUSE_LLMNR == 1 )
     if( memcmp( ( void * ) xLLMNR_MacAdress.ucBytes, ( void * ) pxEthernetHeader->xDestinationAddress.ucBytes, sizeof( MACAddress_t ) ) == 0 )
     {
-        /* The packet is a request for LLMNR - process it. */
+        /*2016--11--26--14--51--20(ZJYC):报是LLMNR请求，处理它    */ 
         eReturn = eProcessBuffer;
     }
     else
 #endif /* ipconfigUSE_LLMNR */
     {
-        /* The packet was not a broadcast, or for this node, just release
-        the buffer without taking any other action. */
+        /*2016--11--26--14--54--50(ZJYC):包不是一个广播包，或者对于这个节点来说不采取任何行动    */ 
         eReturn = eReleaseBuffer;
     }
 
@@ -1148,7 +1069,7 @@ const EthernetHeader_t *pxEthernetHeader;
 
             if( usFrameType <= 0x600U )
             {
-                /* Not an Ethernet II frame. */
+                /*2016--11--26--14--55--47(ZJYC):不是以太网 II 架构    */ 
                 eReturn = eReleaseBuffer;
             }
         }
@@ -1161,16 +1082,14 @@ const EthernetHeader_t *pxEthernetHeader;
 
 static void prvProcessNetworkDownEvent( void )
 {
-    /* Stop the ARP timer while there is no network. */
+    /*2016--11--26--15--03--13(ZJYC):没有网络是停止ARP定时器    */ 
     xARPTimer.bActive = pdFALSE_UNSIGNED;
 
     #if ipconfigUSE_NETWORK_EVENT_HOOK == 1
     {
         static BaseType_t xCallEventHook = pdFALSE;
-
-        /* The first network down event is generated by the IP stack itself to
-        initialise the network hardware, so do not call the network down event
-        the first time through. */
+        /*2016--11--26--15--03--42(ZJYC):第一个掉网事件有IP任务产生去初始化底层硬件
+        所以，不要第一次掉网事件不会采用*/ 
         if( xCallEventHook == pdTRUE )
         {
             vApplicationIPNetworkEventHook( eNetworkDown );
@@ -1178,23 +1097,21 @@ static void prvProcessNetworkDownEvent( void )
         xCallEventHook = pdTRUE;
     }
     #endif
-
-    /* The network has been disconnected (or is being initialised for the first
-    time).  Perform whatever hardware processing is necessary to bring it up
-    again, or wait for it to be available again.  This is hardware dependent. */
+    /*2016--11--26--15--05--02(ZJYC):网络断开（或者被第一次初始化）。执行任何硬件处理是必要的
+    或者，等待其再次可用，这依赖于硬件*/ 
     if( xNetworkInterfaceInitialise() != pdPASS )
     {
-        /* Ideally the network interface initialisation function will only
-        return when the network is available.  In case this is not the case,
-        wait a while before retrying the initialisation. */
+        /*2016--11--26--15--07--38(ZJYC):理想情况下，只有网络可用时网络接口初始化函数才会返回
+        如果情况不是这样，在重新初始化之前等待一会*/ 
         vTaskDelay( ipINITIALISATION_RETRY_DELAY );
         FreeRTOS_NetworkDown();
     }
     else
     {
-        /* Set remaining time to 0 so it will become active immediately. */
+        /*2016--11--26--15--13--08(ZJYC):将剩余时间置为0，他将会立刻激活    */ 
         #if ipconfigUSE_DHCP == 1
         {
+            /*2016--11--26--15--14--01(ZJYC):    */ 
             /* The network is not up until DHCP has completed. */
             vDHCPProcess( pdTRUE );
             xSendEventToIPTask( eDHCPEvent );
