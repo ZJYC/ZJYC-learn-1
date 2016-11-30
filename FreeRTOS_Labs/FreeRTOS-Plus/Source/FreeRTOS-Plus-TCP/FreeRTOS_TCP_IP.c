@@ -525,9 +525,6 @@ NetworkBufferDescriptor_t *pxNetworkBuffer;
             #if( ipconfigUSE_TCP_TIMESTAMPS == 1 )
             {
                 /* 如果时间戳使能，只有在同伴为局域网外时才可使用，通常是在internet上。 */
-                /* When TCP time stamps are enabled, but they will only be applied
-                if the peer is outside the netmask, usually on the internet.
-                Packages sent on a LAN are usually too big to carry time stamps. */
                 if( ( ( pxSocket->u.xTCP.ulRemoteIP ^ FreeRTOS_ntohl( *ipLOCAL_IP_ADDRESS_POINTER ) ) & xNetworkAddressing.ulNetMask ) != 0ul )
                 {
                     pxSocket->u.xTCP.xTCPWindow.u.bits.bTimeStamps = pdTRUE_UNSIGNED;

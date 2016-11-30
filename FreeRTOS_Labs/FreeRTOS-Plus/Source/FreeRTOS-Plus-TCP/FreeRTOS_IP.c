@@ -1153,8 +1153,7 @@ void vIPNetworkUpCalls( void )
 static void prvProcessEthernetPacket( NetworkBufferDescriptor_t * const pxNetworkBuffer )
 {
 EthernetHeader_t *pxEthernetHeader;
-volatile eFrameProcessingResult_t eReturned; /* Volatile to prevent complier warnings when ipCONSIDER_FRAME_FOR_PROCESSING just sets it to eProcessBuffer. */
-
+volatile eFrameProcessingResult_t eReturned; 
     configASSERT( pxNetworkBuffer );
 
     /* Interpret the Ethernet frame. */
@@ -1312,9 +1311,7 @@ uint8_t ucProtocol;
     {
         if( uxHeaderLength > ipSIZE_OF_IPv4_HEADER )
         {
-            /* All structs of headers expect a IP header size of 20 bytes
-             * IP header options were included, we'll ignore them and cut them out
-             * Note: IP options are mostly use in Multi-cast protocols */
+            /*2016--11--30--18--46--33(ZJYC): 有选项   */ 
             const size_t optlen = ( ( size_t ) uxHeaderLength ) - ipSIZE_OF_IPv4_HEADER;
             /* From: the previous start of UDP/ICMP/TCP data */
             uint8_t *pucSource = ( ( uint8_t * ) pxIPHeader ) + uxHeaderLength;
@@ -1322,31 +1319,18 @@ uint8_t ucProtocol;
             uint8_t *pucTarget = ( ( uint8_t * ) pxIPHeader ) + ipSIZE_OF_IPv4_HEADER;
             /* How many: total length minus the options and the lower headers */
             const size_t  xMoveLen = pxNetworkBuffer->xDataLength - optlen - ipSIZE_OF_IPv4_HEADER - ipSIZE_OF_ETH_HEADER;
-
+            /*2016--11--30--18--47--09(ZJYC): 可惜我们不需要这些东西   */ 
             memmove( pucTarget, pucSource, xMoveLen );
             pxNetworkBuffer->xDataLength -= optlen;
         }
-        /* Add the IP and MAC addresses to the ARP table if they are not
-        already there - otherwise refresh the age of the existing
-        entry. */
         if( ucProtocol != ( uint8_t ) ipPROTOCOL_UDP )
         {
-            /* Refresh the ARP cache with the IP/MAC-address of the received packet
-             * For UDP packets, this will be done later in xProcessReceivedUDPPacket()
-             * as soon as know that the message will be handled by someone
-             * This will prevent that the ARP cache will get overwritten
-             * with the IP-address of useless broadcast packets
-             */
+            /*2016--11--30--18--47--48(ZJYC): 加入到ARP缓存中   */ 
             vARPRefreshCacheEntry( &( pxIPPacket->xEthernetHeader.xSourceAddress ), pxIPHeader->ulSourceIPAddress );
         }
         switch( ucProtocol )
         {
             case ipPROTOCOL_ICMP :
-                /* The IP packet contained an ICMP frame.  Don't bother
-                checking the ICMP checksum, as if it is wrong then the
-                wrong data will also be returned, and the source of the
-                ping will know something went wrong because it will not
-                be able to validate what it receives. */
                 #if ( ipconfigREPLY_TO_INCOMING_PINGS == 1 ) || ( ipconfigSUPPORT_OUTGOING_PINGS == 1 )
                 {
                     ICMPPacket_t *pxICMPPacket = ( ICMPPacket_t * ) ( pxNetworkBuffer->pucEthernetBuffer );
@@ -1357,12 +1341,10 @@ uint8_t ucProtocol;
                 }
                 #endif /* ( ipconfigREPLY_TO_INCOMING_PINGS == 1 ) || ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) */
                 break;
-
             case ipPROTOCOL_UDP :
                 {
                     /* The IP packet contained a UDP frame. */
                     UDPPacket_t *pxUDPPacket = ( UDPPacket_t * ) ( pxNetworkBuffer->pucEthernetBuffer );
-
                     /* Note the header values required prior to the
                     checksum generation as the checksum pseudo header
                     may clobber some of these values. */
