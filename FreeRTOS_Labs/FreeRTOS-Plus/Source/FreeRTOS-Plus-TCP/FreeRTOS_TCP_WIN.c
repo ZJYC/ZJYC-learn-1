@@ -554,25 +554,19 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 
     static void vTCPWindowFree( TCPSegment_t *pxSegment )
     {
-        /*  Free entry pxSegment because it's not used any more.  The ownership
-        will be passed back to the segment pool.
-
-        Unlink it from one of the queues, if any. */
+        /*2016--12--02--17--30--37(ZJYC): 将内存返回到segment pool中   */ 
         if( listLIST_ITEM_CONTAINER( &( pxSegment->xQueueItem ) ) != NULL )
         {
             uxListRemove( &( pxSegment->xQueueItem ) );
         }
-
         pxSegment->ulSequenceNumber = 0u;
         pxSegment->lDataLength = 0l;
         pxSegment->u.ulFlags = 0u;
-
         /* Take it out of xRxSegments/xTxSegments */
         if( listLIST_ITEM_CONTAINER( &( pxSegment->xListItem ) ) != NULL )
         {
             uxListRemove( &( pxSegment->xListItem ) );
         }
-
         /* Return it to xSegmentList */
         vListInsertFifo( &xSegmentList, &( pxSegment->xListItem ) );
     }
@@ -587,11 +581,7 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
     List_t * pxSegments;
     BaseType_t xRound;
     TCPSegment_t *pxSegment;
-
-        /*  Destroy a window.  A TCP window doesn't serve any more.  Return all
-        owned segments to the pool.  In order to save code, it will make 2 rounds,
-        one to remove the segments from xRxSegments, and a second round to clear
-        xTxSegments*/
+        /*2016--12--02--17--31--32(ZJYC): 由于TCP窗口不再使用，删除之，分别RX和TX   */ 
         for( xRound = 0; xRound < 2; xRound++ )
         {
             if( xRound != 0 )
@@ -620,33 +610,27 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 void vTCPWindowCreate( TCPWindow_t *pxWindow, uint32_t ulRxWindowLength,
     uint32_t ulTxWindowLength, uint32_t ulAckNumber, uint32_t ulSequenceNumber, uint32_t ulMSS )
 {
-    /* Create and initialize a window. */
-
+    /*2016--12--02--17--32--29(ZJYC): 创建并初始化一窗口   */ 
     #if( ipconfigUSE_TCP_WIN == 1 )
     {
         if( xTCPSegments == NULL )
         {
             prvCreateSectors();
         }
-
-        vListInitialise( &pxWindow->xTxSegments );
-        vListInitialise( &pxWindow->xRxSegments );
-
-        vListInitialise( &pxWindow->xPriorityQueue );           /* Priority queue: segments which must be sent immediately */
-        vListInitialise( &pxWindow->xTxQueue   );           /* Transmit queue: segments queued for transmission */
-        vListInitialise( &pxWindow->xWaitQueue );           /* Waiting queue:  outstanding segments */
+        vListInitialise( &pxWindow->xTxSegments );      /*2016--12--02--17--33--02(ZJYC): 需发送组   */ 
+        vListInitialise( &pxWindow->xRxSegments );      /*2016--12--02--17--33--11(ZJYC): 需接收组   */ 
+        vListInitialise( &pxWindow->xPriorityQueue );   /*2016--12--02--17--33--26(ZJYC): 优先组（必须被马上发送）   */ 
+        vListInitialise( &pxWindow->xTxQueue   );       /*2016--12--02--17--37--14(ZJYC): 排队等待发送   */ 
+        vListInitialise( &pxWindow->xWaitQueue );       /*2016--12--02--17--37--44(ZJYC): 等待确认组   */ 
     }
     #endif /* ipconfigUSE_TCP_WIN == 1 */
 
     if( xTCPWindowLoggingLevel != 0 )
     {
-        FreeRTOS_debug_printf( ( "vTCPWindowCreate: for WinLen = Rx/Tx: %lu/%lu\n",
-            ulRxWindowLength, ulTxWindowLength ) );
+        FreeRTOS_debug_printf( ( "vTCPWindowCreate: for WinLen = Rx/Tx: %lu/%lu\n",ulRxWindowLength, ulTxWindowLength ) );
     }
-
     pxWindow->xSize.ulRxWindowLength = ulRxWindowLength;
     pxWindow->xSize.ulTxWindowLength = ulTxWindowLength;
-
     vTCPWindowInit( pxWindow, ulAckNumber, ulSequenceNumber, ulMSS );
 }
 /*-----------------------------------------------------------*/
@@ -721,7 +705,9 @@ const int32_t l500ms = 500;
  *=============================================================================*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+    /*2016--12--02--18--41--19(ZJYC): 收到一个带着ulSequenceNumber的段，当ulCurrentSequenceNumber =  ulSequenceNumber
+    表示这确实是我们所期望的。本函数用于检查是否存在序列号介于ulSequenceNumber和(ulSequenceNumber+ulLength)的包，
+    一般情况下是没有的，先一个应该接受的段的序列号应等于(ulSequenceNumber+ulLength)*/ 
     static TCPSegment_t *xTCPWindowRxConfirm( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength )
     {
     TCPSegment_t *pxBest = NULL;
@@ -729,15 +715,6 @@ const int32_t l500ms = 500;
     uint32_t ulNextSequenceNumber = ulSequenceNumber + ulLength;
     const MiniListItem_t* pxEnd = ( const MiniListItem_t* ) listGET_END_MARKER( &pxWindow->xRxSegments );
     TCPSegment_t *pxSegment;
-
-        /* A segment has been received with sequence number 'ulSequenceNumber',
-        where 'ulCurrentSequenceNumber == ulSequenceNumber', which means that
-        exactly this segment was expected.  xTCPWindowRxConfirm() will check if
-        there is already another segment with a sequence number between (ulSequenceNumber)
-        and (ulSequenceNumber+ulLength).  Normally none will be found, because
-        the next RX segment should have a sequence number equal to
-        '(ulSequenceNumber+ulLength)'. */
-
         /* Iterate through all RX segments that are stored: */
         for( pxIterator  = ( const ListItem_t * ) listGET_NEXT( pxEnd );
              pxIterator != ( const ListItem_t * ) pxEnd;
@@ -779,20 +756,15 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+    /*2016--12--02--18--45--44(ZJYC): 如果lTCPWindowRxCheck返回0，包会直接传递给用户，如果返回正数，一个之前的报丢失了
+    但是这个包会被保存，如果是负数，包早就被保存了，后者，这是一非顺序包或没有足够的内存了。*/ 
     int32_t lTCPWindowRxCheck( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength, uint32_t ulSpace )
     {
     uint32_t ulCurrentSequenceNumber, ulLast, ulSavedSequenceNumber;
     int32_t lReturn, lDistance;
     TCPSegment_t *pxFound;
 
-        /* If lTCPWindowRxCheck( ) returns == 0, the packet will be passed
-        directly to user (segment is expected).  If it returns a positive
-        number, an earlier packet is missing, but this packet may be stored.
-        If negative, the packet has already been stored, or it is out-of-order,
-        or there is not enough space.
-
-        As a side-effect, pxWindow->ulUserDataLength will get set to non-zero,
+        /* As a side-effect, pxWindow->ulUserDataLength will get set to non-zero,
         if more Rx data may be passed to the user after this packet. */
 
         ulCurrentSequenceNumber = pxWindow->rx.ulCurrentSequenceNumber;
@@ -1031,24 +1003,19 @@ const int32_t l500ms = 500;
             {
                 if( ( pxSegment->u.bits.bOutstanding == pdFALSE_UNSIGNED ) && ( pxSegment->lDataLength != 0 ) )
                 {
-                    /* Adding data to a segment that was already in the TX queue.  It
-                    will be filled-up to a maximum of MSS (maximum segment size). */
+                    /*2016--12--02--18--50--21(ZJYC): 把数据添加到TX队列，将会被调整到MSS   */ 
+                    /*2016--12--02--18--54--13(ZJYC): 寻找待发送数据和pool空闲值之中的最小值   */ 
                     lToWrite = FreeRTOS_min_int32( lBytesLeft, pxSegment->lMaxLength - pxSegment->lDataLength );
-
                     pxSegment->lDataLength += lToWrite;
-
                     if( pxSegment->lDataLength >= pxSegment->lMaxLength )
                     {
                         /* This segment is full, don't add more bytes. */
                         pxWindow->pxHeadSegment = NULL;
                     }
-
                     lBytesLeft -= lToWrite;
-
                     /* ulNextTxSequenceNumber is the sequence number of the next byte to
                     be stored for transmission. */
                     pxWindow->ulNextTxSequenceNumber += ( uint32_t ) lToWrite;
-
                     /* Increased the return value. */
                     lDone += lToWrite;
 
@@ -1073,10 +1040,8 @@ const int32_t l500ms = 500;
 
         while( lBytesLeft > 0 )
         {
-            /* The current transmission segment is full, create new segments as
-            needed. */
+            /*2016--12--02--18--54--45(ZJYC): Pool并没有城下所有的待发送数据，需要新建   */ 
             pxSegment = xTCPWindowTxNew( pxWindow, pxWindow->ulNextTxSequenceNumber, pxWindow->usMSS );
-
             if( pxSegment != NULL )
             {
                 /* Store as many as needed, but no more than the maximum
@@ -1089,10 +1054,8 @@ const int32_t l500ms = 500;
                 lPosition = lTCPIncrementTxPosition( lPosition, lMax, lToWrite );
                 pxWindow->ulNextTxSequenceNumber += ( uint32_t ) lToWrite;
                 lDone += lToWrite;
-
-                /* Link this segment in the Tx-Queue. */
+                /*2016--12--02--18--53--04(ZJYC): 加入发送队列   */ 
                 vListInsertFifo( &( pxWindow->xTxQueue ), &( pxSegment->xQueueItem ) );
-
                 /* Let 'pxHeadSegment' point to this segment if there is still
                 space. */
                 if( pxSegment->lDataLength < pxSegment->lMaxLength )
@@ -1148,26 +1111,20 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+    /*2016--12--02--18--56--30(ZJYC): 看看是否还有数据需要发送，是返回true   */ 
     static BaseType_t prvTCPWindowTxHasSpace( TCPWindow_t *pxWindow, uint32_t ulWindowSize )
     {
     uint32_t ulTxOutstanding;
     BaseType_t xHasSpace;
     TCPSegment_t *pxSegment;
-
-        /* This function will look if there is new transmission data.  It will
-        return true if there is data to be sent. */
-
         pxSegment = xTCPWindowPeekHead( &( pxWindow->xTxQueue ) );
-
         if( pxSegment == NULL )
         {
             xHasSpace = pdFALSE;
         }
         else
         {
-            /* How much data is outstanding, i.e. how much data has been sent
-            but not yet acknowledged ? */
+            /*2016--12--02--18--57--11(ZJYC): 有多少数据在等待应答   */ 
             if( pxWindow->tx.ulHighestSequenceNumber >= pxWindow->tx.ulCurrentSequenceNumber )
             {
                 ulTxOutstanding = pxWindow->tx.ulHighestSequenceNumber - pxWindow->tx.ulCurrentSequenceNumber;
@@ -1218,9 +1175,8 @@ const int32_t l500ms = 500;
 
         if( listLIST_IS_EMPTY( &pxWindow->xPriorityQueue ) == pdFALSE )
         {
-            /* No need to look at retransmissions or new transmission as long as
-            there are priority segments.  *pulDelay equals zero, meaning it must
-            be sent out immediately. */
+            /*2016--12--02--18--58--49(ZJYC): 如果优先组存在，就没有必要重传
+            pulDelay为0 表示必须立即发送*/ 
             xReturn = pdTRUE;
         }
         else
@@ -1229,37 +1185,28 @@ const int32_t l500ms = 500;
 
             if( pxSegment != NULL )
             {
-                /* There is an outstanding segment, see if it is time to resend
-                it. */
+                /*2016--12--02--19--00--40(ZJYC): 存在等待应答组，看看是否需要超时重传   */ 
                 ulAge = ulTimerGetAge( &pxSegment->xTransmitTimer );
-
-                /* After a packet has been sent for the first time, it will wait
-                '1 * lSRTT' ms for an ACK. A second time it will wait '2 * lSRTT' ms,
-                each time doubling the time-out */
                 ulMaxAge = ( 1u << pxSegment->u.bits.ucTransmitCount ) * ( ( uint32_t ) pxWindow->lSRTT );
-
                 if( ulMaxAge > ulAge )
                 {
-                    /* A segment must be sent after this amount of msecs */
+                    /*2016--12--02--19--01--24(ZJYC): 这些时间后发送   */ 
                     *pulDelay = ulMaxAge - ulAge;
                 }
-
                 xReturn = pdTRUE;
             }
             else
             {
-                /* No priority segment, no outstanding data, see if there is new
-                transmission data. */
+                /*2016--12--02--19--01--51(ZJYC): 不存在优先组，不存在等待应答，看看是否有数据要发送   */ 
                 pxSegment = xTCPWindowPeekHead( &pxWindow->xTxQueue );
-
-                /* See if it fits in the peer's reception window. */
+                /*2016--12--02--19--02--31(ZJYC): 是否与对方的接收窗口相匹配   */ 
                 if( pxSegment == NULL )
                 {
                     xReturn = pdFALSE;
                 }
                 else if( prvTCPWindowTxHasSpace( pxWindow, ulWindowSize ) == pdFALSE )
                 {
-                    /* Too many outstanding messages. */
+                    /*2016--12--02--19--03--36(ZJYC): 等待应答的太多了   */ 
                     xReturn = pdFALSE;
                 }
                 else if( ( pxWindow->u.bits.bSendFullSize != pdFALSE_UNSIGNED ) && ( pxSegment->lDataLength < pxSegment->lMaxLength ) )
@@ -1289,34 +1236,23 @@ const int32_t l500ms = 500;
     TCPSegment_t *pxSegment;
     uint32_t ulMaxTime;
     uint32_t ulReturn  = ~0UL;
-
-
-        /* Fetches data to be sent-out now.
-
-        Priority messages: segments with a resend need no check current sliding
-        window size. */
+        /*2016--12--02--19--04--31(ZJYC): 得到现在需要发送的数据，优先组不需要检查窗口大小   */ 
         pxSegment = xTCPWindowGetHead( &( pxWindow->xPriorityQueue ) );
         pxWindow->ulOurSequenceNumber = pxWindow->tx.ulHighestSequenceNumber;
-
         if( pxSegment == NULL )
         {
-            /* Waiting messages: outstanding messages with a running timer
-            neither check peer's reception window size because these packets
-            have been sent earlier. */
+            /*2016--12--02--19--06--15(ZJYC): 等待应答组：这也不需要检查窗口大小
+            因为他们早就被发送了*/ 
             pxSegment = xTCPWindowPeekHead( &( pxWindow->xWaitQueue ) );
-
             if( pxSegment != NULL )
             {
-                /* Do check the timing. */
+                /*2016--12--02--19--07--13(ZJYC): 检查时间   */ 
                 ulMaxTime = ( 1u << pxSegment->u.bits.ucTransmitCount ) * ( ( uint32_t ) pxWindow->lSRTT );
-
                 if( ulTimerGetAge( &pxSegment->xTransmitTimer ) > ulMaxTime )
                 {
-                    /* A normal (non-fast) retransmission.  Move it from the
-                    head of the waiting queue. */
+                    /*2016--12--02--19--09--00(ZJYC): 普通重传，从等待列表删除   */ 
                     pxSegment = xTCPWindowGetHead( &( pxWindow->xWaitQueue ) );
                     pxSegment->u.bits.ucDupAckCount = pdFALSE_UNSIGNED;
-
                     /* Some detailed logging. */
                     if( ( xTCPWindowLoggingLevel != 0 ) && ( ipconfigTCP_MAY_LOG_PORT( pxWindow->usOurPortNumber ) != 0 ) )
                     {
@@ -1334,36 +1270,29 @@ const int32_t l500ms = 500;
                     pxSegment = NULL;
                 }
             }
-
             if( pxSegment == NULL )
             {
-                /* New messages: sent-out for the first time.  Check current
-                sliding window size of peer. */
+                /*2016--12--02--19--09--53(ZJYC): 新的要发送的数据，检查窗口   */ 
                 pxSegment = xTCPWindowPeekHead( &( pxWindow->xTxQueue ) );
-
                 if( pxSegment == NULL )
                 {
-                    /* No segments queued. */
+                    /*2016--12--02--19--10--17(ZJYC): 没有要发送的数据   */ 
                     ulReturn = 0UL;
                 }
                 else if( ( pxWindow->u.bits.bSendFullSize != pdFALSE_UNSIGNED ) && ( pxSegment->lDataLength < pxSegment->lMaxLength ) )
                 {
-                    /* A segment has been queued but the driver waits until it
-                    has a full size of MSS. */
+                    /*2016--12--02--19--10--43(ZJYC): 有数据要发送，但是驱动需要某一大小的数据   */ 
                     ulReturn = 0;
                 }
                 else if( prvTCPWindowTxHasSpace( pxWindow, ulWindowSize ) == pdFALSE )
                 {
-                    /* Peer has no more space at this moment. */
+                    /*2016--12--02--19--11--19(ZJYC): 对方没有空间了   */ 
                     ulReturn = 0;
                 }
                 else
                 {
-                    /* Move it out of the Tx queue. */
+                    /*2016--12--02--19--11--40(ZJYC): 从Tx队列删除，   */ 
                     pxSegment = xTCPWindowGetHead( &( pxWindow->xTxQueue ) );
-
-                    /* Don't let pxHeadSegment point to this segment any more,
-                    so no more data will be added. */
                     if( pxWindow->pxHeadSegment == pxSegment )
                     {
                         pxWindow->pxHeadSegment = NULL;
@@ -1389,8 +1318,7 @@ const int32_t l500ms = 500;
         }
         else
         {
-            /* There is a priority segment. It doesn't need any checking for
-            space or timeouts. */
+            /*2016--12--02--19--12--41(ZJYC): 存在优先组不做超时检查和空间检查   */ 
             if( xTCPWindowLoggingLevel != 0 )
             {
                 FreeRTOS_debug_printf( ( "ulTCPWindowTxGet[%u,%u]: PrioQueue %ld bytes for sequence number %lu (ws %lu)\n",
@@ -1460,27 +1388,7 @@ const int32_t l500ms = 500;
     const MiniListItem_t *pxEnd = ( const MiniListItem_t* )listGET_END_MARKER( &pxWindow->xTxSegments );
     BaseType_t xDoUnlink;
     TCPSegment_t *pxSegment;
-        /* An acknowledgement or a selective ACK (SACK) was received.  See if some outstanding data
-        may be removed from the transmission queue(s).
-        All TX segments for which
-        ( ( ulSequenceNumber >= ulFirst ) && ( ulSequenceNumber < ulLast ) in a
-        contiguous block.  Note that the segments are stored in xTxSegments in a
-        strict sequential order. */
-
-        /* SRTT[i] = (1-a) * SRTT[i-1] + a * RTT
-
-        0 < a < 1; usually a = 1/8
-
-        RTO = 2 * SRTT
-
-        where:
-          RTT is Round Trip Time
-          SRTT is Smoothed RTT
-          RTO is Retransmit timeout
-
-         A Smoothed RTT will increase quickly, but it is conservative when
-         becoming smaller. */
-
+    /*2016--12--02--19--18--20(ZJYC): 收到了应答或者是选择性应答，看看那些等待应答的数据包可以从发送对流清除   */ 
         for(
                 pxIterator  = ( const ListItem_t * ) listGET_NEXT( pxEnd );
                 ( pxIterator != ( const ListItem_t * ) pxEnd ) && ( xSequenceLessThan( ulSequenceNumber, ulLast ) != 0 );
