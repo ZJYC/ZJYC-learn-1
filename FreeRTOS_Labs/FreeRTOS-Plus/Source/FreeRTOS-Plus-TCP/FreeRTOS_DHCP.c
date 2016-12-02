@@ -22,8 +22,6 @@
 #if( ipconfigUSE_DHCP != 0 )
 
 #if ( ipconfigUSE_DHCP != 0 ) && ( ipconfigNETWORK_MTU < 586u )
-    /* DHCP must be able to receive an options field of 312 bytes, the fixed
-    part of the DHCP packet is 240 bytes, and the IP/UDP headers take 28 bytes. */
     /*2016--12--01--11--10--21(ZJYC): DHCP必须能够接收312字节的选项区域，DHCP
     报文的固定部分是240字节，而且IP/UDP头部占用28字节，312+240+28 = 580？？？*/ 
     #error ipconfigNETWORK_MTU needs to be at least 586 to use DHCP
@@ -41,18 +39,43 @@
 #endif
 
 /*2016--12--01--14--01--24(ZJYC): DHCP选项区有用的标志   */ 
+/*2016--12--02--08--39--18(ZJYC): 0 填充字节 长度0   */ 
 #define dhcpZERO_PAD_OPTION_CODE                ( 0u )
+/*2016--12--02--08--39--31(ZJYC): 1 子网掩码 长度4   */ 
 #define dhcpSUBNET_MASK_OPTION_CODE             ( 1u )
+/*2016--12--02--08--47--51(ZJYC): 2 时间偏移 长度4   */ 
+/*2016--12--02--08--39--59(ZJYC): 3 路由地址 长度 n*4   */ 
 #define dhcpGATEWAY_OPTION_CODE                 ( 3u )
+/*2016--12--02--08--49--19(ZJYC): 4 时间服务器 长度 n*4   */ 
+/*2016--12--02--08--49--42(ZJYC): 5 名称服务器 长度 n*4   */ 
+/*2016--12--02--08--50--17(ZJYC): 6 域名服务器 长度 n*4   */ 
 #define dhcpDNS_SERVER_OPTIONS_CODE             ( 6u )
+/*2016--12--02--08--50--42(ZJYC): 7 日志服务器 长度 n*4   */ 
+/*2016--12--02--08--52--59(ZJYC): 8 Cookie服务器 长度 n*4   */
+/*2016--12--02--08--53--41(ZJYC): 9 LPR服务器 长度 n*4   */ 
+/*2016--12--02--08--54--34(ZJYC): 10 Impress 服务器 长度 n*4   */ 
+/*2016--12--02--08--55--32(ZJYC): 11 资源位置服务器 长度 n*4   */ 
+/*2016--12--02--08--56--25(ZJYC): 12 主机名 长度 至少1字节  */ 
 #define dhcpDNS_HOSTNAME_OPTIONS_CODE           ( 12u )
+/*2016--12--02--08--57--12(ZJYC): 13 启动文件大小 长度 2字节   */ 
+/*2016--12--02--08--58--57(ZJYC): 14 转储文件 长度 至少1字节  */ 
+/*2016--12--02--09--05--45(ZJYC): 15 域名 长度 至少1字节   */ 
+/*2016--12--02--09--06--10(ZJYC): 16 交换服务器 长度4字节   */ 
+/*2016--12--02--09--08--44(ZJYC): 17 根路径 长度 至少1字节  */ 
+/*2016--12--02--09--09--16(ZJYC): 18 拓展路径 长度 至少1字节  */ 
+/*2016--12--02--09--10--31(ZJYC): 50 请求的IP地址 长度 4字节   */ 
 #define dhcpREQUEST_IP_ADDRESS_OPTION_CODE      ( 50u )
+/*2016--12--02--09--11--02(ZJYC): 51 IP地址租期 长度 4字节   */ 
 #define dhcpLEASE_TIME_OPTION_CODE              ( 51u )
+/*2016--12--02--09--11--26(ZJYC): 53 消息类型 长度 1字节   */ 
 #define dhcpMESSAGE_TYPE_OPTION_CODE            ( 53u )
+/*2016--12--02--09--17--20(ZJYC): 54 服务器标示 4字节   */ 
 #define dhcpSERVER_IP_ADDRESS_OPTION_CODE       ( 54u )
+/*2016--12--02--09--17--42(ZJYC): 55 参数清单 至少1字节   */ 
 #define dhcpPARAMETER_REQUEST_OPTION_CODE       ( 55u )
+/*2016--12--02--09--18--12(ZJYC): 61 客户端标示 至少2字节   */ 
 #define dhcpCLIENT_IDENTIFIER_OPTION_CODE       ( 61u )
-
+/*2016--12--02--09--09--45(ZJYC): 255 结束符   */ 
 /*2016--12--01--14--08--22(ZJYC): 四种DHCP消息类型   */ 
 #define dhcpMESSAGE_TYPE_DISCOVER               ( 1 )
 #define dhcpMESSAGE_TYPE_OFFER                  ( 2 )
