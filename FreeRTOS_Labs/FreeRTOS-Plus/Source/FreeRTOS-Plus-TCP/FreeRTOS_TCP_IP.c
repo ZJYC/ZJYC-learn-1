@@ -525,9 +525,6 @@ NetworkBufferDescriptor_t *pxNetworkBuffer;
             #if( ipconfigUSE_TCP_TIMESTAMPS == 1 )
             {
                 /* 如果时间戳使能，只有在同伴为局域网外时才可使用，通常是在internet上。 */
-                /* When TCP time stamps are enabled, but they will only be applied
-                if the peer is outside the netmask, usually on the internet.
-                Packages sent on a LAN are usually too big to carry time stamps. */
                 if( ( ( pxSocket->u.xTCP.ulRemoteIP ^ FreeRTOS_ntohl( *ipLOCAL_IP_ADDRESS_POINTER ) ) & xNetworkAddressing.ulNetMask ) != 0ul )
                 {
                     pxSocket->u.xTCP.xTCPWindow.u.bits.bTimeStamps = pdTRUE_UNSIGNED;
@@ -1858,8 +1855,12 @@ int32_t lLength, lTCPHeaderLength, lReceiveLength, lUrgentLength;
 
     return ( BaseType_t ) lReceiveLength;
 }
+<<<<<<< HEAD
 /*2016--11--20--19--53--58(ZJYC): prvStoreRxData()被函数prvTCPHandleState()调用，第二件要做的事情便是检查数据负载
 是否可接受，如果是的话，他们将被添加到接受序列   */ 
+=======
+/* prvStoreRxData()被prvTCPHandleState()调用，第二件要做的事情便是检查负载是否被接收，如果是的话，他们将被加入到接受队列 */
+>>>>>>> origin/master
 static BaseType_t prvStoreRxData( FreeRTOS_Socket_t *pxSocket, uint8_t *pucRecvData,
     NetworkBufferDescriptor_t *pxNetworkBuffer, uint32_t ulReceiveLength )
 {
@@ -1869,15 +1870,20 @@ TCPWindow_t *pxTCPWindow = &pxSocket->u.xTCP.xTCPWindow;
 uint32_t ulSequenceNumber, ulSpace;
 int32_t lOffset, lStored;
 BaseType_t xResult = 0;
-
     ulSequenceNumber = FreeRTOS_ntohl( pxTCPHeader->ulSequenceNumber );
-
     if( ( ulReceiveLength > 0u ) && ( pxSocket->u.xTCP.ucTCPState >= eSYN_RECEIVED ) )
     {
+<<<<<<< HEAD
 		/*2016--11--20--19--57--26(ZJYC):看看我们是否接收数据并将其推送到套接字拥有者    */ 
 		/*2016--11--20--19--59--54(ZJYC): 如果不可被接受，他需要被存储并发送可选择的ACK或SACK
 		来确认，在这种情况下，xTCPWindowRxStore() 会被调用来存储非顺序的数据包
 		*/ 
+=======
+        /* 看我们是否收到数据内容，并将它传递给套接字的拥有者 */
+        /* 如果他不能被接收，他可能已经被存储，发送一个可选的ack (SACK)选项头应答之，
+            在这种情况下，xTCPWindowRxStore()后期会被调用来存储那些非顺序的数据
+        */
+>>>>>>> origin/master
         if ( pxSocket->u.xTCP.rxStream )
         {
             ulSpace = ( uint32_t )uxStreamBufferGetSpace ( pxSocket->u.xTCP.rxStream );
@@ -1886,9 +1892,7 @@ BaseType_t xResult = 0;
         {
             ulSpace = ( uint32_t )pxSocket->u.xTCP.uxRxStreamSize;
         }
-
         lOffset = lTCPWindowRxCheck( pxTCPWindow, ulSequenceNumber, ulReceiveLength, ulSpace );
-
         if( lOffset >= 0 )
         {
 			/*2016--11--20--20--01--53(ZJYC):新数据已经到达并且可以被用户使用。看看是否头部标志
@@ -1898,23 +1902,38 @@ BaseType_t xResult = 0;
             if the head marker in rxStream may be advanced, only if lOffset == 0.
             In case the low-water mark is reached, bLowWater will be set
             "low-water" here stands for "little space". */
+            /* 新数据已经到达，可以被用户使用，看看是否 */
             lStored = lTCPAddRxdata( pxSocket, ( uint32_t ) lOffset, pucRecvData, ulReceiveLength );
 
             if( lStored != ( int32_t ) ulReceiveLength )
             {
                 FreeRTOS_debug_printf( ( "lTCPAddRxdata: stored %ld / %lu bytes??\n", lStored, ulReceiveLength ) );
+<<<<<<< HEAD
 				/*2016--11--20--20--04--39(ZJYC):接收到的数据不能被存储。套接字的bMallocError标志被置位
 				套接字现在eCLOSE_WAIT的状态为并且将发出RST包
 				*/ 
+=======
+                /* 接收到的数据不能被存储，套接字的标志位bMallocError被置位，套接字现在的状态为eCLOSE_WAIT并且带有RST的数据包将会被返回 */
+>>>>>>> origin/master
                 prvTCPSendReset( pxNetworkBuffer );
                 xResult = -1;
             }
         }
+<<<<<<< HEAD
 		/*2016--11--20--20--06--04(ZJYC):收到一个丢失的包之后，更高的数据包会被传递给用户    */ 
         #if( ipconfigUSE_TCP_WIN == 1 )
         {
 			/*2016--11--20--20--07--12(ZJYC):现在lTCPAddRxdata()将会向前移动rxHead指针，
 			所以对用户而言，数据很快变得可用起来，置位bLowWater以防止到达低位线，*/ 
+=======
+        /* 当接收到丢失的数据包之后，较高的数据包可能传递给用户 */
+        #if( ipconfigUSE_TCP_WIN == 1 )
+        {
+            /* Now lTCPAddRxdata() will move the rxHead pointer forward
+            so data becomes available to the user immediately
+            In case the low-water mark is reached, bLowWater will be set. */
+            /* 现在lTCPAddRxdata()，将会向前移动rxHead指针，所以数据立即变得对用户可用，为防止到达低水位标志，bLowWater会被置位 */
+>>>>>>> origin/master
             if( ( xResult == 0 ) && ( pxTCPWindow->ulUserDataLength > 0 ) )
             {
                 lTCPAddRxdata( pxSocket, 0ul, NULL, pxTCPWindow->ulUserDataLength );
