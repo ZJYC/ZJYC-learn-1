@@ -1855,12 +1855,9 @@ int32_t lLength, lTCPHeaderLength, lReceiveLength, lUrgentLength;
 
     return ( BaseType_t ) lReceiveLength;
 }
-<<<<<<< HEAD
 /*2016--11--20--19--53--58(ZJYC): prvStoreRxData()被函数prvTCPHandleState()调用，第二件要做的事情便是检查数据负载
 是否可接受，如果是的话，他们将被添加到接受序列   */ 
-=======
 /* prvStoreRxData()被prvTCPHandleState()调用，第二件要做的事情便是检查负载是否被接收，如果是的话，他们将被加入到接受队列 */
->>>>>>> origin/master
 static BaseType_t prvStoreRxData( FreeRTOS_Socket_t *pxSocket, uint8_t *pucRecvData,
     NetworkBufferDescriptor_t *pxNetworkBuffer, uint32_t ulReceiveLength )
 {
@@ -1873,17 +1870,14 @@ BaseType_t xResult = 0;
     ulSequenceNumber = FreeRTOS_ntohl( pxTCPHeader->ulSequenceNumber );
     if( ( ulReceiveLength > 0u ) && ( pxSocket->u.xTCP.ucTCPState >= eSYN_RECEIVED ) )
     {
-<<<<<<< HEAD
 		/*2016--11--20--19--57--26(ZJYC):看看我们是否接收数据并将其推送到套接字拥有者    */ 
 		/*2016--11--20--19--59--54(ZJYC): 如果不可被接受，他需要被存储并发送可选择的ACK或SACK
 		来确认，在这种情况下，xTCPWindowRxStore() 会被调用来存储非顺序的数据包
 		*/ 
-=======
         /* 看我们是否收到数据内容，并将它传递给套接字的拥有者 */
         /* 如果他不能被接收，他可能已经被存储，发送一个可选的ack (SACK)选项头应答之，
             在这种情况下，xTCPWindowRxStore()后期会被调用来存储那些非顺序的数据
         */
->>>>>>> origin/master
         if ( pxSocket->u.xTCP.rxStream )
         {
             ulSpace = ( uint32_t )uxStreamBufferGetSpace ( pxSocket->u.xTCP.rxStream );
@@ -1908,24 +1902,19 @@ BaseType_t xResult = 0;
             if( lStored != ( int32_t ) ulReceiveLength )
             {
                 FreeRTOS_debug_printf( ( "lTCPAddRxdata: stored %ld / %lu bytes??\n", lStored, ulReceiveLength ) );
-<<<<<<< HEAD
 				/*2016--11--20--20--04--39(ZJYC):接收到的数据不能被存储。套接字的bMallocError标志被置位
 				套接字现在eCLOSE_WAIT的状态为并且将发出RST包
 				*/ 
-=======
                 /* 接收到的数据不能被存储，套接字的标志位bMallocError被置位，套接字现在的状态为eCLOSE_WAIT并且带有RST的数据包将会被返回 */
->>>>>>> origin/master
                 prvTCPSendReset( pxNetworkBuffer );
                 xResult = -1;
             }
         }
-<<<<<<< HEAD
 		/*2016--11--20--20--06--04(ZJYC):收到一个丢失的包之后，更高的数据包会被传递给用户    */ 
-        #if( ipconfigUSE_TCP_WIN == 1 )
-        {
+        //#if( ipconfigUSE_TCP_WIN == 1 )
+        //{
 			/*2016--11--20--20--07--12(ZJYC):现在lTCPAddRxdata()将会向前移动rxHead指针，
 			所以对用户而言，数据很快变得可用起来，置位bLowWater以防止到达低位线，*/ 
-=======
         /* 当接收到丢失的数据包之后，较高的数据包可能传递给用户 */
         #if( ipconfigUSE_TCP_WIN == 1 )
         {
@@ -1933,7 +1922,6 @@ BaseType_t xResult = 0;
             so data becomes available to the user immediately
             In case the low-water mark is reached, bLowWater will be set. */
             /* 现在lTCPAddRxdata()，将会向前移动rxHead指针，所以数据立即变得对用户可用，为防止到达低水位标志，bLowWater会被置位 */
->>>>>>> origin/master
             if( ( xResult == 0 ) && ( pxTCPWindow->ulUserDataLength > 0 ) )
             {
                 lTCPAddRxdata( pxSocket, 0ul, NULL, pxTCPWindow->ulUserDataLength );
@@ -2421,7 +2409,7 @@ static BaseType_t prvTCPHandleState( FreeRTOS_Socket_t *pxSocket, NetworkBufferD
 TCPPacket_t *pxTCPPacket = ( TCPPacket_t * ) ( (*ppxNetworkBuffer)->pucEthernetBuffer );
 TCPHeader_t *pxTCPHeader = &( pxTCPPacket->xTCPHeader );
 BaseType_t xSendLength = 0;
-uint32_t ulReceiveLength;   /* Number of bytes contained in the TCP message. */
+uint32_t ulReceiveLength;   /*2016--12--04--21--26--45(ZJYC): 接收数据的长度   */ 
 uint8_t *pucRecvData;
 uint32_t ulSequenceNumber = FreeRTOS_ntohl (pxTCPHeader->ulSequenceNumber);
 
@@ -2433,24 +2421,29 @@ uint32_t ulSequenceNumber = FreeRTOS_ntohl (pxTCPHeader->ulSequenceNumber);
 UBaseType_t uxOptionsLength = 0u;
 uint8_t ucTCPFlags = pxTCPHeader->ucTCPFlags;
 TCPWindow_t *pxTCPWindow = &( pxSocket->u.xTCP.xTCPWindow );
-
-    /* First get the length and the position of the received data, if any.
-    pucRecvData will point to the first byte of the TCP payload. */
+    /*2016--12--04--21--22--15(ZJYC): 第一步获取接收到的数据的长度和位置
+    pucRecvData将会指向TCP数据的第一个字节*/ 
     ulReceiveLength = ( uint32_t ) prvCheckRxData( *ppxNetworkBuffer, &pucRecvData );
-
+    /*2016--12--04--21--30--11(ZJYC): 以下判断他是不是一个包活信号   */ 
     if( pxSocket->u.xTCP.ucTCPState >= eESTABLISHED )
     {
+        /*2016--12--04--21--23--08(ZJYC): 目前已经处于连接建立的状态   */ 
         if ( pxTCPWindow->rx.ulCurrentSequenceNumber == ulSequenceNumber + 1u )
         {
-            /* This is most probably a keep-alive message from peer.  Setting
-            'bWinChange' doesn't cause a window-size-change, the flag is used
-            here to force sending an immediate ACK. */
+            /*2016--12--04--21--25--45(ZJYC): 难道不应该是ACK number？？
+            我发现在数据结构中根本就不存在ACK Num这一回事，估计是，被在RX
+            中的SEQ就是ACK NUM
+            */ 
+            /*2016--12--04--21--23--33(ZJYC): 判断其确认号为当前seq+1，判断此为包活信号
+            这里置位bWinChange并不会改变窗口大小，而是使得立即发送一个ACK*/ 
             pxSocket->u.xTCP.bits.bWinChange = pdTRUE_UNSIGNED;
         }
     }
 
     /* Keep track of the highest sequence number that might be expected within
     this connection. */
+    /*2016--12--04--21--30--57(ZJYC): 用来跟踪最高序列号，这个序列号在后期大有用处，比如在
+    回复时需要回复最高序列号（SACK除外）   */ 
     if( ( ( int32_t ) ( ulSequenceNumber + ulReceiveLength - pxTCPWindow->rx.ulHighestSequenceNumber ) ) > 0 )
     {
         pxTCPWindow->rx.ulHighestSequenceNumber = ulSequenceNumber + ulReceiveLength;
@@ -2464,73 +2457,56 @@ TCPWindow_t *pxTCPWindow = &( pxSocket->u.xTCP.xTCPWindow );
     else
     {
         uxOptionsLength = prvSetOptions( pxSocket, *ppxNetworkBuffer );
-
+        /*2016--12--04--21--44--22(ZJYC): 下面这个判断是什么意思？？？   */ 
         if( ( pxSocket->u.xTCP.ucTCPState == eSYN_RECEIVED ) && ( ( ucTCPFlags & ipTCP_FLAG_CTRL ) == ipTCP_FLAG_SYN ) )
         {
             FreeRTOS_debug_printf( ( "eSYN_RECEIVED: ACK expected, not SYN: peer missed our SYN+ACK\n" ) );
-
-            /* In eSYN_RECEIVED a simple ACK is expected, but apparently the
-            'SYN+ACK' didn't arrive.  Step back to the previous state in which
-            a first incoming SYN is handled.  The SYN was counted already so
-            decrease it first. */
+            /*2016--12--04--21--40--02(ZJYC): eSYN_RECEIVED表明我们期望收到ACK，但是并没有   */ 
             vTCPStateChange( pxSocket, eSYN_FIRST );
         }
-
+        /*2016--12--04--21--45--35(ZJYC): 对方要停止 && 还没有收到过FIN   */ 
         if( ( ( ucTCPFlags & ipTCP_FLAG_FIN ) != 0u ) && ( pxSocket->u.xTCP.bits.bFinRecv == pdFALSE_UNSIGNED ) )
         {
-            /* It's the first time a FIN has been received, remember its
-            sequence number. */
+            /*2016--12--04--21--46--21(ZJYC): 收到了第一个FIN，记住他的序列号   */ 
             pxTCPWindow->rx.ulFINSequenceNumber = ulSequenceNumber + ulReceiveLength;
             pxSocket->u.xTCP.bits.bFinRecv = pdTRUE_UNSIGNED;
-
-            /* Was peer the first one to send a FIN? */
+            /*2016--12--04--21--47--03(ZJYC): 判断是否是对方先发送的FIN，如果是，我们就得发送
+            LAST-ACK，否则就不用发了   */ 
             if( pxSocket->u.xTCP.bits.bFinSent == pdFALSE_UNSIGNED )
             {
-                /* If so, don't send the-last-ACK. */
                 pxSocket->u.xTCP.bits.bFinLast = pdTRUE_UNSIGNED;
             }
         }
 
         switch (pxSocket->u.xTCP.ucTCPState)
         {
-        case eCLOSED:       /* (server + client) no connection state at all. */
-            /* Nothing to do for a closed socket, except waiting for the
-            owner. */
+        case eCLOSED:/*2016--12--04--21--48--16(ZJYC): （CS）不存在任何连接，我们什么也不做，
+        等待用户动作*/ 
             break;
 
-        case eTCP_LISTEN:   /* (server) waiting for a connection request from
-                            any remote TCP and port. */
-            /* The listen state was handled in xProcessReceivedTCPPacket().
-            Should not come here. */
+        case eTCP_LISTEN:/*2016--12--04--21--48--59(ZJYC): （S）等待任何远程连接，监听状态由
+        xProcessReceivedTCPPacket()控制，这里不再叙述*/ 
             break;
 
-        case eSYN_FIRST:    /* (server) Just received a SYN request for a server
-                            socket. */
+        case eSYN_FIRST:    /*2016--12--04--21--04--41(ZJYC): 服务器刚刚收到一SYN请求   */ 
             {
-                /* A new socket has been created, reply with a SYN+ACK.
-                Acknowledge with seq+1 because the SYN is seen as pseudo data
-                with len = 1. */
+                /*2016--12--04--21--03--38(ZJYC): 一个新的套接字已经被创建，回复SYN+ACK
+                确认号为seq+1*/ 
                 uxOptionsLength = prvSetSynAckOptions( pxSocket, pxTCPPacket );
                 pxTCPHeader->ucTCPFlags = ipTCP_FLAG_SYN | ipTCP_FLAG_ACK;
-
                 xSendLength = ( BaseType_t ) ( ipSIZE_OF_IPv4_HEADER + ipSIZE_OF_TCP_HEADER + uxOptionsLength );
-
-                /* Set the TCP offset field:  ipSIZE_OF_TCP_HEADER equals 20 and
-                xOptionsLength is a multiple of 4.  The complete expression is:
-                ucTCPOffset = ( ( ipSIZE_OF_TCP_HEADER + xOptionsLength ) / 4 ) << 4 */
+                /*2016--12--04--21--05--12(ZJYC): 设置TCP偏移字段，ipSIZE_OF_TCP_HEADER等于20
+                 xOptionsLength是4的倍数，完全的表达式为ucTCPOffset = ( ( ipSIZE_OF_TCP_HEADER + xOptionsLength ) / 4 ) << 4*/ 
                 pxTCPHeader->ucTCPOffset = ( uint8_t )( ( ipSIZE_OF_TCP_HEADER + uxOptionsLength ) << 2 );
                 vTCPStateChange( pxSocket, eSYN_RECEIVED );
-
                 pxTCPWindow->rx.ulCurrentSequenceNumber = pxTCPWindow->rx.ulHighestSequenceNumber = ulSequenceNumber + 1u;
                 pxTCPWindow->tx.ulCurrentSequenceNumber = pxTCPWindow->ulNextTxSequenceNumber = pxTCPWindow->tx.ulFirstSequenceNumber + 1u; /* because we send a TCP_SYN. */
             }
             break;
 
-        case eCONNECT_SYN:  /* (client) also called SYN_SENT: we've just send a
-                            SYN, expect a SYN+ACK and send a ACK now. */
+        case eCONNECT_SYN: /*2016--12--04--21--07--49(ZJYC): 客户发送SYN，我们期望收到SYN+ACK。   */ 
             /* Fall through */
-        case eSYN_RECEIVED: /* (server) we've had a SYN, replied with SYN+SCK
-                            expect a ACK and do nothing. */
+        case eSYN_RECEIVED: /*2016--12--04--21--09--06(ZJYC): 收到SYN并回复了SYN+ACK，期望收到ACK   */ 
             xSendLength = prvHandleSynReceived( pxSocket, ppxNetworkBuffer, ulReceiveLength, uxOptionsLength );
             break;
 
@@ -2649,20 +2625,15 @@ uint16_t xLocalPort = FreeRTOS_htons( pxTCPPacket->xTCPHeader.usDestinationPort 
 uint32_t ulRemoteIP = FreeRTOS_htonl( pxTCPPacket->xIPHeader.ulSourceIPAddress );
 uint16_t xRemotePort = FreeRTOS_htons( pxTCPPacket->xTCPHeader.usSourcePort );
 BaseType_t xResult = pdPASS;
-
-    /* Find the destination socket, and if not found: return a socket listing to
-    the destination PORT. */
+    /*2016--12--04--21--51--13(ZJYC): 寻找目标套接字，如果没有，返回一个监听
+    目标端口的套接字？？？（为什么返回一个监听的套接字？？？？）   */ 
     pxSocket = ( FreeRTOS_Socket_t * ) pxTCPSocketLookup( ulLocalIP, xLocalPort, ulRemoteIP, xRemotePort );
 
     if( ( pxSocket == NULL ) || ( prvTCPSocketIsActive( ( UBaseType_t ) pxSocket->u.xTCP.ucTCPState ) == pdFALSE ) )
     {
-        /* A TCP messages is received but either there is no socket with the
-        given port number or the there is a socket, but it is in one of these
-        non-active states:  eCLOSED, eCLOSE_WAIT, eFIN_WAIT_2, eCLOSING, or
-        eTIME_WAIT. */
-
+        /*2016--12--04--21--52--44(ZJYC): 收到了TCP消息，但是或者没有套接字对应
+        或者套接字处于eCLOSED, eCLOSE_WAIT, eFIN_WAIT_2, eCLOSING, or eTIME_WAIT*/ 
         FreeRTOS_debug_printf( ( "TCP: No active socket on port %d (%lxip:%d)\n", xLocalPort, ulRemoteIP, xRemotePort ) );
-
         /* Send a RST to all packets that can not be handled.  As a result
         the other party will get a ECONN error.  There are two exceptions:
         1) A packet that already has the RST flag set.
@@ -2681,16 +2652,12 @@ BaseType_t xResult = pdPASS;
     else
     {
         pxSocket->u.xTCP.ucRepCount = 0u;
-
         if( pxSocket->u.xTCP.ucTCPState == eTCP_LISTEN )
         {
-            /* The matching socket is in a listening state.  Test if the peer
-            has set the SYN flag. */
+            /*2016--12--04--21--56--20(ZJYC): 匹配的套接字有SYN标志，看看对方是不是有SYN   */ 
             if( ( ucTCPFlags & ipTCP_FLAG_CTRL ) != ipTCP_FLAG_SYN )
             {
-                /* What happens: maybe after a reboot, a client doesn't know the
-                connection had gone.  Send a RST in order to get a new connect
-                request. */
+                /*2016--12--04--21--57--05(ZJYC): 我们在同步状态，但是对方没发送SYN，给他个FST   */ 
                 #if( ipconfigHAS_DEBUG_PRINTF == 1 )
                 {
                 FreeRTOS_debug_printf( ( "TCP: Server can't handle flags: %s from %lxip:%u to port %u\n",
@@ -2706,11 +2673,10 @@ BaseType_t xResult = pdPASS;
             }
             else
             {
-                /* prvHandleListen() will either return a newly created socket
-                (if bReuseSocket is false), otherwise it returns the current
-                socket which will later get connected. */
+                /*2016--12--04--21--59--09(ZJYC): 啥意思：if bReuseSocket is false？？？？   */ 
+                /*2016--12--04--21--57--57(ZJYC): prvHandleListen()将会返回一个新的套接字
+                （if bReuseSocket is false），要不然，返回当前套接字，后期会被连接   */ 
                 pxSocket = prvHandleListen( pxSocket, pxNetworkBuffer );
-
                 if( pxSocket == NULL )
                 {
                     xResult = pdFAIL;
@@ -2719,21 +2685,19 @@ BaseType_t xResult = pdPASS;
         }   /* if( pxSocket->u.xTCP.ucTCPState == eTCP_LISTEN ). */
         else
         {
-            /* This is not a socket in listening mode. Check for the RST
-            flag. */
+            /*2016--12--04--22--00--18(ZJYC): 本套接字并不处于监听模式，检查RST   */ 
             if( ( ucTCPFlags & ipTCP_FLAG_RST ) != 0u )
             {
-                /* The target socket is not in a listening state, any RST packet
-                will cause the socket to be closed. */
+                /*2016--12--04--22--01--26(ZJYC): 本套接字不在监听模式，而又收到了RST
+                说明本套接字想关闭*/ 
                 FreeRTOS_debug_printf( ( "TCP: RST received from %lxip:%u for %u\n", ulRemoteIP, xRemotePort, xLocalPort ) );
                 vTCPStateChange( pxSocket, eCLOSED );
-
                 /* The packet cannot be handled. */
                 xResult = pdFAIL;
             }
             else if( ( ( ucTCPFlags & ipTCP_FLAG_CTRL ) == ipTCP_FLAG_SYN ) && ( pxSocket->u.xTCP.ucTCPState >= eESTABLISHED ) )
             {
-                /* SYN flag while this socket is already connected. */
+                /*2016--12--04--22--02--47(ZJYC): 对方发送SYN && 我们早就建立连接了==矛盾了   */ 
                 FreeRTOS_debug_printf( ( "TCP: SYN unexpected from %lxip:%u\n", ulRemoteIP, xRemotePort ) );
 
                 /* The packet cannot be handled. */
@@ -2744,38 +2708,33 @@ BaseType_t xResult = pdPASS;
                 /* Update the copy of the TCP header only (skipping eth and IP
                 headers).  It might be used later on, whenever data must be sent
                 to the peer. */
+                /*2016--12--04--22--04--47(ZJYC): 保存报文头？？？？？？？   */ 
+                /*2016--12--04--22--05--58(ZJYC): 这里才是正常的流程？？？   */ 
                 const BaseType_t lOffset = ( BaseType_t ) ( ipSIZE_OF_ETH_HEADER + ipSIZE_OF_IPv4_HEADER );
                 memcpy( pxSocket->u.xTCP.xPacket.u.ucLastPacket + lOffset, pxNetworkBuffer->pucEthernetBuffer + lOffset, ipSIZE_OF_TCP_HEADER );
             }
         }
     }
-
     if( xResult != pdFAIL )
     {
-        /* Touch the alive timers because we received a message for this
-        socket. */
+        /*2016--12--04--22--06--30(ZJYC): 更新计时   */ 
         prvTCPTouchSocket( pxSocket );
-
-        /* Parse the TCP option(s), if present. */
-        /* _HT_ : if we're in the SYN phase, and peer does not send a MSS option,
-        then we MUST assume an MSS size of 536 bytes for backward compatibility. */
-
-        /* When there are no TCP options, the TCP offset equals 20 bytes, which is stored as
-        the number 5 (words) in the higher niblle of the TCP-offset byte. */
+        /*2016--12--04--22--07--07(ZJYC): 解析TCP选项，如果我们处于SYN阶段，但是对方没有发送MSS
+        我们默认为536，以为了后续的兼容性*/ 
+        /*2016--12--04--22--08--13(ZJYC): 如果不存在TCP选项，offset为5表示20字节，   */ 
         if( ( pxTCPPacket->xTCPHeader.ucTCPOffset & TCP_OFFSET_LENGTH_BITS ) > TCP_OFFSET_STANDARD_LENGTH )
         {
+            /*2016--12--04--22--09--00(ZJYC): 我们需要检查选项   */ 
             prvCheckOptions( pxSocket, pxNetworkBuffer );
         }
-
-
         #if( ipconfigUSE_TCP_WIN == 1 )
         {
+            /*2016--12--04--22--09--54(ZJYC): 此处设置窗口大小=窗口*放大因子   */ 
             pxSocket->u.xTCP.ulWindowSize = FreeRTOS_ntohs( pxTCPPacket->xTCPHeader.usWindow );
             pxSocket->u.xTCP.ulWindowSize =
                 ( pxSocket->u.xTCP.ulWindowSize << pxSocket->u.xTCP.ucPeerWinScaleFactor );
         }
         #endif
-
         /* In prvTCPHandleState() the incoming messages will be handled
         depending on the current state of the connection. */
         if( prvTCPHandleState( pxSocket, &pxNetworkBuffer ) > 0 )
@@ -2788,19 +2747,15 @@ BaseType_t xResult = pdPASS;
             }
             #endif /* ipconfigUSE_TCP_WIN */
         }
-
         if( pxNetworkBuffer != NULL )
         {
-            /* We must check if the buffer is unequal to NULL, because the
-            socket might keep a reference to it in case a delayed ACK must be
-            sent. */
+            /*2016--12--04--22--14--48(ZJYC): 把缓存释放吧，没用了   */ 
             vReleaseNetworkBufferAndDescriptor( pxNetworkBuffer );
             pxNetworkBuffer = NULL;
         }
-
-        /* And finally, calculate when this socket wants to be woken up. */
+        /*2016--12--04--22--13--48(ZJYC): 最后计算下次被唤醒的时间   */ 
         prvTCPNextTimeout ( pxSocket );
-        /* Return pdPASS to tell that the network buffer is 'consumed'. */
+        /*2016--12--04--22--14--11(ZJYC): 告诉调用者，缓存已被消耗   */ 
         xResult = pdPASS;
     }
 
@@ -2814,22 +2769,19 @@ static FreeRTOS_Socket_t *prvHandleListen( FreeRTOS_Socket_t *pxSocket, NetworkB
 TCPPacket_t * pxTCPPacket = ( TCPPacket_t * ) ( pxNetworkBuffer->pucEthernetBuffer );
 FreeRTOS_Socket_t *pxReturn;
 
-    /* A pure SYN (without ACK) has come in, create a new socket to answer
-    it. */
+    /*2016--12--04--22--17--56(ZJYC): 收到一个单纯的SYN，创建一个套接字来对付他   */ 
     if( pxSocket->u.xTCP.bits.bReuseSocket != pdFALSE_UNSIGNED )
     {
-        /* The flag bReuseSocket indicates that the same instance of the
-        listening socket should be used for the connection. */
+        /*2016--12--04--22--18--29(ZJYC): 这个套接字确实实在等待此端口，我们直接用这个
+        套接字而不用在建立了*/ 
         pxReturn = pxSocket;
         pxSocket->u.xTCP.bits.bPassQueued = pdTRUE_UNSIGNED;
         pxSocket->u.xTCP.pxPeerSocket = pxSocket;
     }
     else
     {
-        /* The socket does not have the bReuseSocket flag set meaning create a
-        new socket when a connection comes in. */
+        /*2016--12--04--22--19--39(ZJYC): 直接创建个新的套接字   */ 
         pxReturn = NULL;
-
         if( pxSocket->u.xTCP.usChildCount >= pxSocket->u.xTCP.usBacklog )
         {
             FreeRTOS_printf( ( "Check: Socket %u already has %u / %u child%s\n",
@@ -2843,7 +2795,6 @@ FreeRTOS_Socket_t *pxReturn;
         {
             FreeRTOS_Socket_t *pxNewSocket = (FreeRTOS_Socket_t *)
                 FreeRTOS_socket( FREERTOS_AF_INET, FREERTOS_SOCK_STREAM, FREERTOS_IPPROTO_TCP );
-
             if( ( pxNewSocket == NULL ) || ( pxNewSocket == FREERTOS_INVALID_SOCKET ) )
             {
                 FreeRTOS_debug_printf( ( "TCP: Listen: new socket failed\n" ) );
@@ -2851,10 +2802,8 @@ FreeRTOS_Socket_t *pxReturn;
             }
             else if( prvTCPSocketCopy( pxNewSocket, pxSocket ) != pdFALSE )
             {
-                /* The socket will be connected immediately, no time for the
-                owner to setsockopt's, therefore copy properties of the server
-                socket to the new socket.  Only the binding might fail (due to
-                lack of resources). */
+                /*2016--12--04--22--22--47(ZJYC): 套接字后期马上就会连接，也没有时间见去配置，
+                我们直接使用本套接字的设置就可以啦*/ 
                 pxReturn = pxNewSocket;
             }
         }
@@ -2865,18 +2814,13 @@ FreeRTOS_Socket_t *pxReturn;
         pxReturn->u.xTCP.usRemotePort = FreeRTOS_htons( pxTCPPacket->xTCPHeader.usSourcePort );
         pxReturn->u.xTCP.ulRemoteIP = FreeRTOS_htonl( pxTCPPacket->xIPHeader.ulSourceIPAddress );
         pxReturn->u.xTCP.xTCPWindow.ulOurSequenceNumber = ulNextInitialSequenceNumber;
-
         /* Here is the SYN action. */
         pxReturn->u.xTCP.xTCPWindow.rx.ulCurrentSequenceNumber = FreeRTOS_ntohl( pxTCPPacket->xTCPHeader.ulSequenceNumber );
         prvSocketSetMSS( pxReturn );
-
         prvTCPCreateWindow( pxReturn );
-
         /* It is recommended to increase the ISS for each new connection with a value of 0x102. */
         ulNextInitialSequenceNumber += INITIAL_SEQUENCE_NUMBER_INCREMENT;
-
         vTCPStateChange( pxReturn, eSYN_FIRST );
-
         /* Make a copy of the header up to the TCP header.  It is needed later
         on, whenever data must be sent to the peer. */
         memcpy( pxReturn->u.xTCP.xPacket.u.ucLastPacket, pxNetworkBuffer->pucEthernetBuffer, sizeof( pxReturn->u.xTCP.xPacket.u.ucLastPacket ) );

@@ -315,17 +315,14 @@ extern void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewL
 
 void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem, MiniListItem_t * const pxWhere )
 {
-    /* Insert a new list item into pxList, it does not sort the list,
-    but it puts the item just before xListEnd, so it will be the last item
-    returned by listGET_HEAD_ENTRY() */
+    /*2016--12--03--18--16--54(ZJYC): 向pxList插入一新的成员，这不会对列表排序，
+    他吧成员放在xListEnd之前，所以他会是最后一个被listGET_HEAD_ENTRY()返回的元素*/ 
     pxNewListItem->pxNext = (struct xLIST_ITEM * configLIST_VOLATILE)pxWhere;
     pxNewListItem->pxPrevious = pxWhere->pxPrevious;
     pxWhere->pxPrevious->pxNext = pxNewListItem;
     pxWhere->pxPrevious = pxNewListItem;
-
-    /* Remember which list the item is in. */
+    /*2016--12--03--18--18--53(ZJYC): 记住这一个成员在哪一个列表中   */ 
     pxNewListItem->pvContainer = ( void * ) pxList;
-
     ( pxList->uxNumberOfItems )++;
 }
 /*-----------------------------------------------------------*/
@@ -335,12 +332,9 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
     static BaseType_t prvCreateSectors( void )
     {
     BaseType_t xIndex, xReturn;
-
-        /* Allocate space for 'xTCPSegments' and store them in 'xSegmentList'. */
-
+        /*2016--12--03--18--19--31(ZJYC): 为xTCPSegments创建空间，并保存在xSegmentList   */ 
         vListInitialise( &xSegmentList );
-        xTCPSegments = ( TCPSegment_t * ) pvPortMallocLarge( ipconfigTCP_WIN_SEG_COUNT * sizeof( xTCPSegments[ 0 ] ) );
-
+        xTCPSegments = ( TCPSegment_t * ) pvPortMallocLarge( ipconfigTCP_WIN_SEG_COUNT * sizeof(    xTCPSegments[ 0 ] ) );
         if( xTCPSegments == NULL )
         {
             FreeRTOS_debug_printf( ( "prvCreateSectors: malloc %lu failed\n",
@@ -350,9 +344,8 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
         }
         else
         {
-            /* Clear the allocated space. */
+            /*2016--12--03--18--20--15(ZJYC): 清空已申请的空间   */ 
             memset( xTCPSegments, '\0', ipconfigTCP_WIN_SEG_COUNT * sizeof( xTCPSegments[ 0 ] ) );
-
             for( xIndex = 0; xIndex < ipconfigTCP_WIN_SEG_COUNT; xIndex++ )
             {
                 /* Could call vListInitialiseItem here but all data has been
@@ -363,13 +356,10 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
                 /* And add it to the pool of available segments */
                 vListInsertFifo( &xSegmentList, &( xTCPSegments[xIndex].xListItem ) );
             }
-
             xReturn = pdPASS;
         }
-
         return xReturn;
     }
-
 #endif /* ipconfigUSE_TCP_WIN == 1 */
 /*-----------------------------------------------------------*/
 
@@ -380,28 +370,21 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
     const ListItem_t *pxIterator;
     const MiniListItem_t* pxEnd;
     TCPSegment_t *pxSegment, *pxReturn = NULL;
-
-        /* Find a segment with a given sequence number in the list of received
-        segments. */
-
+        /*2016--12--03--18--21--18(ZJYC): 在接收段集合中找到给定序列号的段   */ 
         pxEnd = ( const MiniListItem_t* )listGET_END_MARKER( &pxWindow->xRxSegments );
-
         for( pxIterator  = ( const ListItem_t * ) listGET_NEXT( pxEnd );
              pxIterator != ( const ListItem_t * ) pxEnd;
              pxIterator  = ( const ListItem_t * ) listGET_NEXT( pxIterator ) )
         {
             pxSegment = ( TCPSegment_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
-
             if( pxSegment->ulSequenceNumber == ulSequenceNumber )
             {
                 pxReturn = pxSegment;
                 break;
             }
         }
-
         return pxReturn;
     }
-
 #endif /* ipconfigUSE_TCP_WIN == 1 */
 /*-----------------------------------------------------------*/
 
@@ -411,9 +394,8 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
     {
     TCPSegment_t *pxSegment;
     ListItem_t * pxItem;
-
-        /* Allocate a new segment.  The socket will borrow all segments from a
-        common pool: 'xSegmentList', which is a list of 'TCPSegment_t' */
+        /*2016--12--03--18--22--27(ZJYC): 申请一新的段，套接字将会从一共同的内存池中借段，
+        xSegmentList*/ 
         if( listLIST_IS_EMPTY( &xSegmentList ) != pdFALSE )
         {
             /* If the TCP-stack runs out of segments, you might consider
@@ -423,23 +405,18 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
         }
         else
         {
-            /* Pop the item at the head of the list.  Semaphore protection is
-            not required as only the IP task will call these functions.  */
+            /*2016--12--03--18--24--32(ZJYC): 从列表中弹出成员，同步保护不需要，
+            因为只存在一个任务调用他们*/ 
             pxItem = ( ListItem_t * ) listGET_HEAD_ENTRY( &xSegmentList );
             pxSegment = ( TCPSegment_t * ) listGET_LIST_ITEM_OWNER( pxItem );
-
             configASSERT( pxItem != NULL );
             configASSERT( pxSegment != NULL );
-
-            /* Remove the item from xSegmentList. */
+            /*2016--12--03--18--25--57(ZJYC): 从xSegmentList删除成员   */ 
             uxListRemove( pxItem );
-
-            /* Add it to either the connections' Rx or Tx queue. */
+            /*2016--12--03--18--26--42(ZJYC): 把它放到另一个连接Rx或者Tx中   */ 
             vListInsertFifo( xIsForRx ? &pxWindow->xRxSegments : &pxWindow->xTxSegments, pxItem );
-
-            /* And set the segment's timer to zero */
+            /*2016--12--03--18--27--18(ZJYC): 并且设置本段的定时器为0   */ 
             vTCPTimerSet( &pxSegment->xTransmitTimer );
-
             pxSegment->u.ulFlags = 0;
             pxSegment->u.bits.bIsForRx = ( xIsForRx != 0 );
             pxSegment->lMaxLength = lCount;
@@ -449,7 +426,6 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
             {
             static UBaseType_t xLowestLength = ipconfigTCP_WIN_SEG_COUNT;
             UBaseType_t xLength = listCURRENT_LIST_LENGTH( &xSegmentList );
-
                 if( xLowestLength > xLength )
                 {
                     xLowestLength = xLength;
@@ -457,10 +433,8 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
             }
             #endif /* ipconfigHAS_DEBUG_PRINTF */
         }
-
         return pxSegment;
     }
-
 #endif /* ipconfigUSE_TCP_WIN == 1 */
 /*-----------------------------------------------------------*/
 
@@ -469,21 +443,16 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
     BaseType_t xTCPWindowRxEmpty( TCPWindow_t *pxWindow )
     {
     BaseType_t xReturn;
-
-        /* When the peer has a close request (FIN flag), the driver will check
-        if there are missing packets in the Rx-queue.  It will accept the
-        closure of the connection if both conditions are true:
-          - the Rx-queue is empty
-          - the highest Rx sequence number has been ACK'ed */
+        /*2016--12--03--18--28--01(ZJYC): 当对方有关闭请求时（FIN），驱动会检查接受队列是否存在
+        丢失的包，如果接受队列为空或者最高接收序列号已被应答，则会接收关闭请求*/ 
         if( listLIST_IS_EMPTY( ( &pxWindow->xRxSegments ) ) == pdFALSE )
         {
-            /* Rx data has been stored while earlier packets were missing. */
+            /*2016--12--03--18--30--01(ZJYC): 数据已存储但是早些的数据丢失了   */ 
             xReturn = pdFALSE;
         }
         else if( xSequenceGreaterThanOrEqual( pxWindow->rx.ulCurrentSequenceNumber, pxWindow->rx.ulHighestSequenceNumber ) != pdFALSE )
         {
-            /* No Rx packets are being stored and the highest sequence number
-            that has been received has been ACKed. */
+            /*2016--12--03--18--30--31(ZJYC): 没有接收包被存储，并且最高序列号已经被应答   */ 
             xReturn = pdTRUE;
         }
         else
@@ -562,15 +531,14 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
         pxSegment->ulSequenceNumber = 0u;
         pxSegment->lDataLength = 0l;
         pxSegment->u.ulFlags = 0u;
-        /* Take it out of xRxSegments/xTxSegments */
+        /*2016--12--03--18--38--34(ZJYC): 从xRxSegments/xTxSegments中取出   */ 
         if( listLIST_ITEM_CONTAINER( &( pxSegment->xListItem ) ) != NULL )
         {
             uxListRemove( &( pxSegment->xListItem ) );
         }
-        /* Return it to xSegmentList */
+        /*2016--12--03--18--38--54(ZJYC): 返回到xSegmentList   */ 
         vListInsertFifo( &xSegmentList, &( pxSegment->xListItem ) );
     }
-
 #endif /* ipconfigUSE_TCP_WIN == 1 */
 /*-----------------------------------------------------------*/
 
@@ -592,7 +560,6 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
             {
                 pxSegments = &( pxWindow->xTxSegments );
             }
-
             if( listLIST_IS_INITIALISED( pxSegments ) != pdFALSE )
             {
                 while( listCURRENT_LIST_LENGTH( pxSegments ) > 0U )
@@ -624,7 +591,6 @@ void vTCPWindowCreate( TCPWindow_t *pxWindow, uint32_t ulRxWindowLength,
         vListInitialise( &pxWindow->xWaitQueue );       /*2016--12--02--17--37--44(ZJYC): 等待确认组   */ 
     }
     #endif /* ipconfigUSE_TCP_WIN == 1 */
-
     if( xTCPWindowLoggingLevel != 0 )
     {
         FreeRTOS_debug_printf( ( "vTCPWindowCreate: for WinLen = Rx/Tx: %lu/%lu\n",ulRxWindowLength, ulTxWindowLength ) );
