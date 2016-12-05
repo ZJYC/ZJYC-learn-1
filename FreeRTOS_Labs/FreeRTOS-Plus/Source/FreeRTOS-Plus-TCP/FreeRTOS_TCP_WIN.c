@@ -1,70 +1,3 @@
-/*
- * FreeRTOS+TCP Labs Build 160919 (C) 2016 Real Time Engineers ltd.
- * Authors include Hein Tibosch and Richard Barry
- *
- *******************************************************************************
- ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
- ***                                                                         ***
- ***                                                                         ***
- ***   FREERTOS+TCP IS STILL IN THE LAB (mainly because the FTP and HTTP     ***
- ***   demos have a dependency on FreeRTOS+FAT, which is only in the Labs    ***
- ***   download):                                                            ***
- ***                                                                         ***
- ***   FreeRTOS+TCP is functional and has been used in commercial products   ***
- ***   for some time.  Be aware however that we are still refining its       ***
- ***   design, the source code does not yet quite conform to the strict      ***
- ***   coding and style standards mandated by Real Time Engineers ltd., and  ***
- ***   the documentation and testing is not necessarily complete.            ***
- ***                                                                         ***
- ***   PLEASE REPORT EXPERIENCES USING THE SUPPORT RESOURCES FOUND ON THE    ***
- ***   URL: http://www.FreeRTOS.org/contact  Active early adopters may, at   ***
- ***   the sole discretion of Real Time Engineers Ltd., be offered versions  ***
- ***   under a license other than that described below.                      ***
- ***                                                                         ***
- ***                                                                         ***
- ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
- *******************************************************************************
- *
- * FreeRTOS+TCP can be used under two different free open source licenses.  The
- * license that applies is dependent on the processor on which FreeRTOS+TCP is
- * executed, as follows:
- *
- * If FreeRTOS+TCP is executed on one of the processors listed under the Special
- * License Arrangements heading of the FreeRTOS+TCP license information web
- * page, then it can be used under the terms of the FreeRTOS Open Source
- * License.  If FreeRTOS+TCP is used on any other processor, then it can be used
- * under the terms of the GNU General Public License V2.  Links to the relevant
- * licenses follow:
- *
- * The FreeRTOS+TCP License Information Page: http://www.FreeRTOS.org/tcp_license
- * The FreeRTOS Open Source License: http://www.FreeRTOS.org/license
- * The GNU General Public License Version 2: http://www.FreeRTOS.org/gpl-2.0.txt
- *
- * FreeRTOS+TCP is distributed in the hope that it will be useful.  You cannot
- * use FreeRTOS+TCP unless you agree that you use the software 'as is'.
- * FreeRTOS+TCP is provided WITHOUT ANY WARRANTY; without even the implied
- * warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A PARTICULAR
- * PURPOSE. Real Time Engineers Ltd. disclaims all conditions and terms, be they
- * implied, expressed, or statutory.
- *
- * 1 tab == 4 spaces!
- *
- * http://www.FreeRTOS.org
- * http://www.FreeRTOS.org/plus
- * http://www.FreeRTOS.org/labs
- *
- */
-
-/*
- * FreeRTOS_TCP_WIN.c
- * Module which handles the TCP windowing schemes for FreeRTOS+TCP.  Many
- * functions have two versions - one for FreeRTOS+TCP (full) and one for
- * FreeRTOS+TCP (lite).
- *
- * In this module all ports and IP addresses and sequence numbers are
- * being stored in host byte-order.
- */
-
 /* Standard includes. */
 #include <stdint.h>
 
@@ -485,10 +418,8 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
         {
             pxItem = ( ListItem_t * ) listGET_HEAD_ENTRY( pxList );
             pxSegment = ( TCPSegment_t * ) listGET_LIST_ITEM_OWNER( pxItem );
-
             uxListRemove( pxItem );
         }
-
         return pxSegment;
     }
 
@@ -946,10 +877,8 @@ const int32_t l500ms = 500;
         {
             lPosition -= lMax;
         }
-
         return lPosition;
     }
-
 #endif /* ipconfigUSE_TCP_WIN == 1 */
 /*-----------------------------------------------------------*/
 
@@ -1136,9 +1065,7 @@ const int32_t l500ms = 500;
     TCPSegment_t *pxSegment;
     BaseType_t xReturn;
     TickType_t ulAge, ulMaxAge;
-
         *pulDelay = 0u;
-
         if( listLIST_IS_EMPTY( &pxWindow->xPriorityQueue ) == pdFALSE )
         {
             /*2016--12--02--18--58--49(ZJYC): 如果优先组存在，就没有必要重传
@@ -1148,7 +1075,6 @@ const int32_t l500ms = 500;
         else
         {
             pxSegment = xTCPWindowPeekHead( &( pxWindow->xWaitQueue ) );
-
             if( pxSegment != NULL )
             {
                 /*2016--12--02--19--00--40(ZJYC): 存在等待应答组，看看是否需要超时重传   */ 
@@ -1188,10 +1114,8 @@ const int32_t l500ms = 500;
                 }
             }
         }
-
         return xReturn;
     }
-
 #endif /* ipconfigUSE_TCP_WIN == 1 */
 /*-----------------------------------------------------------*/
 
@@ -1345,7 +1269,7 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+    /*2016--12--05--14--00--46(ZJYC): ulFirst和ulLast指明了确认的范围，在此范围内的数据被确认   */ 
     static uint32_t prvTCPWindowTxCheckAck( TCPWindow_t *pxWindow, uint32_t ulFirst, uint32_t ulLast )
     {
     uint32_t ulBytesConfirmed = 0u;
@@ -1362,25 +1286,20 @@ const int32_t l500ms = 500;
         {
             xDoUnlink = pdFALSE;
             pxSegment = ( TCPSegment_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
-
             /* Move to the next item because the current item might get
             removed. */
             pxIterator = ( const ListItem_t * ) listGET_NEXT( pxIterator );
-
-            /* Continue if this segment does not fall within the ACK'd range. */
+            /*2016--12--05--13--56--33(ZJYC): 如果段不在ACK范围之内则跳过   */ 
             if( xSequenceGreaterThan( ulSequenceNumber, pxSegment->ulSequenceNumber ) != pdFALSE )
             {
                 continue;
             }
-
             /* Is it ready? */
             if( ulSequenceNumber != pxSegment->ulSequenceNumber )
             {
                 break;
             }
-
             ulDataLength = ( uint32_t ) pxSegment->lDataLength;
-
             if( pxSegment->u.bits.bAcked == pdFALSE_UNSIGNED )
             {
                 if( xSequenceGreaterThan( pxSegment->ulSequenceNumber + ( uint32_t )ulDataLength, ulLast ) != pdFALSE )
@@ -1403,16 +1322,13 @@ const int32_t l500ms = 500;
                     #endif /* ipconfigHAS_DEBUG_PRINTF */
                     break;
                 }
-
                 /* This segment is fully ACK'd, set the flag. */
                 pxSegment->u.bits.bAcked = pdTRUE_UNSIGNED;
-
                 /* Calculate the RTT only if the segment was sent-out for the
                 first time and if this is the last ACK'd segment in a range. */
                 if( ( pxSegment->u.bits.ucTransmitCount == 1 ) && ( ( pxSegment->ulSequenceNumber + ulDataLength ) == ulLast ) )
                 {
                     int32_t mS = ( int32_t ) ulTimerGetAge( &( pxSegment->xTransmitTimer ) );
-
                     if( pxWindow->lSRTT >= mS )
                     {
                         /* RTT becomes smaller: adapt slowly. */
@@ -1423,18 +1339,15 @@ const int32_t l500ms = 500;
                         /* RTT becomes larger: adapt quicker */
                         pxWindow->lSRTT = ( ( winSRTT_INCREMENT_NEW * mS ) + ( winSRTT_INCREMENT_CURRENT * pxWindow->lSRTT ) ) / ( winSRTT_INCREMENT_NEW + winSRTT_INCREMENT_CURRENT );
                     }
-
                     /* Cap to the minimum of 50ms. */
                     if( pxWindow->lSRTT < winSRTT_CAP_mS )
                     {
                         pxWindow->lSRTT = winSRTT_CAP_mS;
                     }
                 }
-
                 /* Unlink it from the 3 queues, but do not destroy it (yet). */
                 xDoUnlink = pdTRUE;
             }
-
             /* pxSegment->u.bits.bAcked is now true.  Is it located at the left
             side of the transmission queue?  If so, it may be freed. */
             if( ulSequenceNumber == pxWindow->tx.ulCurrentSequenceNumber )
@@ -1446,27 +1359,21 @@ const int32_t l500ms = 500;
                         ulLast - pxWindow->tx.ulFirstSequenceNumber,
                         pxSegment->ulSequenceNumber - pxWindow->tx.ulFirstSequenceNumber ) );
                 }
-
                 /* Increase the left-hand value of the transmission window. */
                 pxWindow->tx.ulCurrentSequenceNumber += ulDataLength;
-
                 /* This function will return the number of bytes that the tail
                 of txStream may be advanced. */
                 ulBytesConfirmed += ulDataLength;
-
                 /* All segments below tx.ulCurrentSequenceNumber may be freed. */
                 vTCPWindowFree( pxSegment );
-
                 /* No need to unlink it any more. */
                 xDoUnlink = pdFALSE;
             }
-
             if( ( xDoUnlink != pdFALSE ) && ( listLIST_ITEM_CONTAINER( &( pxSegment->xQueueItem ) ) != NULL ) )
             {
                 /* Remove item from its queues. */
                 uxListRemove( &pxSegment->xQueueItem );
             }
-
             ulSequenceNumber += ulDataLength;
         }
 

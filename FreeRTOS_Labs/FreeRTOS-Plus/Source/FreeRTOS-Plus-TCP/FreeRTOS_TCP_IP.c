@@ -1059,16 +1059,12 @@ UBaseType_t uxNewMSS;
                     uint32_t ulFirst = ulChar2u32( pucPtr );
                     uint32_t ulLast  = ulChar2u32( pucPtr + 4 );
                     uint32_t ulCount = ulTCPWindowTxSack( &pxSocket->u.xTCP.xTCPWindow, ulFirst, ulLast );
-                        /* ulTCPWindowTxSack( ) returns the number of bytes which have been acked
-                        starting from the head position.
-                        Advance the tail pointer in txStream. */
-                        /* ulTCPWindowTxSack返回返回从头部开始已经被应答的字节数 */
+                        /* ulTCPWindowTxSack返回从头部开始已经被应答的字节数 */
                         if( ( pxSocket->u.xTCP.txStream  != NULL ) && ( ulCount > 0 ) )
                         {
                             /* Just advancing the tail index, 'ulCount' bytes have been confirmed. */
                             uxStreamBufferGet( pxSocket->u.xTCP.txStream, 0, NULL, ( size_t ) ulCount, pdFALSE );
                             pxSocket->xEventBits |= eSOCKET_SEND;
-
                             #if ipconfigSUPPORT_SELECT_FUNCTION == 1
                             {
                                 if( pxSocket->xSelectBits & eSELECT_WRITE )
@@ -1079,9 +1075,6 @@ UBaseType_t uxNewMSS;
                                 }
                             }
                             #endif
-
-                            /* In case the socket owner has installed an OnSent handler,
-                            call it now. */
                             #if( ipconfigUSE_CALLBACKS == 1 )
                             {
                                 if( ipconfigIS_VALID_PROG_ADDRESS( pxSocket->u.xTCP.pxHandleSent ) )
@@ -1108,13 +1101,12 @@ UBaseType_t uxNewMSS;
                 #endif  /* ipconfigUSE_TCP_TIMESTAMPS == 1 */
             }
             #endif  /* ipconfigUSE_TCP_WIN == 1 */
-
             pucPtr += len;
         }
     }
 }
 /*-----------------------------------------------------------*/
-
+/*2016--12--05--14--44--49(ZJYC): 设置窗口放大因子   */ 
 #if( ipconfigUSE_TCP_WIN != 0 )
 
     static uint8_t prvWinScaleFactor( FreeRTOS_Socket_t *pxSocket )
@@ -1130,12 +1122,10 @@ UBaseType_t uxNewMSS;
             uxWinSize >>= 1;
             ucFactor++;
         }
-
         FreeRTOS_debug_printf( ( "prvWinScaleFactor: uxRxWinSize %lu MSS %lu Factor %u\n",
             pxSocket->u.xTCP.uxRxWinSize,
             pxSocket->u.xTCP.usInitMSS,
             ucFactor ) );
-
         return ucFactor;
     }
 
@@ -1852,7 +1842,6 @@ int32_t lLength, lTCPHeaderLength, lReceiveLength, lUrgentLength;
         *ppucRecvData += lUrgentLength;
         lReceiveLength -= FreeRTOS_min_int32( lReceiveLength, lUrgentLength );
     }
-
     return ( BaseType_t ) lReceiveLength;
 }
 /*2016--11--20--19--53--58(ZJYC): prvStoreRxData()被函数prvTCPHandleState()调用，第二件要做的事情便是检查数据负载
@@ -1911,8 +1900,6 @@ BaseType_t xResult = 0;
             }
         }
 		/*2016--11--20--20--06--04(ZJYC):收到一个丢失的包之后，更高的数据包会被传递给用户    */ 
-        //#if( ipconfigUSE_TCP_WIN == 1 )
-        //{
 			/*2016--11--20--20--07--12(ZJYC):现在lTCPAddRxdata()将会向前移动rxHead指针，
 			所以对用户而言，数据很快变得可用起来，置位bLowWater以防止到达低位线，*/ 
         /* 当接收到丢失的数据包之后，较高的数据包可能传递给用户 */
@@ -1934,7 +1921,6 @@ BaseType_t xResult = 0;
     {
         pxTCPWindow->ucOptionLength = 0u;
     }
-
     return xResult;
 }
 /*2016--11--20--20--09--51(ZJYC): 为即将发出的数据包设置选项（如果有的话）   */ 
@@ -2082,16 +2068,6 @@ BaseType_t xSendLength = 0;
 
     return xSendLength;
 }
-/*-----------------------------------------------------------*/
-
-/*
- * prvHandleEstablished(): called from prvTCPHandleState()
- *
- * Called if the status is eESTABLISHED.  Data reception has been handled
- * earlier.  Here the ACK's from peer will be checked, and if a FIN is received,
- * the code will check if it may be accepted, i.e. if all expected data has been
- * completely received.
- */
 /*2016--11--20--20--42--03(ZJYC):prvHandleEstablished()被prvTCPHandleState()调用，如果状态为建立则调用此函数
 数据接收早些时候已经被掌管，这里的对方发过来的ACK会被检查，如果收到FIN，代码会检查是否收到他，即：如果所有的数据
 被完全接收    */ 
@@ -2114,7 +2090,7 @@ int32_t lDistance, lSendResult;
     if( ( ucTCPFlags & ( uint8_t ) ipTCP_FLAG_ACK ) != 0u )
     {
         ulCount = ulTCPWindowTxAck( pxTCPWindow, FreeRTOS_ntohl( pxTCPPacket->xTCPHeader.ulAckNr ) );
-		/*2016--11--20--20--50--38(ZJYC):ulTCPWindowTxAck返回已经被被应答的字节数，从tx.ulCurrentSequenceNumber开始    */ 
+        /*2016--11--20--20--50--38(ZJYC):ulTCPWindowTxAck返回已经被被应答的字节数，从tx.ulCurrentSequenceNumber开始    */ 
         /* ulTCPWindowTxAck() returns the number of bytes which have been acked,
         starting at 'tx.ulCurrentSequenceNumber'.  Advance the tail pointer in
         txStream. */
@@ -2244,13 +2220,8 @@ int32_t lDistance, lSendResult;
 
     return xSendLength;
 }
-/*-----------------------------------------------------------*/
-
-/*
- * Called from prvTCPHandleState().  There is data to be sent.  If
- * ipconfigUSE_TCP_WIN is defined, and if only an ACK must be sent, it will be
- * checked if it would better be postponed for efficiency.
- */
+/*2016--12--05--14--38--25(ZJYC): 有数据要发送，如果ipconfigUSE_TCP_WIN被定义 并且只有一个ACK被发送
+最好是延迟一段时间再发送（再延迟的过程中有数据的话就跟随者发出去，这样更加高效）   */ 
 static BaseType_t prvSendData( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t **ppxNetworkBuffer,
     uint32_t ulReceiveLength, BaseType_t xSendLength )
 {
@@ -2386,8 +2357,6 @@ int32_t lRxSpace;
 
     return xSendLength;
 }
-/*-----------------------------------------------------------*/
-
 /*
  * prvTCPHandleState()
  * is the most important function of this TCP stack
@@ -2404,6 +2373,7 @@ int32_t lRxSpace;
  * As these functions are declared static, and they're called from one location
  * only, most compilers will inline them, thus avoiding a call and return.
  */
+/*2016--12--05--14--37--32(ZJYC): 状态机主体   */ 
 static BaseType_t prvTCPHandleState( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t **ppxNetworkBuffer )
 {
 TCPPacket_t *pxTCPPacket = ( TCPPacket_t * ) ( (*ppxNetworkBuffer)->pucEthernetBuffer );
@@ -2564,7 +2534,7 @@ TCPWindow_t *pxTCPWindow = &( pxSocket->u.xTCP.xTCPWindow );
     return xSendLength;
 }
 /*-----------------------------------------------------------*/
-
+/*2016--12--05--14--36--51(ZJYC): 发送复位标志   */ 
 static BaseType_t prvTCPSendReset( NetworkBufferDescriptor_t *pxNetworkBuffer )
 {
     #if( ipconfigIGNORE_UNKNOWN_PACKETS == 0 )
@@ -2574,36 +2544,27 @@ static BaseType_t prvTCPSendReset( NetworkBufferDescriptor_t *pxNetworkBuffer )
 
         pxTCPPacket->xTCPHeader.ucTCPFlags = ipTCP_FLAG_ACK | ipTCP_FLAG_RST;
         pxTCPPacket->xTCPHeader.ucTCPOffset = ( ipSIZE_OF_TCP_HEADER + 0u ) << 2;
-
         prvTCPReturnPacket( NULL, pxNetworkBuffer, ( uint32_t ) xSendLength, pdFALSE );
     }
     #endif /* !ipconfigIGNORE_UNKNOWN_PACKETS */
-
     /* Remove compiler warnings if ipconfigIGNORE_UNKNOWN_PACKETS == 1. */
     ( void ) pxNetworkBuffer;
-
     /* The packet was not consumed. */
     return pdFAIL;
 }
-/*-----------------------------------------------------------*/
-
+/*2016--12--05--14--34--01(ZJYC): 通过简单判断并设置套接字的MSS值，   */ 
 static void prvSocketSetMSS( FreeRTOS_Socket_t *pxSocket )
 {
 uint32_t ulMSS = ipconfigTCP_MSS;
 
     if( ( ( FreeRTOS_ntohl( pxSocket->u.xTCP.ulRemoteIP ) ^ *ipLOCAL_IP_ADDRESS_POINTER ) & xNetworkAddressing.ulNetMask ) != 0ul )
     {
-        /* Data for this peer will pass through a router, and maybe through
-        the internet.  Limit the MSS to 1400 bytes or less. */
+        /*2016--12--05--14--34--32(ZJYC): 判断而得出 到达对方的数据有可能经过路由器甚至是因特网  我们应把MSS限制在1400或更少   */ 
         ulMSS = FreeRTOS_min_uint32( ( uint32_t ) REDUCED_MSS_THROUGH_INTERNET, ulMSS );
     }
-
     FreeRTOS_debug_printf( ( "prvSocketSetMSS: %lu bytes for %lxip:%u\n", ulMSS, pxSocket->u.xTCP.ulRemoteIP, pxSocket->u.xTCP.usRemotePort ) );
-
     pxSocket->u.xTCP.usInitMSS = pxSocket->u.xTCP.usCurMSS = ( uint16_t ) ulMSS;
 }
-/*-----------------------------------------------------------*/
-
 /*
  *  FreeRTOS_TCP_IP has only 2 public functions, this is the second one:
  *  xProcessReceivedTCPPacket()
@@ -2615,6 +2576,7 @@ uint32_t ulMSS = ipconfigTCP_MSS;
  *          prvTCPReturnPacket()        // Prepare for returning
  *          xNetworkInterfaceOutput()   // Sends data to the NIC
 */
+/*2016--12--05--14--32--55(ZJYC): 号称第二大TCP_IP公开函数，灰常重要   */ 
 BaseType_t xProcessReceivedTCPPacket( NetworkBufferDescriptor_t *pxNetworkBuffer )
 {
 FreeRTOS_Socket_t *pxSocket;
@@ -2628,7 +2590,6 @@ BaseType_t xResult = pdPASS;
     /*2016--12--04--21--51--13(ZJYC): 寻找目标套接字，如果没有，返回一个监听
     目标端口的套接字？？？（为什么返回一个监听的套接字？？？？）   */ 
     pxSocket = ( FreeRTOS_Socket_t * ) pxTCPSocketLookup( ulLocalIP, xLocalPort, ulRemoteIP, xRemotePort );
-
     if( ( pxSocket == NULL ) || ( prvTCPSocketIsActive( ( UBaseType_t ) pxSocket->u.xTCP.ucTCPState ) == pdFALSE ) )
     {
         /*2016--12--04--21--52--44(ZJYC): 收到了TCP消息，但是或者没有套接字对应
@@ -2645,7 +2606,6 @@ BaseType_t xResult = pdPASS;
         {
             prvTCPSendReset( pxNetworkBuffer );
         }
-
         /* The packet can't be handled. */
         xResult = pdFAIL;
     }
@@ -2664,7 +2624,6 @@ BaseType_t xResult = pdPASS;
                     prvTCPFlagMeaning( ( UBaseType_t ) ucTCPFlags ), ulRemoteIP, xRemotePort, xLocalPort ) );
                 }
                 #endif /* ipconfigHAS_DEBUG_PRINTF */
-
                 if( ( ucTCPFlags & ipTCP_FLAG_RST ) == 0u )
                 {
                     prvTCPSendReset( pxNetworkBuffer );
@@ -2699,7 +2658,6 @@ BaseType_t xResult = pdPASS;
             {
                 /*2016--12--04--22--02--47(ZJYC): 对方发送SYN && 我们早就建立连接了==矛盾了   */ 
                 FreeRTOS_debug_printf( ( "TCP: SYN unexpected from %lxip:%u\n", ulRemoteIP, xRemotePort ) );
-
                 /* The packet cannot be handled. */
                 xResult = pdFAIL;
             }
@@ -2735,8 +2693,7 @@ BaseType_t xResult = pdPASS;
                 ( pxSocket->u.xTCP.ulWindowSize << pxSocket->u.xTCP.ucPeerWinScaleFactor );
         }
         #endif
-        /* In prvTCPHandleState() the incoming messages will be handled
-        depending on the current state of the connection. */
+        /*2016--12--05--14--18--12(ZJYC): 根据状态机来处理这些数据   */ 
         if( prvTCPHandleState( pxSocket, &pxNetworkBuffer ) > 0 )
         {
             /* prvTCPHandleState() has sent a message, see if there are more to
@@ -2758,17 +2715,16 @@ BaseType_t xResult = pdPASS;
         /*2016--12--04--22--14--11(ZJYC): 告诉调用者，缓存已被消耗   */ 
         xResult = pdPASS;
     }
-
     /* pdPASS being returned means the buffer has been consumed. */
     return xResult;
 }
 /*-----------------------------------------------------------*/
-
+/*2016--12--05--14--27--22(ZJYC): 在监听状态下我们收到了连接请求，我们在这里想办法搞出一
+套接字，并填充该套接字   */ 
 static FreeRTOS_Socket_t *prvHandleListen( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t *pxNetworkBuffer )
 {
 TCPPacket_t * pxTCPPacket = ( TCPPacket_t * ) ( pxNetworkBuffer->pucEthernetBuffer );
 FreeRTOS_Socket_t *pxReturn;
-
     /*2016--12--04--22--17--56(ZJYC): 收到一个单纯的SYN，创建一个套接字来对付他   */ 
     if( pxSocket->u.xTCP.bits.bReuseSocket != pdFALSE_UNSIGNED )
     {
@@ -2811,27 +2767,21 @@ FreeRTOS_Socket_t *pxReturn;
 
     if( pxReturn != NULL )
     {
+        /*2016--12--05--14--30--35(ZJYC): 套接字已经建立，如下填充该套接字   */ 
         pxReturn->u.xTCP.usRemotePort = FreeRTOS_htons( pxTCPPacket->xTCPHeader.usSourcePort );
         pxReturn->u.xTCP.ulRemoteIP = FreeRTOS_htonl( pxTCPPacket->xIPHeader.ulSourceIPAddress );
         pxReturn->u.xTCP.xTCPWindow.ulOurSequenceNumber = ulNextInitialSequenceNumber;
-        /* Here is the SYN action. */
         pxReturn->u.xTCP.xTCPWindow.rx.ulCurrentSequenceNumber = FreeRTOS_ntohl( pxTCPPacket->xTCPHeader.ulSequenceNumber );
         prvSocketSetMSS( pxReturn );
         prvTCPCreateWindow( pxReturn );
-        /* It is recommended to increase the ISS for each new connection with a value of 0x102. */
         ulNextInitialSequenceNumber += INITIAL_SEQUENCE_NUMBER_INCREMENT;
         vTCPStateChange( pxReturn, eSYN_FIRST );
-        /* Make a copy of the header up to the TCP header.  It is needed later
-        on, whenever data must be sent to the peer. */
         memcpy( pxReturn->u.xTCP.xPacket.u.ucLastPacket, pxNetworkBuffer->pucEthernetBuffer, sizeof( pxReturn->u.xTCP.xPacket.u.ucLastPacket ) );
     }
     return pxReturn;
 }
-/*-----------------------------------------------------------*/
-
-/*
- * Duplicates a socket after a listening socket receives a connection.
- */
+/*2016--12--05--14--21--22(ZJYC): 监听状态的套接字收到连接之后会复制别人的套接字设置 因为 
+监听状态下的套接字没有时间配置套接字  */ 
 static BaseType_t prvTCPSocketCopy( FreeRTOS_Socket_t *pxNewSocket, FreeRTOS_Socket_t *pxSocket )
 {
 struct freertos_sockaddr xAddress;
@@ -2921,8 +2871,7 @@ struct freertos_sockaddr xAddress;
 
     return pdTRUE;
 }
-/*-----------------------------------------------------------*/
-
+/*2016--12--05--14--23--25(ZJYC): 获取TCP状态的名称，常用于调试打印   */ 
 #if( ( ipconfigHAS_DEBUG_PRINTF != 0 ) || ( ipconfigHAS_PRINTF != 0 ) )
 
     const char *FreeRTOS_GetTCPStateName( UBaseType_t ulState )
@@ -2935,21 +2884,14 @@ struct freertos_sockaddr xAddress;
     }
 
 #endif /* ( ( ipconfigHAS_DEBUG_PRINTF != 0 ) || ( ipconfigHAS_PRINTF != 0 ) ) */
-/*-----------------------------------------------------------*/
-
-/*
- * In the API accept(), the user asks is there is a new client?  As API's can
- * not walk through the xBoundTCPSocketsList the IP-task will do this.
- */
+/*2016--12--05--14--24--28(ZJYC): API accept()，用户会问是否存在一个新的客户（连接）
+由于API不能直接遍历xBoundTCPSocketsList  IP主任务会这样做   */ 
 BaseType_t xTCPCheckNewClient( FreeRTOS_Socket_t *pxSocket )
 {
 TickType_t xLocalPort = FreeRTOS_htons( pxSocket->usLocalPort );
 ListItem_t *pxIterator;
 FreeRTOS_Socket_t *pxFound;
 BaseType_t xResult = pdFALSE;
-
-    /* Here xBoundTCPSocketsList can be accessed safely IP-task is the only one
-    who has access. */
     for( pxIterator = ( ListItem_t * ) listGET_HEAD_ENTRY( &xBoundTCPSocketsList );
         pxIterator != ( ListItem_t * ) listGET_END_MARKER( &xBoundTCPSocketsList );
         pxIterator = ( ListItem_t * ) listGET_NEXT( pxIterator ) )
