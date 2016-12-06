@@ -1,60 +1,3 @@
-/*
- * FreeRTOS+TCP Labs Build 160919 (C) 2016 Real Time Engineers ltd.
- * Authors include Hein Tibosch and Richard Barry
- *
- *******************************************************************************
- ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
- ***                                                                         ***
- ***                                                                         ***
- ***   FREERTOS+TCP IS STILL IN THE LAB (mainly because the FTP and HTTP     ***
- ***   demos have a dependency on FreeRTOS+FAT, which is only in the Labs    ***
- ***   download):                                                            ***
- ***                                                                         ***
- ***   FreeRTOS+TCP is functional and has been used in commercial products   ***
- ***   for some time.  Be aware however that we are still refining its       ***
- ***   design, the source code does not yet quite conform to the strict      ***
- ***   coding and style standards mandated by Real Time Engineers ltd., and  ***
- ***   the documentation and testing is not necessarily complete.            ***
- ***                                                                         ***
- ***   PLEASE REPORT EXPERIENCES USING THE SUPPORT RESOURCES FOUND ON THE    ***
- ***   URL: http://www.FreeRTOS.org/contact  Active early adopters may, at   ***
- ***   the sole discretion of Real Time Engineers Ltd., be offered versions  ***
- ***   under a license other than that described below.                      ***
- ***                                                                         ***
- ***                                                                         ***
- ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
- *******************************************************************************
- *
- * FreeRTOS+TCP can be used under two different free open source licenses.  The
- * license that applies is dependent on the processor on which FreeRTOS+TCP is
- * executed, as follows:
- *
- * If FreeRTOS+TCP is executed on one of the processors listed under the Special
- * License Arrangements heading of the FreeRTOS+TCP license information web
- * page, then it can be used under the terms of the FreeRTOS Open Source
- * License.  If FreeRTOS+TCP is used on any other processor, then it can be used
- * under the terms of the GNU General Public License V2.  Links to the relevant
- * licenses follow:
- *
- * The FreeRTOS+TCP License Information Page: http://www.FreeRTOS.org/tcp_license
- * The FreeRTOS Open Source License: http://www.FreeRTOS.org/license
- * The GNU General Public License Version 2: http://www.FreeRTOS.org/gpl-2.0.txt
- *
- * FreeRTOS+TCP is distributed in the hope that it will be useful.  You cannot
- * use FreeRTOS+TCP unless you agree that you use the software 'as is'.
- * FreeRTOS+TCP is provided WITHOUT ANY WARRANTY; without even the implied
- * warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A PARTICULAR
- * PURPOSE. Real Time Engineers Ltd. disclaims all conditions and terms, be they
- * implied, expressed, or statutory.
- *
- * 1 tab == 4 spaces!
- *
- * http://www.FreeRTOS.org
- * http://www.FreeRTOS.org/plus
- * http://www.FreeRTOS.org/labs
- *
- */
-
 /* Standard includes. */
 #include <stdint.h>
 #include <stdio.h>
@@ -89,56 +32,46 @@ UDPPacketHeader_t xDefaultPartUDPPacketHeader =
 {
     /* .ucBytes : */
     {
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* Ethernet source MAC address. */
-        0x08, 0x00,                             /* Ethernet frame type. */
-        ipIP_VERSION_AND_HEADER_LENGTH_BYTE,    /* ucVersionHeaderLength. */
-        0x00,                                   /* ucDifferentiatedServicesCode. */
-        0x00, 0x00,                             /* usLength. */
-        0x00, 0x00,                             /* usIdentification. */
-        0x00, 0x00,                             /* usFragmentOffset. */
-        ipconfigUDP_TIME_TO_LIVE,               /* ucTimeToLive */
-        ipPROTOCOL_UDP,                         /* ucProtocol. */
-        0x00, 0x00,                             /* usHeaderChecksum. */
-        0x00, 0x00, 0x00, 0x00                  /* Source IP address. */
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* 源地址MAC */
+        0x08, 0x00,                             /* 帧类型 */
+        ipIP_VERSION_AND_HEADER_LENGTH_BYTE,    /* 版本和头长度 */
+        0x00,                                   /* 服务类型 */
+        0x00, 0x00,                             /* 封包总长度 */
+        0x00, 0x00,                             /* 封包标识 */
+        0x00, 0x00,                             /* 片段偏移地址 */
+        ipconfigUDP_TIME_TO_LIVE,               /* 存活时间 */
+        ipPROTOCOL_UDP,                         /* 协议类型 */
+        0x00, 0x00,                             /* 头校验 */
+        0x00, 0x00, 0x00, 0x00                  /* 源地址IP */
     }
 };
 /*-----------------------------------------------------------*/
-
+/* 产生UDP包 */
 void vProcessGeneratedUDPPacket( NetworkBufferDescriptor_t * const pxNetworkBuffer )
 {
 UDPPacket_t *pxUDPPacket;
 IPHeader_t *pxIPHeader;
 eARPLookupResult_t eReturned;
 uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
-
-    /* Map the UDP packet onto the start of the frame. */
     pxUDPPacket = ( UDPPacket_t * ) pxNetworkBuffer->pucEthernetBuffer;
-
-    /* Determine the ARP cache status for the requested IP address. */
+    /* 搜索有没有其ARP缓存 */
     eReturned = eARPGetCacheEntry( &( ulIPAddress ), &( pxUDPPacket->xEthernetHeader.xDestinationAddress ) );
-
-    if( eReturned != eCantSendPacket )
+    if( eReturned != eCantSendPacket )/* 本地地址非0 */
     {
-        if( eReturned == eARPCacheHit )
+        if( eReturned == eARPCacheHit )/* 找到其在本地的ARP缓存 */
         {
             #if( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 0 )
                 uint8_t ucSocketOptions;
             #endif
             iptraceSENDING_UDP_PACKET( pxNetworkBuffer->ulIPAddress );
-
-            /* Create short cuts to the data within the packet. */
             pxIPHeader = &( pxUDPPacket->xIPHeader );
-
         #if ( ipconfigSUPPORT_OUTGOING_PINGS == 1 )
-            /* Is it possible that the packet is not actually a UDP packet
-            after all, but an ICMP packet. */
+            /* 也有可能是ICMP报文 */
             if( pxNetworkBuffer->usPort != ipPACKET_CONTAINS_ICMP_DATA )
         #endif /* ipconfigSUPPORT_OUTGOING_PINGS */
             {
-            UDPHeader_t *pxUDPHeader;
-
+                UDPHeader_t *pxUDPHeader;
                 pxUDPHeader = &( pxUDPPacket->xUDPHeader );
-
                 pxUDPHeader->usDestinationPort = pxNetworkBuffer->usPort;
                 pxUDPHeader->usSourcePort = pxNetworkBuffer->usBoundPort;
                 pxUDPHeader->usLength = ( uint16_t ) ( pxNetworkBuffer->xDataLength + sizeof( UDPHeader_t ) );
@@ -177,13 +110,11 @@ uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
             {
                 pxIPHeader->usLength = ( uint16_t ) ( pxNetworkBuffer->xDataLength + sizeof( IPHeader_t ) + sizeof( UDPHeader_t ) );
             }
-
             /* The total transmit size adds on the Ethernet header. */
             pxNetworkBuffer->xDataLength = pxIPHeader->usLength + sizeof( EthernetHeader_t );
             pxIPHeader->usLength = FreeRTOS_htons( pxIPHeader->usLength );
             /* HT:endian: changed back to network endian */
             pxIPHeader->ulDestinationIPAddress = pxNetworkBuffer->ulIPAddress;
-
             #if( ipconfigUSE_LLMNR == 1 )
             {
                 /* LLMNR messages are typically used on a LAN and they're
@@ -194,13 +125,11 @@ uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
                 }
             }
             #endif
-
             #if( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 0 )
             {
                 pxIPHeader->usHeaderChecksum = 0u;
                 pxIPHeader->usHeaderChecksum = usGenerateChecksum( 0UL, ( uint8_t * ) &( pxIPHeader->ucVersionHeaderLength ), ipSIZE_OF_IPv4_HEADER );
                 pxIPHeader->usHeaderChecksum = ~FreeRTOS_htons( pxIPHeader->usHeaderChecksum );
-
                 if( ( ucSocketOptions & ( uint8_t ) FREERTOS_SO_UDPCKSUM_OUT ) != 0u )
                 {
                     usGenerateProtocolChecksum( (uint8_t*)pxUDPPacket, pdTRUE );
@@ -212,7 +141,7 @@ uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
             }
             #endif
         }
-        else if( eReturned == eARPCacheMiss )
+        else if( eReturned == eARPCacheMiss )/* 找不到缓存 */
         {
             /* Add an entry to the ARP table with a null hardware address.
             This allows the ARP timer to know that an ARP reply is
@@ -234,15 +163,11 @@ uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
 
     if( eReturned != eCantSendPacket )
     {
-        /* The network driver is responsible for freeing the network buffer
-        after the packet has been sent. */
-
-        #if defined( ipconfigETHERNET_MINIMUM_PACKET_BYTES )
+        #if defined( ipconfigETHERNET_MINIMUM_PACKET_BYTES )/* 定义了网络最小发送单元，在这里进行填充 */
         {
             if( pxNetworkBuffer->xDataLength < ( size_t ) ipconfigETHERNET_MINIMUM_PACKET_BYTES )
             {
-            BaseType_t xIndex;
-
+                BaseType_t xIndex;
                 FreeRTOS_printf( ( "vProcessGeneratedUDPPacket: length %lu\n", pxNetworkBuffer->xDataLength ) );
                 for( xIndex = ( BaseType_t ) pxNetworkBuffer->xDataLength; xIndex < ( BaseType_t ) ipconfigETHERNET_MINIMUM_PACKET_BYTES; xIndex++ )
                 {
@@ -252,36 +177,27 @@ uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
             }
         }
         #endif
-
-        xNetworkInterfaceOutput( pxNetworkBuffer, pdTRUE );
+        xNetworkInterfaceOutput( pxNetworkBuffer, pdTRUE );/* 发送完即释放内存 */
     }
-    else
+    else/* 包不能被发送（DHCP为完成？），把包释放掉 */
     {
-        /* The packet can't be sent (DHCP not completed?).  Just drop the
-        packet. */
         vReleaseNetworkBufferAndDescriptor( pxNetworkBuffer );
     }
 }
-/*-----------------------------------------------------------*/
-
+/* 接收UDP包 */
 BaseType_t xProcessReceivedUDPPacket( NetworkBufferDescriptor_t *pxNetworkBuffer, uint16_t usPort )
 {
 BaseType_t xReturn = pdPASS;
 FreeRTOS_Socket_t *pxSocket;
 
 UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
-
+    /* 根据端口号找到套接字 */
     pxSocket = pxUDPSocketLookup( usPort );
-
-    if( pxSocket )
+    if( pxSocket )/* 套接字存在 */
     {
-
-        /* When refreshing the ARP cache with received UDP packets we must be
-        careful;  hundreds of broadcast messages may pass and if we're not
-        handling them, no use to fill the ARP cache with those IP addresses. */
+        /* 刷新ARP缓存要小心，有时候，会有数百个广播经过，增加缓存无事于补 */
         vARPRefreshCacheEntry( &( pxUDPPacket->xEthernetHeader.xSourceAddress ), pxUDPPacket->xIPHeader.ulSourceIPAddress );
-
-        #if( ipconfigUSE_CALLBACKS == 1 )
+        #if( ipconfigUSE_CALLBACKS == 1 )/* 回调函数 */
         {
             /* Did the owner of this socket register a reception handler ? */
             if( ipconfigIS_VALID_PROG_ADDRESS( pxSocket->u.xUDP.pxHandleReceive ) )
@@ -293,7 +209,6 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
                 xSourceAddress.sin_addr = pxNetworkBuffer->ulIPAddress;
                 destinationAddress.sin_port = usPort;
                 destinationAddress.sin_addr = pxUDPPacket->xIPHeader.ulDestinationIPAddress;
-
                 if( xHandler( ( Socket_t * ) pxSocket, ( void* ) pcData, ( size_t ) pxNetworkBuffer->xDataLength,
                     &xSourceAddress, &destinationAddress ) )
                 {
@@ -302,8 +217,7 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
             }
         }
         #endif /* ipconfigUSE_CALLBACKS */
-
-        #if( ipconfigUDP_MAX_RX_PACKETS > 0 )
+        #if( ipconfigUDP_MAX_RX_PACKETS > 0 )/* 我们定义了最大接收包，在这里检查 */
         {
             if( xReturn == pdPASS )
             {
@@ -317,7 +231,6 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
             }
         }
         #endif
-
         if( xReturn == pdPASS )
         {
             vTaskSuspendAll();
@@ -326,21 +239,18 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
                 {
                     taskENTER_CRITICAL();
                     {
-                        /* Add the network packet to the list of packets to be
-                        processed by the socket. */
+                        /* 把数据包传递给套接字 */
                         vListInsertEnd( &( pxSocket->u.xUDP.xWaitingPacketsList ), &( pxNetworkBuffer->xBufferListItem ) );
                     }
                     taskEXIT_CRITICAL();
                 }
             }
             xTaskResumeAll();
-
-            /* Set the socket's receive event */
+            /* 设置套接字的事件标识 */
             if( pxSocket->xEventGroup != NULL )
             {
-                xEventGroupSetBits( pxSocket->xEventGroup, eSOCKET_RECEIVE );
+                xEventGroupSetBits( pxSock；et->xEventGroup, eSOCKET_RECEIVE );
             }
-
             #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
             {
                 if( ( pxSocket->pxSocketSet != NULL ) && ( ( pxSocket->xSelectBits & eSELECT_READ ) != 0 ) )
@@ -349,7 +259,6 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
                 }
             }
             #endif
-
             #if( ipconfigSOCKET_HAS_USER_SEMAPHORE == 1 )
             {
                 if( pxSocket->pxUserSemaphore != NULL )
@@ -358,8 +267,7 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
                 }
             }
             #endif
-
-            #if( ipconfigUSE_DHCP == 1 )
+            #if( ipconfigUSE_DHCP == 1 )/* 是不是DHCP事件？？ */
             {
                 if( xIsDHCPSocket( pxSocket ) )
                 {
@@ -369,16 +277,10 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
             #endif
         }
     }
-    else
+    else/* 套接字不存在 */
     {
-        /* There is no socket listening to the target port, but still it might
-        be for this node. */
-
-        #if( ipconfigUSE_DNS == 1 )
-            /* a DNS reply, check for the source port.  Although the DNS client
-            does open a UDP socket to send a messages, this socket will be
-            closed after a short timeout.  Messages that come late (after the
-            socket is closed) will be treated here. */
+        /* 不存在监听此端口的套接字 */
+        #if( ipconfigUSE_DNS == 1 )/* 一个DNS应答？？ */
             if( FreeRTOS_ntohs( pxUDPPacket->xUDPHeader.usSourcePort ) == ipDNS_PORT )
             {
                 vARPRefreshCacheEntry( &( pxUDPPacket->xEthernetHeader.xSourceAddress ), pxUDPPacket->xIPHeader.ulSourceIPAddress );
@@ -386,9 +288,7 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
             }
             else
         #endif
-
-        #if( ipconfigUSE_LLMNR == 1 )
-            /* a LLMNR request, check for the destination port. */
+        #if( ipconfigUSE_LLMNR == 1 )/* LLMNR请求？？ */
             if( ( usPort == FreeRTOS_ntohs( ipLLMNR_PORT ) ) ||
                 ( pxUDPPacket->xUDPHeader.usSourcePort == FreeRTOS_ntohs( ipLLMNR_PORT ) ) )
             {
@@ -397,9 +297,7 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
             }
             else
         #endif /* ipconfigUSE_LLMNR */
-
-        #if( ipconfigUSE_NBNS == 1 )
-            /* a NetBIOS request, check for the destination port */
+        #if( ipconfigUSE_NBNS == 1 )/* NBNS请求？？ */
             if( ( usPort == FreeRTOS_ntohs( ipNBNS_PORT ) ) ||
                 ( pxUDPPacket->xUDPHeader.usSourcePort == FreeRTOS_ntohs( ipNBNS_PORT ) ) )
             {
