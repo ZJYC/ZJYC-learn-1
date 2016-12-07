@@ -34,14 +34,31 @@
 /*
  * TCP标志
  */
-#define ipTCP_FLAG_FIN          0x0001u /* No more data from sender */
-#define ipTCP_FLAG_SYN          0x0002u /* Synchronize sequence numbers */
-#define ipTCP_FLAG_RST          0x0004u /* Reset the connection */
-#define ipTCP_FLAG_PSH          0x0008u /* Push function: please push buffered data to the recv application */
-#define ipTCP_FLAG_ACK          0x0010u /* Acknowledgment field is significant */
-#define ipTCP_FLAG_URG          0x0020u /* Urgent pointer field is significant */
-#define ipTCP_FLAG_ECN          0x0040u /* ECN-Echo */
-#define ipTCP_FLAG_CWR          0x0080u /* Congestion Window Reduced */
+
+/*                  部分说明                
+    ipTCP_FLAG_ECN：
+    一般情况下我们把网络中间环节（路由等）当做黑盒子看待，只能通过丢包来判断是否发生拥塞，
+    由于部分应用（在线视频）对拥塞很敏感，简单的丢包重传、慢启动和快速重传使得用户体验较
+    差，如果传输层支持ECN功能，，便会在IP报文中添加ECT指示，当中间路由器的RED算法检测到此
+    功能开启之后会将此数据包标记为CE，接收端收到数据包之后，发现CE标志有效，那其随后的ACK
+    报文的TCP投中设置ECN-Echo来指示拥塞的发生，发送端收到之后会做相应调整（窗口变小了），
+    并在随后的TCP报文中设置CWR位，接收端收到此CWR标志，便知晓发送端以了解了拥塞的情况，随
+    后的ACK便不再设置ECN-Echo。IP头部有一ECN区域：
+    00不支持ECT
+    01ECT(1)
+    10ECT(0)
+    11CE
+
+*/
+
+#define ipTCP_FLAG_FIN          0x0001u /* 结束标志，发送者不会再有数据 */
+#define ipTCP_FLAG_SYN          0x0002u /* 同步字 */
+#define ipTCP_FLAG_RST          0x0004u /* 复位连接 */
+#define ipTCP_FLAG_PSH          0x0008u /* 有数据：请把数据传递给用户接收 */
+#define ipTCP_FLAG_ACK          0x0010u /* 应答数字有效*/
+#define ipTCP_FLAG_URG          0x0020u /* 紧急指针有效 */
+#define ipTCP_FLAG_ECN          0x0040u /* 标表明网络正在发生拥塞（显式拥塞通告） */
+#define ipTCP_FLAG_CWR          0x0080u /* 拥塞窗口减少 */
 #define ipTCP_FLAG_NS           0x0100u /* ECN-nonce concealment protection */
 #define ipTCP_FLAG_RSV          0x0E00u /* Reserved, keep 0 */
 
@@ -51,18 +68,21 @@
 /*
  * TCP选项
  */
-#define TCP_OPT_END             0u   /* End of TCP options list */
-#define TCP_OPT_NOOP            1u   /* "No-operation" TCP option */
-#define TCP_OPT_MSS             2u   /* Maximum segment size TCP option */
-#define TCP_OPT_WSOPT           3u   /* TCP Window Scale Option (3-byte long) */
-#define TCP_OPT_SACK_P          4u   /* Advertize that SACK is permitted */
-#define TCP_OPT_SACK_A          5u   /* SACK option with first/last */
-#define TCP_OPT_TIMESTAMP       8u   /* Time-stamp option */
-
-#define TCP_OPT_MSS_LEN         4u   /* Length of TCP MSS option. */
-#define TCP_OPT_WSOPT_LEN       3u   /* Length of TCP WSOPT option. */
-
-#define TCP_OPT_TIMESTAMP_LEN   10  /* fixed length of the time-stamp option */
+/*                      部分说明                
+    SACK
+    当TCP数据丢失之后，传统的做法是重传所有数据，这会减少TCP利用率，使用SACK
+    （选择新重传）之后，则只会重新传输那些丢失的包。
+ */
+#define TCP_OPT_END             0u   /* TCP选项结束 */
+#define TCP_OPT_NOOP            1u   /* TCP选项“空操作” */
+#define TCP_OPT_MSS             2u   /* TCP选项MSS */
+#define TCP_OPT_WSOPT           3u   /* TCP窗口放大因子 */
+#define TCP_OPT_SACK_P          4u   /* 允许SACK */
+#define TCP_OPT_SACK_A          5u   /* 选择性确认区域 */
+#define TCP_OPT_TIMESTAMP       8u   /* 时间戳 */
+#define TCP_OPT_MSS_LEN         4u   /* TCP MSS选项的长度 */
+#define TCP_OPT_WSOPT_LEN       3u   /* 窗口放大系数的长度 */
+#define TCP_OPT_TIMESTAMP_LEN   10   /* 时间戳长度 */
 
 #ifndef ipconfigTCP_ACK_EARLIER_PACKET
     #define ipconfigTCP_ACK_EARLIER_PACKET      1
@@ -77,6 +97,10 @@
  * to prevent that the socket will be deleted before the last ACK has been
  * and thus causing a 'RST' packet on either side.
  */
+/* 宏定义NOW_CONNECTED()用来判断是否，技术上讲，连接状态早就被关闭了，但是
+库会避免套接字在向对方发送ACK之前被关闭从而造成‘RST？？？’ */
+/* 如果状态出于以下几种：eESTABLISHED, eFIN_WAIT_1, eFIN_WAIT_2, eCLOSING, eLAST_ACK, eTIME_WAIT
+则宏定义NOW_CONNECTED()返回真， */
 #define NOW_CONNECTED( status )\
     ( ( status >= eESTABLISHED ) && ( status != eCLOSE_WAIT ) )
 
@@ -93,11 +117,7 @@
 /* 每次建立TCP连接就会使用一个初始的序列号，序列号最好以0x102的大小自增 */
 #define INITIAL_SEQUENCE_NUMBER_INCREMENT       ( 0x102UL )
 
-/*
- * When there are no TCP options, the TCP offset equals 20 bytes, which is stored as
- * the number 5 (words) in the higher niblle of the TCP-offset byte.
- */
-/* 如果不使用TCP选项，TCP头的大小为20字节，表示为5个字 */
+/* 如果不使用TCP选项，TCP头的大小为20字节，表示为5个字，存储在高位 */
 #define TCP_OFFSET_LENGTH_BITS          ( 0xf0u )
 #define TCP_OFFSET_STANDARD_LENGTH      ( 0x50u )
 
@@ -125,160 +145,99 @@
 };
 #endif /* ( ipconfigHAS_DEBUG_PRINTF != 0 ) || ( ipconfigHAS_PRINTF != 0 ) */
 
-/*
- * Returns true if the socket must be checked.  Non-active sockets are waiting
- * for user action, either connect() or close().
- */
+/* 如果套接字必须检查，则返回真，未激活的套接字在等待用户动作：连接或者是关闭 */
 static BaseType_t prvTCPSocketIsActive( UBaseType_t uxStatus );
 
-/*
- * Either sends a SYN or calls prvTCPSendRepeated (for regular messages).
- */
+/* 用于发送数据包 */
 static int32_t prvTCPSendPacket( FreeRTOS_Socket_t *pxSocket );
 
-/*
- * Try to send a series of messages.
- */
+/* 尝试发送一系列数据 */
 static int32_t prvTCPSendRepeated( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t **ppxNetworkBuffer );
 
-/*
- * Return or send a packet to the other party.
- */
+/* 返回或者是发送数据给另一方 */
 static void prvTCPReturnPacket( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t *pxNetworkBuffer,
     uint32_t ulLen, BaseType_t xReleaseAfterSend );
 
-/*
- * Initialise the data structures which keep track of the TCP windowing system.
- */
+/* 初始化保持跟踪TCP窗口系统的数据结构 */
 static void prvTCPCreateWindow( FreeRTOS_Socket_t *pxSocket );
 
-/*
- * Let ARP look-up the MAC-address of the peer and initialise the first SYN
- * packet.
- */
+/* 让ARP查找对方MAC并初始化第一个SYN包 */
 static BaseType_t prvTCPPrepareConnect( FreeRTOS_Socket_t *pxSocket );
 
 #if( ipconfigHAS_DEBUG_PRINTF != 0 )
-    /*
-     * For logging and debugging: make a string showing the TCP flags.
-     */
+    /* 用于记录和调试 */
     static const char *prvTCPFlagMeaning( UBaseType_t xFlags);
 #endif /* ipconfigHAS_DEBUG_PRINTF != 0 */
 
 /* 检查TCP选项 */
 static void prvCheckOptions( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t *pxNetworkBuffer );
 
-/*
- * Set the initial properties in the options fields, like the preferred
- * value of MSS and whether SACK allowed.  Will be transmitted in the state
- * 'eCONNECT_SYN'.
- */
+/* 设置选项区域的出事属性，比如MSS和是否允许SACK，将会在状态‘eCONNECT_SYN’发送 */
 static UBaseType_t prvSetSynAckOptions( FreeRTOS_Socket_t *pxSocket, TCPPacket_t * pxTCPPacket );
 
-/*
- * For anti-hang protection and TCP keep-alive messages.  Called in two places:
- * after receiving a packet and after a state change.  The socket's alive timer
- * may be reset.
- */
+/* 对于凡挂起保护和TCP保活信号，在两个地方调用：收到一个数据包和状态改变。
+套接字的活定时器会被复位 */
 static void prvTCPTouchSocket( FreeRTOS_Socket_t *pxSocket );
 
-/*
- * Prepare an outgoing message, if anything has to be sent.
- */
+/* 如果有东西要发送，准备一个即将发出的消息 */
 static int32_t prvTCPPrepareSend( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t **ppxNetworkBuffer, UBaseType_t uxOptionsLength );
 
-/*
- * Calculate when this socket needs to be checked to do (re-)transmissions.
- */
+/* 计算什么时候套接字需要被检查去重传 */
 static TickType_t prvTCPNextTimeout( FreeRTOS_Socket_t *pxSocket );
 
-/*
- * The API FreeRTOS_send() adds data to the TX stream.  Add
- * this data to the windowing system to it can be transmitted.
- */
+/* API FreeRTOS_send()向TX流添加数据，把数据添加到窗口系统来发送数据 */
 static void prvTCPAddTxData( FreeRTOS_Socket_t *pxSocket );
 
-/*
- *  Called to handle the closure of a TCP connection.
- */
+/* 用来掌握TCP连接的关闭 */
 static BaseType_t prvTCPHandleFin( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t *pxNetworkBuffer );
 
+/* 设置TCP时间戳 */
 #if(    ipconfigUSE_TCP_TIMESTAMPS == 1 )
     static UBaseType_t prvTCPSetTimeStamp( BaseType_t lOffset, FreeRTOS_Socket_t *pxSocket, TCPHeader_t *pxTCPHeader );
 #endif
 
-/*
- * Called from prvTCPHandleState().  Find the TCP payload data and check and
- * return its length.
- */
+/* 被prvTCPHandleState()调用，找到TCP数据并检查返回其长度 */
 static BaseType_t prvCheckRxData( NetworkBufferDescriptor_t *pxNetworkBuffer, uint8_t **ppucRecvData );
 
-/*
- * Called from prvTCPHandleState().  Check if the payload data may be accepted.
- * If so, it will be added to the socket's reception queue.
- */
+/* 被prvTCPHandleState()调用，检查是否数据可以被接受，如果是，他将会添加到套接字的接受队列 */
 static BaseType_t prvStoreRxData( FreeRTOS_Socket_t *pxSocket, uint8_t *pucRecvData,
     NetworkBufferDescriptor_t *pxNetworkBuffer, uint32_t ulReceiveLength );
 
-/*
- * Set the TCP options (if any) for the outgoing packet.
- */
+/* 设置TCP选项 */
 static UBaseType_t prvSetOptions( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t *pxNetworkBuffer );
 
 /*
  * Called from prvTCPHandleState() as long as the TCP status is eSYN_RECEIVED to
  * eCONNECT_SYN.
  */
+/* 被prvTCPHandleState()调用， */
 static BaseType_t prvHandleSynReceived( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t **ppxNetworkBuffer,
     uint32_t ulReceiveLength, UBaseType_t uxOptionsLength );
 
-/*
- * Called from prvTCPHandleState() as long as the TCP status is eESTABLISHED.
- */
+/* 被prvTCPHandleState()调用，TCP状态为eESTABLISHED */
 static BaseType_t prvHandleEstablished( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t **ppxNetworkBuffer,
     uint32_t ulReceiveLength, UBaseType_t uxOptionsLength );
 
-/*
- * Called from prvTCPHandleState().  There is data to be sent.
- * If ipconfigUSE_TCP_WIN is defined, and if only an ACK must be sent, it will
- * be checked if it would better be postponed for efficiency.
- */
+/* 被prvTCPHandleState()调用有数据被发送，如果定义了ipconfigUSE_TCP_WIN，并且只有一个ACK要发送时
+我们会检查一下是不是推迟一段时间再发送更好更有效率 */
 static BaseType_t prvSendData( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t **ppxNetworkBuffer,
     uint32_t ulReceiveLength, BaseType_t xSendLength );
 
-/*
- * The heart of all: check incoming packet for valid data and acks and do what
- * is necessary in each state.
- */
+/* 所有的核心：检查到来的数据或是应答，根据当前状态决定要做什么 */
 static BaseType_t prvTCPHandleState( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t **ppxNetworkBuffer );
 
-/*
- * Reply to a peer with the RST flag on, in case a packet can not be handled.
- */
+/* 用RST回复对方，在数据传输有问题的时候使用 */
 static BaseType_t prvTCPSendReset( NetworkBufferDescriptor_t *pxNetworkBuffer );
 
-/*
- * Set the initial value for MSS (Maximum Segment Size) to be used.
- */
+/* 设置MSS初始值， */
 static void prvSocketSetMSS( FreeRTOS_Socket_t *pxSocket );
 
-/*
- * Return either a newly created socket, or the current socket in a connected
- * state (depends on the 'bReuseSocket' flag).
- */
+/* 返回一个新创建的套接字，或者是当前连接的套接字（取决于标志‘bReuseSocket’） */
 static FreeRTOS_Socket_t *prvHandleListen( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t *pxNetworkBuffer );
 
-/*
- * After a listening socket receives a new connection, it may duplicate itself.
- * The copying takes place in prvTCPSocketCopy.
- */
+/* 在监听套接字收到一个新的连接之后，他会复制自己。用此函数完成复制 */
 static BaseType_t prvTCPSocketCopy( FreeRTOS_Socket_t *pxNewSocket, FreeRTOS_Socket_t *pxSocket );
 
-/*
- * prvTCPStatusAgeCheck() will see if the socket has been in a non-connected
- * state for too long.  If so, the socket will be closed, and -1 will be
- * returned.
- */
 /* 本函数将会检查套接字是否非连接状态太久了，如果是，这个套接字会被关闭并返回-1 */
 #if( ipconfigTCP_HANG_PROTECTION == 1 )
     static BaseType_t prvTCPStatusAgeCheck( FreeRTOS_Socket_t *pxSocket );
@@ -295,16 +254,10 @@ static NetworkBufferDescriptor_t *prvTCPBufferResize( FreeRTOS_Socket_t *pxSocke
     static uint8_t prvWinScaleFactor( FreeRTOS_Socket_t *pxSocket );
 #endif
 
-/*-----------------------------------------------------------*/
-
 /* 初始化序列号，此数值应当随机以防止洪水攻击 */
 uint32_t ulNextInitialSequenceNumber = 0ul;
 
-/*-----------------------------------------------------------*/
-
-/* prvTCPSocketIsActive() returns true if the socket must be checked.
- * Non-active sockets are waiting for user action, either connect()
- * or close(). */
+/* 如果套接字必须检查，则返回真，未激活的套接字在等待用户动作：连接或者是关闭 */
 static BaseType_t prvTCPSocketIsActive( UBaseType_t uxStatus )
 {
     switch( uxStatus )
@@ -319,29 +272,26 @@ static BaseType_t prvTCPSocketIsActive( UBaseType_t uxStatus )
         return pdTRUE;
     }
 }
-/*-----------------------------------------------------------*/
-
+/* 本函数将会检查套接字是否非连接状态太久了，如果是，这个套接字会被关闭并返回-1 */
 #if( ipconfigTCP_HANG_PROTECTION == 1 )
-
     static BaseType_t prvTCPStatusAgeCheck( FreeRTOS_Socket_t *pxSocket )
     {
     BaseType_t xResult;
         switch( pxSocket->u.xTCP.ucTCPState )
         {
         case eESTABLISHED:
-            /* If the 'ipconfigTCP_KEEP_ALIVE' option is enabled, sockets in
-            state ESTABLISHED can be protected using keep-alive messages. */
+            /* 如果ipconfigTCP_KEEP_ALIVE选项被使能，处于ESTABLISHED的套接字
+            会通过保活信号保护*/
             xResult = pdFALSE;
             break;
         case eCLOSED:
         case eTCP_LISTEN:
         case eCLOSE_WAIT:
-            /* These 3 states may last for ever, up to the owner. */
+            /* 这三个状态会持续到永久，就看用户了  */
             xResult = pdFALSE;
             break;
         default:
-            /* All other (non-connected) states will get anti-hanging
-            protection. */
+            /* 所有其他（非连接）状态将会得到反挂起保护 */
             xResult = pdTRUE;
             break;
         }
@@ -349,8 +299,7 @@ static BaseType_t prvTCPSocketIsActive( UBaseType_t uxStatus )
         {
             /* 计算时长 */
             TickType_t xAge = xTaskGetTickCount( ) - pxSocket->u.xTCP.xLastActTime;
-
-            /* ipconfigTCP_HANG_PROTECTION_TIME is in units of seconds. */
+            /* ipconfigTCP_HANG_PROTECTION_TIME以秒为单位 */
             if( xAge > ( ipconfigTCP_HANG_PROTECTION_TIME * configTICK_RATE_HZ ) )
             {
                 #if( ipconfigHAS_DEBUG_PRINTF == 1 )
@@ -362,10 +311,8 @@ static BaseType_t prvTCPSocketIsActive( UBaseType_t uxStatus )
                         FreeRTOS_GetTCPStateName( ( UBaseType_t ) pxSocket->u.xTCP.ucTCPState ) ) );
                 }
                 #endif /* ipconfigHAS_DEBUG_PRINTF */
-
                 /* 转向eCLOSE_WAIT状态 */
                 vTCPStateChange( pxSocket, eCLOSE_WAIT );
-
                 /* 当bPassQueued为true，在连接之前，套接字为孤儿 */
                 if( pxSocket->u.xTCP.bits.bPassQueued != pdFALSE_UNSIGNED )
                 {
@@ -381,8 +328,6 @@ static BaseType_t prvTCPSocketIsActive( UBaseType_t uxStatus )
         }
         return xResult;
     }
-    /*-----------------------------------------------------------*/
-
 #endif
 
 /*
@@ -390,12 +335,12 @@ static BaseType_t prvTCPSocketIsActive( UBaseType_t uxStatus )
  * 他可以发送延迟应答或者是新的数据
  * 通常的调用序列如下 :
  * IP-Task:
- *      xTCPTimerCheck()                // Check all sockets ( declared in FreeRTOS_Sockets.c )
- *      xTCPSocketCheck()               // Either send a delayed ACK or call prvTCPSendPacket()
- *      prvTCPSendPacket()              // Either send a SYN or call prvTCPSendRepeated ( regular messages )
- *      prvTCPSendRepeated()            // Send at most 8 messages on a row
- *          prvTCPReturnPacket()        // Prepare for returning
- *          xNetworkInterfaceOutput()   // Sends data to the NIC ( declared in portable/NetworkInterface/xxx )
+ *      xTCPTimerCheck()                // 检查所有的套接字
+ *      xTCPSocketCheck()               // 要么发送延迟应答要么调用prvTCPSendPacket()
+ *      prvTCPSendPacket()              // 要么发送延迟应答要么调用prvTCPSendRepeated
+ *      prvTCPSendRepeated()            // 在一行发送至多8个消息
+ *          prvTCPReturnPacket()        // 准备返回
+ *          xNetworkInterfaceOutput()   // 向网络接口发送数据 ( 在portable/NetworkInterface/xxx声明 )
  */
 BaseType_t xTCPSocketCheck( FreeRTOS_Socket_t *pxSocket )
 {
@@ -404,11 +349,9 @@ BaseType_t xReady = pdFALSE;
 
     if( ( pxSocket->u.xTCP.ucTCPState >= eESTABLISHED ) && ( pxSocket->u.xTCP.txStream != NULL ) )
     {
-        /* The API FreeRTOS_send() might have added data to the TX stream.  Add
-        this data to the windowing system to it can be transmitted. */
+        /* API FreeRTOS_send()向TX流添加数据，把数据添加到窗口系统来发送数据 */
         prvTCPAddTxData( pxSocket );
     }
-
     #if ipconfigUSE_TCP_WIN == 1
     {
         if( pxSocket->u.xTCP.pxAckMessage != NULL )
@@ -473,7 +416,6 @@ BaseType_t xReady = pdFALSE;
         }
         /* 设置该套接字 到下一次唤醒的超时时长 */
         prvTCPNextTimeout( pxSocket );
-
         #if( ipconfigTCP_HANG_PROTECTION == 1 )
         {
             /* In all (non-connected) states in which keep-alive messages can not be sent
@@ -552,7 +494,7 @@ NetworkBufferDescriptor_t *pxNetworkBuffer;
     return lResult;
 }
 /*-----------------------------------------------------------*/
-/* 只要存在需要发送的数据，只要发送窗口不满，prvTCPSendRepeated就会尝试发送一系列信息 */
+/* 只要存在需要发送的数据，只要发送窗口不满，本函数就会尝试发送一系列信息 */
 static int32_t prvTCPSendRepeated( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t **ppxNetworkBuffer )
 {
 UBaseType_t uxIndex;
