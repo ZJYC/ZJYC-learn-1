@@ -1,153 +1,109 @@
 
-/* 标准头文件 */
+/* Standard includes. */
 #include <stdint.h>
 #include <stdio.h>
 
-/* FreeRtos头文件 */
+/* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
 
-/* FreeRTOS+TCP头文件 */
+/* FreeRTOS+TCP includes. */
 #include "FreeRTOS_UDP_IP.h"
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 #include "FreeRTOS_IP_Private.h"
 #include "FreeRTOS_DNS.h"
 #include "NetworkBufferManagement.h"
-
-/* 设置套接字的端口号 */
+/*2016--11--26--20--18--19(ZJYC):xBoundSocketListItem的成员含有套接字的端口号    */ 
 #define socketSET_SOCKET_PORT( pxSocket, usPort ) listSET_LIST_ITEM_VALUE( ( &( ( pxSocket )->xBoundSocketListItem ) ), ( usPort ) )
 #define socketGET_SOCKET_PORT( pxSocket ) listGET_LIST_ITEM_VALUE( ( &( ( pxSocket )->xBoundSocketListItem ) ) )
-
-/* Test if a socket it bound which means it is either included in
-xBoundUDPSocketsList or xBoundTCPSocketsList */
-/* 检查套接字是否被绑定也就是意味着 */
+/*2016--11--26--20--19--34(ZJYC):测试一个套接字是否绑定意味着他存在于xBoundUDPSocketsList
+或者是xBoundTCPSocketsList中    */ 
 #define socketSOCKET_IS_BOUND( pxSocket )      ( listLIST_ITEM_CONTAINER( & ( pxSocket )->xBoundSocketListItem ) != NULL )
-
-/* If FreeRTOS_sendto() is called on a socket that is not bound to a port
-number then, depending on the FreeRTOSIPConfig.h settings, it might be that a
-port number is automatically generated for the socket.  Automatically generated
-port numbers will be between socketAUTO_PORT_ALLOCATION_START_NUMBER and
-0xffff. */
+/*2016--11--26--20--20--54(ZJYC):如果FreeRTOS_sendto()在一个没有绑定端口号的
+套接字上使用，取决于FreeRTOSIPConfig.h设置，他或许会自动绑定一随机端口，
+该随机端口号将会介于socketAUTO_PORT_ALLOCATION_START_NUMBER和0xffff之间    */ 
 /* _HT_ thinks that the default of 0xc000 is pretty high */
 #if !defined( socketAUTO_PORT_ALLOCATION_START_NUMBER )
     #define socketAUTO_PORT_ALLOCATION_START_NUMBER ( ( uint16_t ) 0xc000 )
 #endif
-
-/* When the automatically generated port numbers overflow, the next value used
-is not set back to socketAUTO_PORT_ALLOCATION_START_NUMBER because it is likely
-that the first few automatically generated ports will still be in use.  Instead
-it is reset back to the value defined by this constant. */
+/*2016--11--26--20--23--00(ZJYC):当自动产生的端口号溢出，由于先前的几个自动端口号可能
+还在使用中，这些端口号将不会回归socketAUTO_PORT_ALLOCATION_START_NUMBER，他会回归如下常值    */ 
 #define socketAUTO_PORT_ALLOCATION_RESET_NUMBER ( ( uint16_t ) 0xc100 )
 #define socketAUTO_PORT_ALLOCATION_MAX_NUMBER   ( ( uint16_t ) 0xff00 )
-
-/* The number of octets that make up an IP address. */
+/*2016--11--26--20--26--29(ZJYC):几个octets组成一IP地址    */ 
 #define socketMAX_IP_ADDRESS_OCTETS     4u
-
-/* A block time of 0 simply means "don't block". */
+/*2016--11--26--20--26--51(ZJYC):阻塞时间为0意味着不要堵塞    */ 
 #define socketDONT_BLOCK                ( ( TickType_t ) 0 )
 
 #if( ( ipconfigUSE_TCP == 1 ) && !defined( ipTCP_TIMER_PERIOD_MS ) )
     #define ipTCP_TIMER_PERIOD_MS   ( 1000 )
 #endif
-
-/* The next private port number to use when binding a client socket is stored in
-the usNextPortToUse[] array - which has either 1 or two indexes depending on
-whether TCP is being supported. */
+/*2016--11--26--20--27--24(ZJYC):下一个绑定客户端时使用的私有端口号存储在数组usNextPortToUse[]
+中，他有一个或者是二个索引取决于是否使能TCP功能    */ 
 #if( ipconfigUSE_TCP == 1 )
     #define socketPROTOCOL_COUNT        2
 #else
     #define socketPROTOCOL_COUNT        1
 #endif
-
-/* Indexes into the usNextPortToUse[] array for UDP and TCP sockets
-respectively. */
+/*2016--11--26--20--29--04(ZJYC):UDP和TC对于usNextPortToUse[]各自的索引值    */ 
 #define socketNEXT_UDP_PORT_NUMBER_INDEX    0
 #define socketNEXT_TCP_PORT_NUMBER_INDEX    1
 
 
 /*-----------------------------------------------------------*/
-
-/*
- * Allocate the next port number from the private allocation range.
- * TCP and UDP each have their own series of port numbers
- * ulProtocol is either ipPROTOCOL_UDP or ipPROTOCOL_TCP
- */
+/*2016--11--26--20--30--42(ZJYC):从各自的申请范围内申请端口号，TCP和UDP有他们自己的
+一系列端口号，ulProtocol为ipPROTOCOL_UDP或者ipPROTOCOL_TCP    */ 
 static uint16_t prvGetPrivatePortNumber( BaseType_t xProtocol );
-
-/*
- * Return the list item from within pxList that has an item value of
- * xWantedItemValue.  If there is no such list item return NULL.
- */
+/*2016--11--26--20--32--15(ZJYC):在pxList中搜索xWantedItemValue，没有返回NULL    */ 
 static const ListItem_t * pxListFindListItemWithValue( const List_t *pxList, TickType_t xWantedItemValue );
-
-/*
- * Return pdTRUE only if pxSocket is valid and bound, as far as can be
- * determined.
- */
+/*2016--11--26--20--34--28(ZJYC):只有pxSocket有效并且绑定才会返回pdTRUE    */ 
 static BaseType_t prvValidSocket( FreeRTOS_Socket_t *pxSocket, BaseType_t xProtocol, BaseType_t xIsBound );
-
-/*
- * Before creating a socket, check the validity of the parameters used
- * and find the size of the socket space, which is different for UDP and TCP
- */
+/*2016--11--26--20--35--07(ZJYC):在创建套接字之前，检查参数的有效性并且找到套接字的空间，
+这个空间对于UDP和TCP是不一样的    */ 
 static BaseType_t prvDetermineSocketSize( BaseType_t xDomain, BaseType_t xType, BaseType_t xProtocol, size_t *pxSocketSize );
 
 #if( ipconfigUSE_TCP == 1 )
-    /*
-     * Create a txStream or a rxStream, depending on the parameter 'xIsInputStream'
-     */
+    /*2016--11--26--20--36--23(ZJYC):根据xIsInputStream创建一txStream或者是rxStream    */ 
     static StreamBuffer_t *prvTCPCreateStream (FreeRTOS_Socket_t *pxSocket, BaseType_t xIsInputStream );
 #endif /* ipconfigUSE_TCP == 1 */
 
 #if( ipconfigUSE_TCP == 1 )
-    /*
-     * Called from FreeRTOS_send(): some checks which will be done before
-     * sending a TCP packed.
-     */
+    /*2016--11--26--20--37--06(ZJYC):被FreeRTOS_send()调用，在发送TCP包之前会做一些检查    */ 
     static int32_t prvTCPSendCheck( FreeRTOS_Socket_t *pxSocket, size_t xDataLength );
 #endif /* ipconfigUSE_TCP */
 
 #if( ipconfigUSE_TCP == 1 )
-    /*
-     * When a child socket gets closed, make sure to update the child-count of the parent
-     */
+    /*2016--11--26--20--38--13(ZJYC):当一个子套接字关闭，确保更新父套接字的孩子计数值    */ 
     static void prvTCPSetSocketCount( FreeRTOS_Socket_t *pxSocketToDelete );
 #endif  /* ipconfigUSE_TCP == 1 */
 
 #if( ipconfigUSE_TCP == 1 )
-    /*
-     * Called from FreeRTOS_connect(): make some checks and if allowed, send a
-     * message to the IP-task to start connecting to a remote socket
-     */
+    /*2016--11--26--20--39--06(ZJYC):被FreeRTOS_connect()调用，做一些检查，如果通过了，就发送消息
+    给IP-Task来启动连接到远程套接字*/ 
     static BaseType_t prvTCPConnectStart( FreeRTOS_Socket_t *pxSocket, struct freertos_sockaddr *pxAddress );
 #endif /* ipconfigUSE_TCP */
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
-
-    /* Executed by the IP-task, it will check all sockets belonging to a set */
+    /*2016--11--26--20--40--46(ZJYC):被IP-Task检查，他会检查所有的套接字隶属于一个集合    */ 
     static FreeRTOS_Socket_t *prvFindSelectedSocket( SocketSelect_t *pxSocketSet );
 
 #endif /* ipconfigSUPPORT_SELECT_FUNCTION == 1 */
 /*-----------------------------------------------------------*/
-
-/* The list that contains mappings between sockets and port numbers.  Accesses
-to this list must be protected by critical sections of one kind or another. */
+/*2016--11--26--20--41--33(ZJYC):保存套接字与端口号的列表，访问该列表必须通过临界区
+保护    */ 
 List_t xBoundUDPSocketsList;
 
 #if ipconfigUSE_TCP == 1
     List_t xBoundTCPSocketsList;
 #endif /* ipconfigUSE_TCP == 1 */
-
-/* Holds the next private port number to use when binding a client socket for
-UDP, and if ipconfigUSE_TCP is set to 1, also TCP.  UDP uses index
-socketNEXT_UDP_PORT_NUMBER_INDEX and TCP uses index
-socketNEXT_TCP_PORT_NUMBER_INDEX.  The initial value is set to be between
-socketAUTO_PORT_ALLOCATION_RESET_NUMBER and socketAUTO_PORT_ALLOCATION_MAX_NUMBER
-when the IP stack is initialised.  Note ipconfigRAND32() is used, which must be
-seeded prior to the IP task being started. */
+/*2016--11--26--20--42--38(ZJYC):对于UDP，当绑定一客户端时，掌握着下一个私人端口号
+如果使能TCP，对于TCP也是这样的，当IP-Task被初始化，UDP使用索引
+socketNEXT_UDP_PORT_NUMBER_INDEX而TCP使用索引socketNEXT_TCP_PORT_NUMBER_INDEX，
+初始数值介于socketAUTO_PORT_ALLOCATION_RESET_NUMBER和
+socketAUTO_PORT_ALLOCATION_MAX_NUMBER之间。注意：ipconfigRAND32()应在IP-Task启动之前开始，    */ 
 static uint16_t usNextPortToUse[ socketPROTOCOL_COUNT ] = { 0 };
 
 /*-----------------------------------------------------------*/
@@ -181,11 +137,9 @@ const uint32_t ulAutoPortRange = socketAUTO_PORT_ALLOCATION_MAX_NUMBER - socketA
 uint32_t ulRandomPort;
 
     vListInitialise( &xBoundUDPSocketsList );
-
-    /* Determine the first anonymous UDP port number to get assigned.  Give it
-    a random value in order to avoid confusion about port numbers being used
-    earlier, before rebooting the device.  Start with the first auto port
-    number, then add a random offset up to a maximum of the range of numbers. */
+    /*2016--11--26--20--50--27(ZJYC):决定第一个被派出的未命名UDP端口号，给他一个
+    随机数值以避免与之前使用的端口号混淆，从第一个自动端口号开始，然后添加介于
+    最大范围的随机的偏移*/ 
     ulRandomPort = socketAUTO_PORT_ALLOCATION_START_NUMBER;
     ulRandomPort += ( ipconfigRAND32() % ulAutoPortRange );
     usNextPortToUse[ socketNEXT_UDP_PORT_NUMBER_INDEX ] = ( uint16_t ) ulRandomPort;
@@ -196,7 +150,7 @@ uint32_t ulRandomPort;
 
         ulNextInitialSequenceNumber = ipconfigRAND32();
 
-        /* Determine the first anonymous TCP port number to get assigned. */
+        /*2016--11--26--20--54--01(ZJYC):同理，TCP也得使用一个端口号    */ 
         ulRandomPort = socketAUTO_PORT_ALLOCATION_START_NUMBER;
         ulRandomPort += ( ipconfigRAND32() % ulAutoPortRange );
         usNextPortToUse[ socketNEXT_TCP_PORT_NUMBER_INDEX ] = ( uint16_t ) ulRandomPort;
@@ -220,14 +174,14 @@ FreeRTOS_Socket_t *pxSocket;
     }
     else
     {
-        /* Only Ethernet is currently supported. */
+        /*2016--11--26--20--55--04(ZJYC):目前只指出以太网    */ 
         configASSERT( xDomain == FREERTOS_AF_INET );
 
-        /* Check if the UDP socket-list has been initialised. */
+        /*2016--11--26--20--55--27(ZJYC):检查UDP套接字列表是否被初始化    */ 
         configASSERT( listLIST_IS_INITIALISED( &xBoundUDPSocketsList ) );
         #if( ipconfigUSE_TCP == 1 )
         {
-            /* Check if the TCP socket-list has been initialised. */
+            /*2016--11--26--20--55--53(ZJYC):同理检查TCP。。。    */ 
             configASSERT( listLIST_IS_INITIALISED( &xBoundTCPSocketsList ) );
         }
         #endif  /* ipconfigUSE_TCP == 1 */
@@ -277,10 +231,8 @@ Socket_t xReturn;
     }
     else
     {
-        /* Allocate the structure that will hold the socket information.  The
-        size depends on the type of socket: UDP sockets need less space.  A
-        define 'pvPortMallocSocket' will used to allocate the necessary space.
-        By default it points to the FreeRTOS function 'pvPortMalloc()'. */
+        /*2016--11--26--20--57--43(ZJYC):申请可以存储套接字信息的结构体，大小取决于
+        套接字类型（UDP/TCP），pvPortMallocSocket会被调用，默认的，他会指向pvPortMalloc()*/ 
         pxSocket = ( FreeRTOS_Socket_t * ) pvPortMallocSocket( uxSocketSize );
 
         if( pxSocket == NULL )
@@ -300,10 +252,8 @@ Socket_t xReturn;
             memset( pxSocket, '\0', uxSocketSize );
 
             pxSocket->xEventGroup = xEventGroup;
-
-            /* Initialise the socket's members.  The semaphore will be created
-            if the socket is bound to an address, for now the pointer to the
-            semaphore is just set to NULL to show it has not been created. */
+            /*2016--11--26--20--59--53(ZJYC):初始化套接字的信息，如果套接字
+            绑定了地址，信号量会被创建，但是现在，信号量是空的    */ 
             if( xProtocol == FREERTOS_IPPROTO_UDP )
             {
                 vListInitialise( &( pxSocket->u.xUDP.xWaitingPacketsList ) );
@@ -344,9 +294,8 @@ Socket_t xReturn;
                         pxSocket->u.xTCP.uxTxWinSize  = 1u;
                     }
                     #endif
-                    /* The above values are just defaults, and can be overridden by
-                    calling FreeRTOS_setsockopt().  No buffers will be allocated until a
-                    socket is connected and data is exchanged. */
+                    /*2016--11--26--21--01--49(ZJYC):以上信息是默认的，可以通过FreeRTOS_setsockopt
+                    来修改，直到套接字连接并且数据发生交换，网络缓存才会被创建*/ 
                 }
             }
             #endif  /* ipconfigUSE_TCP == 1 */
@@ -403,7 +352,7 @@ Socket_t xReturn;
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
 
-    /* Add a socket to a set */
+    /*2016--11--26--21--03--39(ZJYC):添加套接字到集合    */ 
     void FreeRTOS_FD_SET( Socket_t xSocket, SocketSet_t xSocketSet, EventBits_t xSelectBits )
     {
     FreeRTOS_Socket_t *pxSocket = ( FreeRTOS_Socket_t * ) xSocket;
@@ -412,8 +361,7 @@ Socket_t xReturn;
         configASSERT( pxSocket != NULL );
         configASSERT( xSocketSet != NULL );
 
-        /* Make sure we're not adding bits which are reserved for internal use,
-        such as eSELECT_CALL_IP */
+        /*2016--11--26--21--16--19(ZJYC):确保我们不置位内部使用的位，比如eSELECT_CALL_IP    */ 
         pxSocket->xSelectBits |= ( xSelectBits & eSELECT_ALL );
 
         if( ( pxSocket->xSelectBits & eSELECT_ALL ) != 0 )
@@ -421,10 +369,8 @@ Socket_t xReturn;
             /* Adding a socket to a socket set. */
             pxSocket->pxSocketSet = ( SocketSelect_t * ) xSocketSet;
 
-            /* Now have the IP-task call vSocketSelect() to see if the set contains
-            any sockets which are 'ready' and set the proper bits.
-            By setting 'bApiCalled = false', vSocketSelect() knows that it was
-            not called from a user API */
+            /*2016--11--26--21--18--10(ZJYC):现在由vSocketSelect查看集合中是否有
+            套接字准备就绪并置位合适的位，bApiCalled = false没被用户API调用过    */ 
             pxSocketSet->bApiCalled = pdFALSE;
             prvFindSelectedSocket( pxSocketSet );
         }
@@ -434,8 +380,7 @@ Socket_t xReturn;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
-    /* Clear select bits for a socket
-    If the mask becomes 0, remove the socket from the set */
+    /*2016--11--26--21--20--31(ZJYC):清除掉某些位，如果标志为0，则从该集合中删除    */ 
     void FreeRTOS_FD_CLR( Socket_t xSocket, SocketSet_t xSocketSet, EventBits_t xSelectBits )
     {
     FreeRTOS_Socket_t *pxSocket = ( FreeRTOS_Socket_t * ) xSocket;
@@ -461,7 +406,7 @@ Socket_t xReturn;
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
 
-    /* Test if a socket belongs to a socket-set */
+    /*2016--11--26--21--21--14(ZJYC):判断一个套接字是否属于某个集合    */ 
     EventBits_t FreeRTOS_FD_ISSET( Socket_t xSocket, SocketSet_t xSocketSet )
     {
     EventBits_t xReturn;
@@ -489,8 +434,7 @@ Socket_t xReturn;
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
 
-    /* The select() statement: wait for an event to occur on any of the sockets
-    included in a socket set */
+    /*2016--11--26--21--21--47(ZJYC):等待集合中的任何一个套接字发生事件    */ 
     BaseType_t FreeRTOS_select( SocketSet_t xSocketSet, TickType_t xBlockTimeTicks )
     {
     TimeOut_t xTimeOut;
@@ -548,9 +492,7 @@ Socket_t xReturn;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
-
-    /* Send a message to the IP-task to have it check all sockets belonging to
-    'pxSocketSet' */
+    /*2016--11--26--21--23--44(ZJYC):向IP-Task发送消息去检查是否多有的套接字属于pxSocketSet    */ 
     static FreeRTOS_Socket_t *prvFindSelectedSocket( SocketSelect_t *pxSocketSet )
     {
     IPStackEvent_t xSelectEvent;
@@ -559,21 +501,20 @@ Socket_t xReturn;
         xSelectEvent.eEventType = eSocketSelectEvent;
         xSelectEvent.pvData = ( void * ) pxSocketSet;
 
-        /* while the IP-task works on the request, the API will block on
-        'eSELECT_CALL_IP'.  So clear it first. */
+        /*2016--11--26--21--25--37(ZJYC):当IP-Task响应该请求时，会堵塞在eSELECT_CALL_IP，清掉它    */ 
         xEventGroupClearBits( pxSocketSet->xSelectGroup, eSELECT_CALL_IP );
 
         /* Now send the socket select event */
         if( xSendEventStructToIPTask( &xSelectEvent, ( TickType_t ) portMAX_DELAY ) == pdFAIL )
         {
+            /*2016--11--26--21--26--40(ZJYC):呵呵呵    */ 
             /* Oops, we failed to wake-up the IP task. No use to wait for it. */
             FreeRTOS_debug_printf( ( "prvFindSelectedSocket: failed\n" ) );
             xReturn = NULL;
         }
         else
         {
-            /* As soon as the IP-task is ready, it will set 'eSELECT_CALL_IP' to
-            wakeup the calling API */
+            /*2016--11--26--21--27--31(ZJYC):当IP-Task处理完成，他设置eSELECT_CALL_IP来唤醒调用API*/ 
             xEventGroupWaitBits( pxSocketSet->xSelectGroup, eSELECT_CALL_IP, pdTRUE, pdFALSE, portMAX_DELAY );
 
             /* Return 'pxSocket' which is set by the IP-task */
@@ -586,11 +527,8 @@ Socket_t xReturn;
 #endif /* ipconfigSUPPORT_SELECT_FUNCTION == 1 */
 /*-----------------------------------------------------------*/
 
-/*
- * FreeRTOS_recvfrom: receive data from a bound socket
- * In this library, the function can only be used with connectionsless sockets
- * (UDP)
- */
+/*2016--11--26--21--28--52(ZJYC):从绑定的套接字返回数据
+在这个库中，本函数只能使用在未连接的套接字上（UDP）    */ 
 int32_t FreeRTOS_recvfrom( Socket_t xSocket, void *pvBuffer, size_t xBufferLength, BaseType_t xFlags, struct freertos_sockaddr *pxSourceAddress, socklen_t *pxSourceAddressLength )
 {
 BaseType_t lPacketCount = 0;
@@ -890,14 +828,10 @@ FreeRTOS_Socket_t *pxSocket;
     return lReturn;
 } /* Tested */
 /*-----------------------------------------------------------*/
-
-/*
- * FreeRTOS_bind() : binds a sockt to a local port number.  If port 0 is
- * provided, a system provided port number will be assigned.  This function can
- * be used for both UDP and TCP sockets.  The actual binding will be performed
- * by the IP-task to avoid mutual access to the bound-socket-lists
- * (xBoundUDPSocketsList or xBoundTCPSocketsList).
- */
+/*2016--11--27--10--45--29(ZJYC):FreeRTOS_bind()把套接字与本地端口号绑定，
+如果提供端口号0，一个系统指定的端口号会被分配。本函数可以被UDP和TCP使用
+实际的操作有IP任务完成，以防止多线程访问绑定列表（xBoundUDPSocketsList 或
+xBoundTCPSocketsList）    */ 
 BaseType_t FreeRTOS_bind( Socket_t xSocket, struct freertos_sockaddr * pxAddress, socklen_t xAddressLength )
 {
 IPStackEvent_t xBindEvent;
@@ -910,8 +844,7 @@ BaseType_t xReturn = 0;
     {
         xReturn = -pdFREERTOS_ERRNO_EINVAL;
     }
-    /* Once a socket is bound to a port, it can not be bound to a different
-    port number */
+    /*2016--11--27--10--48--22(ZJYC):一旦套接字与端口号绑定，便不可在于其他端口号绑定    */ 
     else if( socketSOCKET_IS_BOUND( pxSocket) != pdFALSE )
     {
         /* The socket is already bound. */
@@ -920,8 +853,7 @@ BaseType_t xReturn = 0;
     }
     else
     {
-        /* Prepare a messages to the IP-task in order to perform the binding.
-        The desired port number will be passed in usLocalPort. */
+        /*2016--11--27--10--49--08(ZJYC):向IP任务发送消息使之绑定（usLocalPort为端口号）    */ 
         xBindEvent.eEventType = eSocketBindEvent;
         xBindEvent.pvData = ( void * ) xSocket;
         if( pxAddress != NULL )
@@ -945,8 +877,7 @@ BaseType_t xReturn = 0;
         }
         else
         {
-            /* The IP-task will set the 'eSOCKET_BOUND' bit when it has done its
-            job. */
+            /*2016--11--27--10--50--54(ZJYC):当IP任务完成绑定，会置位eSOCKET_BOUND    */ 
             xEventGroupWaitBits( pxSocket->xEventGroup, eSOCKET_BOUND, pdTRUE /*xClearOnExit*/, pdFALSE /*xWaitAllBits*/, portMAX_DELAY );
             if( socketSOCKET_IS_BOUND( pxSocket ) == pdFALSE )
             {
@@ -957,12 +888,8 @@ BaseType_t xReturn = 0;
 
     return xReturn;
 }
-
-/*
- * vSocketBind(): internal version of bind() that should not be called directly.
- * 'xInternal' is used for TCP sockets only: it allows to have several
- * (connected) child sockets bound to the same server port.
- */
+/*2016--11--27--10--51--36(ZJYC):内部绑定函数，不应直接调用，xInternal只用于
+TCP：它允许同一个端口号有若干个子套接字    */ 
 BaseType_t vSocketBind( FreeRTOS_Socket_t *pxSocket, struct freertos_sockaddr * pxAddress, size_t uxAddressLength, BaseType_t xInternal )
 {
 BaseType_t xReturn = 0; /* In Berkeley sockets, 0 means pass for bind(). */
@@ -991,11 +918,9 @@ List_t *pxSocketList;
 
     #if( ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND == 1 )
     {
-        /* pxAddress will be NULL if sendto() was called on a socket without the
-        socket being bound to an address.  In this case, automatically allocate
-        an address to the socket.  There is a very tiny chance that the allocated
-        port will already be in use - if that is the case, then the check below
-        [pxListFindListItemWithValue()] will result in an error being returned. */
+        /*2016--11--27--11--00--58(ZJYC):如果sendto()被调用在一个没有绑定端口号的套接字上
+        pxAddress将为NULL，这种情况先，自动申请套接字。申请的套接字有很小的几率与在使用
+        的端口号重复，如果出现这种情况，检查pxListFindListItemWithValue()会返回一个错误*/ 
         if( pxAddress == NULL )
         {
             pxAddress = &xAddress;
@@ -1015,13 +940,10 @@ List_t *pxSocketList;
         {
             pxAddress->sin_port = prvGetPrivatePortNumber( ( BaseType_t ) pxSocket->ucProtocol );
         }
-
-        /* If vSocketBind() is called from the API FreeRTOS_bind() it has been
-        confirmed that the socket was not yet bound to a port.  If it is called
-        from the IP-task, no such check is necessary. */
-
-        /* Check to ensure the port is not already in use.  If the bind is
-        called internally, a port MAY be used by more than one socket. */
+        /*2016--11--27--11--05--03(ZJYC):如果vSocketBind()被API-FreeRTOS_bind()调用，
+        便已经确定套接字没有绑定端口号，如果他被IP任务调用，便没有该项检查*/ 
+        /*2016--11--27--11--06--43(ZJYC):检查以确定端口号没有被使用，如果绑定是内
+        部调用的，一个端口号有可能被不止一个套接字使用    */ 
         if( ( ( xInternal == pdFALSE ) || ( pxSocket->ucProtocol != ( uint8_t ) FREERTOS_IPPROTO_TCP ) ) &&
             ( pxListFindListItemWithValue( pxSocketList, ( TickType_t ) pxAddress->sin_port ) != NULL ) )
         {

@@ -1138,14 +1138,13 @@ void vIPNetworkUpCalls( void )
 
     #if( ipconfigDNS_USE_CALLBACKS != 0 )
     {
-        /* The following function is declared in FreeRTOS_DNS.c and 'private' to
-        this library */
+        /*2016--11--26--19--30--46(ZJYC):如下的函数在FreeRTOS_DNS.c中声明，并且
+        对于库私有（不公开）*/ 
         extern void vDNSInitialise( void );
         vDNSInitialise();
     }
     #endif /* ipconfigDNS_USE_CALLBACKS != 0 */
-
-    /* Set remaining time to 0 so it will become active immediately. */
+    /*2016--11--26--19--31--45(ZJYC):将剩余时间设置为0，所以他会被立即激活    */ 
     prvIPTimerReload( &xARPTimer, pdMS_TO_TICKS( ipARP_TIMER_PERIOD_MS ) );
 }
 /*-----------------------------------------------------------*/
@@ -1162,16 +1161,16 @@ volatile eFrameProcessingResult_t eReturned;
 
     if( eReturned == eProcessBuffer )
     {
-        /* Interpret the received Ethernet packet. */
+        /*2016--11--26--19--32--53(ZJYC):翻译收到的以太网数据包    */ 
         switch( pxEthernetHeader->usFrameType )
         {
             case ipARP_FRAME_TYPE :
-                /* The Ethernet frame contains an ARP packet. */
+                /*2016--11--26--19--33--24(ZJYC):以太网数据包含有ARP    */ 
                 eReturned = eARPProcessPacket( ( ARPPacket_t * ) pxNetworkBuffer->pucEthernetBuffer );
                 break;
 
             case ipIPv4_FRAME_TYPE :
-                /* The Ethernet frame contains an IP packet. */
+                /*2016--11--26--19--33--48(ZJYC):以太网数据包含有IP    */ 
                 eReturned = prvProcessIPPacket( ( IPPacket_t * ) pxNetworkBuffer->pucEthernetBuffer, pxNetworkBuffer );
                 break;
 
@@ -1186,23 +1185,18 @@ volatile eFrameProcessingResult_t eReturned;
     switch( eReturned )
     {
         case eReturnEthernetFrame :
-            /* The Ethernet frame will have been updated (maybe it was
-            an ARP request or a PING request?) and should be sent back to
-            its source. */
+            /*2016--11--26--19--35--28(ZJYC):以太网帧可能已经被更新了，
+            （或许他是一个ARP请求或者是PING请求？）并且应当原路返回*/ 
             vReturnEthernetFrame( pxNetworkBuffer, pdTRUE );
-            /* parameter pdTRUE: the buffer must be released once
-            the frame has been transmitted */
+            /*2016--11--26--19--35--03(ZJYC):pdTRUE缓冲一旦被发送即释放    */ 
             break;
 
         case eFrameConsumed :
-            /* The frame is in use somewhere, don't release the buffer
-            yet. */
+            /*2016--11--26--19--36--56(ZJYC):该缓存正在什么地方使用，现在不能释放    */ 
             break;
 
         default :
-            /* The frame is not being used anywhere, and the
-            NetworkBufferDescriptor_t structure containing the frame should
-            just be released back to the list of free buffers. */
+            /*2016--11--26--19--37--30(ZJYC):该帧什么地方都用不到，并且，***要释放    */ 
             vReleaseNetworkBufferAndDescriptor( pxNetworkBuffer );
             break;
     }
@@ -1224,11 +1218,10 @@ eFrameProcessingResult_t eReturn = eProcessBuffer;
 
     #if( ipconfigETHERNET_DRIVER_FILTERS_PACKETS == 0 )
     {
-        /* In systems with a very small amount of RAM, it might be advantageous
-        to have incoming messages checked earlier, by the network card driver.
-        This method may decrease the usage of sparse network buffers. */
+        /*2016--11--26--19--39--50(ZJYC):在RAM较小的系统中，提前检查到来的数据
+        是有一定优势的，通过网卡驱动，该方法会减少网络缓存的使用量*/ 
         uint32_t ulDestinationIPAddress = pxIPHeader->ulDestinationIPAddress;
-
+            /*2016--11--26--19--41--27(ZJYC):确保到来的数据包没有？？？    */ 
             /* Ensure that the incoming packet is not fragmented (only outgoing
             packets can be fragmented) as these are the only handled IP frames
             currently. */
