@@ -612,6 +612,15 @@ const int32_t l500ms = 500;
     uint32_t ulNextSequenceNumber = ulSequenceNumber + ulLength;
     const MiniListItem_t* pxEnd = ( const MiniListItem_t* ) listGET_END_MARKER( &pxWindow->xRxSegments );
     TCPSegment_t *pxSegment;
+
+        /* A segment has been received with sequence number 'ulSequenceNumber',
+        where 'ulCurrentSequenceNumber == ulSequenceNumber', which means that
+        exactly this segment was expected.  xTCPWindowRxConfirm() will check if
+        there is already another segment with a sequence number between (ulSequenceNumber)
+        and (ulSequenceNumber+ulLength).  Normally none will be found, because
+        the next RX segment should have a sequence number equal to
+        '(ulSequenceNumber+ulLength)'. */
+
         /* Iterate through all RX segments that are stored: */
         for( pxIterator  = ( const ListItem_t * ) listGET_NEXT( pxEnd );
              pxIterator != ( const ListItem_t * ) pxEnd;
@@ -661,7 +670,13 @@ const int32_t l500ms = 500;
     int32_t lReturn, lDistance;
     TCPSegment_t *pxFound;
 
-        /* As a side-effect, pxWindow->ulUserDataLength will get set to non-zero,
+        /* If lTCPWindowRxCheck( ) returns == 0, the packet will be passed
+        directly to user (segment is expected).  If it returns a positive
+        number, an earlier packet is missing, but this packet may be stored.
+        If negative, the packet has already been stored, or it is out-of-order,
+        or there is not enough space.
+
+        As a side-effect, pxWindow->ulUserDataLength will get set to non-zero,
         if more Rx data may be passed to the user after this packet. */
 
         ulCurrentSequenceNumber = pxWindow->rx.ulCurrentSequenceNumber;
