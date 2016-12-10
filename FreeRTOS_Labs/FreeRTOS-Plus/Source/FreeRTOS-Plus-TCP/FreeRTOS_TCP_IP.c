@@ -1,4 +1,29 @@
 /* TCP协议是TCP/IP协议的重中之重，保证数据连接的可靠性，加入端口号使得不同的进程可以共享网卡 */
+/*                      API简介               
+    prvTCPSocketIsActive
+        检查套接字是否激活或者是是否可用
+    prvTCPStatusAgeCheck
+        本函数将会检查套接字是否非连接状态太久了，如果是，这个套接字会被关闭并返回-1
+    xTCPSocketCheck
+        可以发送延迟应答或者是新的数据
+    prvTCPSendRepeated
+        只要存在需要发送的数据，只要发送窗口不满，本函数就会尝试发送一系列信息
+    prvTCPReturnPacket
+        发送以太网数据
+    prvTCPCreateWindow
+        创建窗口
+    prvTCPPrepareConnect
+        准备连接，查找ARP，填充TCP，创建窗口
+    prvCheckOptions
+        检查TCP选项
+    prvWinScaleFactor
+        设置窗口放大因子
+    prvSetSynAckOptions
+        设置选项用于SYN+ACK发送
+    prvTCPTouchSocket
+        更新套接字计数器
+    
+ */
 /* Standard includes. */
 #include <stdint.h>
 #include <stdio.h>
@@ -373,7 +398,6 @@ BaseType_t xReady = pdFALSE;
                     }
                     /* 这是啥？？？？？？？？？？？？？？？？？？？？ */
                     prvTCPReturnPacket( pxSocket, pxSocket->u.xTCP.pxAckMessage, ipSIZE_OF_IPv4_HEADER + ipSIZE_OF_TCP_HEADER, ipconfigZERO_COPY_TX_DRIVER );
-
                     #if( ipconfigZERO_COPY_TX_DRIVER != 0 )
                     {
                         /* The ownership has been passed to the SEND routine,
@@ -391,12 +415,8 @@ BaseType_t xReady = pdFALSE;
             }
             else
             {
-                /* The user wants to perform an active shutdown(), skip sending
-                the delayed ACK.  The function prvTCPSendPacket() will send the
-                FIN along with the ACK's. */
                 /* 用户希望主动关闭，略过延迟应答，函数prvTCPSendPacket将会发送FIN顺带ACK */
             }
-
             if( pxSocket->u.xTCP.pxAckMessage != NULL )
             {
                 vReleaseNetworkBufferAndDescriptor( pxSocket->u.xTCP.pxAckMessage );
@@ -539,7 +559,6 @@ NetworkBufferDescriptor_t xTempBuffer;
     if( pxNetworkBuffer == NULL )
     {
         pxNetworkBuffer = &xTempBuffer;
-
         #if( ipconfigUSE_LINKED_RX_MESSAGES != 0 )
         {
             xTempBuffer.pxNextBuffer = NULL;
@@ -549,7 +568,6 @@ NetworkBufferDescriptor_t xTempBuffer;
         xTempBuffer.xDataLength = sizeof( pxSocket->u.xTCP.xPacket.u.ucLastPacket );
         xReleaseAfterSend = pdFALSE;
     }
-
     #if( ipconfigZERO_COPY_TX_DRIVER != 0 )
     {
         if( xReleaseAfterSend == pdFALSE )
@@ -574,7 +592,6 @@ NetworkBufferDescriptor_t xTempBuffer;
         {
             /* 计算接受缓冲的空间以公布套接字的接收窗口大小 */
             pxTCPWindow = &( pxSocket->u.xTCP.xTCPWindow );
-
             if( pxSocket->u.xTCP.rxStream != NULL )
             {
                 /* 缓冲早已经创建，直接看有多少空闲空间就好了 */
@@ -753,14 +770,6 @@ NetworkBufferDescriptor_t xTempBuffer;
         }
     } /* if( pxNetworkBuffer != NULL ) */
 }
-/*-----------------------------------------------------------*/
-
-/*
- * The SYN event is very important: the sequence numbers, which have a kind of
- * random starting value, are being synchronised.  The sliding window manager
- * (in FreeRTOS_TCP_WIN.c) needs to know them, along with the Maximum Segment
- * Size (MSS) in use.
- */
 /* SYN时间非常重要：这序列号，开始于随机数值，在过程中被同步。滑动窗口管理需要知道这些 */
 static void prvTCPCreateWindow( FreeRTOS_Socket_t *pxSocket )
 {
@@ -894,11 +903,6 @@ BaseType_t xReturn = pdTRUE;
 
 #endif /* ipconfigHAS_DEBUG_PRINTF */
 
-/*
- * Parse the TCP option(s) received, if present.  It has already been verified
- * that: ((pxTCPHeader->ucTCPOffset & 0xf0) > 0x50), meaning that the TP header
- * is longer than the usual 20 (5 x 4) bytes.
- */
 /* 检查收到的选项，如果存在：((pxTCPHeader->ucTCPOffset & 0xf0) > 0x50) TCP包头大于5*4=20 */
 static void prvCheckOptions( FreeRTOS_Socket_t *pxSocket, NetworkBufferDescriptor_t *pxNetworkBuffer )
 {
@@ -1072,7 +1076,6 @@ UBaseType_t uxNewMSS;
     }
 
 #endif
-/*-----------------------------------------------------------*/
 /* 当打开一TCP连接，当SYN被发送，对方可能会通知他需要什么样的MSS，MSS是负荷的净尺寸，总是小于MTU */
 static UBaseType_t prvSetSynAckOptions( FreeRTOS_Socket_t *pxSocket, TCPPacket_t * pxTCPPacket )
 {
@@ -1220,7 +1223,6 @@ BaseType_t bAfter  = ( BaseType_t ) NOW_CONNECTED( eTCPState );                 
                 /* 不再需要父套接字，所以引用pxPeerSocket可以被清除掉 */
                 pxSocket->u.xTCP.pxPeerSocket = NULL;
                 pxSocket->u.xTCP.bits.bPassQueued = pdFALSE_UNSIGNED;
-                /* When true, this socket may be returned in a call to accept(). */
                 /* 当为真，套接字可能被返回。。。。。 */
                 pxSocket->u.xTCP.bits.bPassAccept = pdTRUE_UNSIGNED;
             }
@@ -1284,7 +1286,7 @@ BaseType_t bAfter  = ( BaseType_t ) NOW_CONNECTED( eTCPState );                 
     }
     /* 填写新的状态 */
     pxSocket->u.xTCP.ucTCPState = ( uint8_t ) eTCPState;
-    /* touch the alive timers because moving to another state. */
+    /* 更新其定时计数器 */
     prvTCPTouchSocket( pxSocket );
     #if( ipconfigHAS_DEBUG_PRINTF == 1 )
     {
@@ -1297,7 +1299,6 @@ BaseType_t bAfter  = ( BaseType_t ) NOW_CONNECTED( eTCPState );                 
             FreeRTOS_GetTCPStateName( ( UBaseType_t ) eTCPState ) ) );
     }
     #endif /* ipconfigHAS_DEBUG_PRINTF */
-
     #if( ipconfigUSE_CALLBACKS == 1 )
     {
         if( xConnected != NULL )
