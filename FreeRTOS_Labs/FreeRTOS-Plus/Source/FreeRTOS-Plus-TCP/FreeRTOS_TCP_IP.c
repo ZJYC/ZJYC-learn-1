@@ -1171,13 +1171,13 @@ BaseType_t bAfter  = ( BaseType_t ) NOW_CONNECTED( eTCPState );                 
     FreeRTOS_Socket_t *xConnected = NULL;
 #endif
 
-    /* 状态是否发生改变？ */
+    /* 状态发生改变 */
     if( bBefore != bAfter )
     {
-        /* 套接字现在还连接吗 */
+        /* 套接字现在连接 */
         if( bAfter != pdFALSE )
         {
-            /* 如果bPassQueued为真，直到连接之前，本套接字是个孤儿 */
+            /* 本套接字是个孤儿 */
             if( pxSocket->u.xTCP.bits.bPassQueued != pdFALSE_UNSIGNED )
             {
                 /* 现在他已连接，找到他的父亲 */
@@ -1239,7 +1239,7 @@ BaseType_t bAfter  = ( BaseType_t ) NOW_CONNECTED( eTCPState );                 
                 #endif
             }
         }
-        else  /* bAfter == pdFALSE, connection is closed. */
+        else  /* 连接被关闭 */
         {
             /* 通过信号量 通知/唤醒套接字的拥有者 */
             pxSocket->xEventBits |= eSOCKET_CLOSED;
@@ -1802,10 +1802,10 @@ BaseType_t xResult = 0;
     ulSequenceNumber = FreeRTOS_ntohl( pxTCPHeader->ulSequenceNumber );
     if( ( ulReceiveLength > 0u ) && ( pxSocket->u.xTCP.ucTCPState >= eSYN_RECEIVED ) )
     {
-		/*2016--11--20--19--57--26(ZJYC):看看我们是否接收数据并将其推送到套接字拥有者    */ 
-		/*2016--11--20--19--59--54(ZJYC): 如果不可被接受，他需要被存储并发送可选择的ACK或SACK
-		来确认，在这种情况下，xTCPWindowRxStore() 会被调用来存储非顺序的数据包
-		*/ 
+        /*2016--11--20--19--57--26(ZJYC):看看我们是否接收数据并将其推送到套接字拥有者    */ 
+        /*2016--11--20--19--59--54(ZJYC): 如果不可被接受，他需要被存储并发送可选择的ACK或SACK
+        来确认，在这种情况下，xTCPWindowRxStore() 会被调用来存储非顺序的数据包
+        */ 
         /* 看我们是否收到数据内容，并将它传递给套接字的拥有者 */
         /* 如果他不能被接收，他可能已经被存储，发送一个可选的ack (SACK)选项头应答之，
             在这种情况下，xTCPWindowRxStore()后期会被调用来存储那些非顺序的数据
@@ -1821,9 +1821,9 @@ BaseType_t xResult = 0;
         lOffset = lTCPWindowRxCheck( pxTCPWindow, ulSequenceNumber, ulReceiveLength, ulSpace );
         if( lOffset >= 0 )
         {
-			/*2016--11--20--20--01--53(ZJYC):新数据已经到达并且可以被用户使用。看看是否头部标志
-			
-			*/ 
+            /*2016--11--20--20--01--53(ZJYC):新数据已经到达并且可以被用户使用。看看是否头部标志
+            
+            */ 
             /* New data has arrived and may be made available to the user.  See
             if the head marker in rxStream may be advanced, only if lOffset == 0.
             In case the low-water mark is reached, bLowWater will be set
@@ -1834,17 +1834,17 @@ BaseType_t xResult = 0;
             if( lStored != ( int32_t ) ulReceiveLength )
             {
                 FreeRTOS_debug_printf( ( "lTCPAddRxdata: stored %ld / %lu bytes??\n", lStored, ulReceiveLength ) );
-				/*2016--11--20--20--04--39(ZJYC):接收到的数据不能被存储。套接字的bMallocError标志被置位
-				套接字现在eCLOSE_WAIT的状态为并且将发出RST包
-				*/ 
+                /*2016--11--20--20--04--39(ZJYC):接收到的数据不能被存储。套接字的bMallocError标志被置位
+                套接字现在eCLOSE_WAIT的状态为并且将发出RST包
+                */ 
                 /* 接收到的数据不能被存储，套接字的标志位bMallocError被置位，套接字现在的状态为eCLOSE_WAIT并且带有RST的数据包将会被返回 */
                 prvTCPSendReset( pxNetworkBuffer );
                 xResult = -1;
             }
         }
-		/*2016--11--20--20--06--04(ZJYC):收到一个丢失的包之后，更高的数据包会被传递给用户    */ 
-			/*2016--11--20--20--07--12(ZJYC):现在lTCPAddRxdata()将会向前移动rxHead指针，
-			所以对用户而言，数据很快变得可用起来，置位bLowWater以防止到达低位线，*/ 
+        /*2016--11--20--20--06--04(ZJYC):收到一个丢失的包之后，更高的数据包会被传递给用户    */ 
+            /*2016--11--20--20--07--12(ZJYC):现在lTCPAddRxdata()将会向前移动rxHead指针，
+            所以对用户而言，数据很快变得可用起来，置位bLowWater以防止到达低位线，*/ 
         /* 当接收到丢失的数据包之后，较高的数据包可能传递给用户 */
         #if( ipconfigUSE_TCP_WIN == 1 )
         {
@@ -1877,7 +1877,7 @@ UBaseType_t uxOptionsLength = pxTCPWindow->ucOptionLength;
     #if(    ipconfigUSE_TCP_WIN == 1 )
         if( uxOptionsLength != 0u )
         {
-			/*2016--11--20--20--10--46(ZJYC):TCP选项必须被发送，因为接受到了非顺序数据包    */ 
+            /*2016--11--20--20--10--46(ZJYC):TCP选项必须被发送，因为接受到了非顺序数据包    */ 
             if( xTCPWindowLoggingLevel >= 0 )
                 FreeRTOS_debug_printf( ( "SACK[%d,%d]: optlen %lu sending %lu - %lu\n",
                     pxSocket->usLocalPort,
@@ -1886,14 +1886,14 @@ UBaseType_t uxOptionsLength = pxTCPWindow->ucOptionLength;
                     FreeRTOS_ntohl( pxTCPWindow->ulOptionsData[ 1 ] ) - pxSocket->u.xTCP.xTCPWindow.rx.ulFirstSequenceNumber,
                     FreeRTOS_ntohl( pxTCPWindow->ulOptionsData[ 2 ] ) - pxSocket->u.xTCP.xTCPWindow.rx.ulFirstSequenceNumber ) );
             memcpy( pxTCPHeader->ucOptdata, pxTCPWindow->ulOptionsData, ( size_t ) uxOptionsLength );
-			/*2016--11--20--20--11--42(ZJYC): 除以4并放在高位，等同于左移2   */ 
+            /*2016--11--20--20--11--42(ZJYC): 除以4并放在高位，等同于左移2   */ 
             pxTCPHeader->ucTCPOffset = ( uint8_t )( ( ipSIZE_OF_TCP_HEADER + uxOptionsLength ) << 2 );
         }
         else
     #endif  /* ipconfigUSE_TCP_WIN */
     if( ( pxSocket->u.xTCP.ucTCPState >= eESTABLISHED ) && ( pxSocket->u.xTCP.bits.bMssChange != pdFALSE_UNSIGNED ) )
     {
-		/*2016--11--20--20--12--48(ZJYC):TCP选项必须被发送，因为MSS已改变    */ 
+        /*2016--11--20--20--12--48(ZJYC):TCP选项必须被发送，因为MSS已改变    */ 
         pxSocket->u.xTCP.bits.bMssChange = pdFALSE_UNSIGNED;
         if( xTCPWindowLoggingLevel >= 0 )
         {
@@ -1931,7 +1931,7 @@ uint8_t ucTCPFlags = pxTCPHeader->ucTCPFlags;
 uint32_t ulSequenceNumber = FreeRTOS_ntohl( pxTCPHeader->ulSequenceNumber );
 BaseType_t xSendLength = 0;
 
-	/*2016--11--20--20--40--34(ZJYC): 期望ACK或者是SYN+ACK*/ 
+    /*2016--11--20--20--40--34(ZJYC): 期望ACK或者是SYN+ACK*/ 
     uint16_t usExpect = ( uint16_t ) ipTCP_FLAG_ACK;
     if( pxSocket->u.xTCP.ucTCPState == eCONNECT_SYN )
     {
