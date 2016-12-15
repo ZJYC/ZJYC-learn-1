@@ -1322,12 +1322,16 @@ NetworkBufferDescriptor_t *pxReturn;
 int32_t lNeeded;
 BaseType_t xResize;
 
-    if( xBufferAllocFixedSize != pdFALSE )
+    if( xBufferAllocFixedSize != pdFALSE )/* 允许修整缓存大小 */
     {
         /* 网络缓冲通过固定的大小创建，可以容下最大的MTU */
         lNeeded = ( int32_t ) ipTOTAL_ETHERNET_FRAME_SIZE;
         /* 所以缓存不能太小，只能申请一个新的缓存以防没有提供 */
         xResize = ( pxNetworkBuffer == NULL );
+        /* 
+            if(pxNetworkBuffer == NULL)xResize = pdTRUE;
+            else xResize = pdFALSE;
+        */
     }
     else
     {
@@ -1393,6 +1397,7 @@ int32_t lStreamPos;
     else
     {
         /* 现在，让他指向上一个包的头 */
+        /*2016--12--11--20--42--03(ZJYC): 为什么要从上一个包中获取以太网缓冲？？*/ 
         pucEthernetBuffer = pxSocket->u.xTCP.xPacket.u.ucLastPacket;
     }
     pxTCPPacket = ( TCPPacket_t * ) ( pucEthernetBuffer );
@@ -1402,7 +1407,7 @@ int32_t lStreamPos;
     pxTCPPacket->xTCPHeader.ucTCPFlags |= ipTCP_FLAG_ACK;
     if( pxSocket->u.xTCP.txStream != NULL )
     {
-        /* ulTCPWindowTxGet将会返回被发送数据的大小和在发送流中的位置，为什么检查MSS大于1？因为一些TCP协议栈用此来进行流控 */
+        /* ulTCPWindowTxGet 将会返回被发送数据的大小和在发送流中的位置，为什么检查MSS大于1？因为一些TCP协议栈用此来进行流控 */
         if( pxSocket->u.xTCP.usCurMSS > 1u )
         {
             lDataLen = ( int32_t ) ulTCPWindowTxGet( pxTCPWindow, pxSocket->u.xTCP.ulWindowSize, &lStreamPos );
@@ -1416,17 +1421,11 @@ int32_t lStreamPos;
                 *ppxNetworkBuffer = pxNewBuffer;
                 pucEthernetBuffer = pxNewBuffer->pucEthernetBuffer;
                 pxTCPPacket = ( TCPPacket_t * ) ( pucEthernetBuffer );
-
                 pucSendData = pucEthernetBuffer + ipSIZE_OF_ETH_HEADER + ipSIZE_OF_IPv4_HEADER + ipSIZE_OF_TCP_HEADER + uxOptionsLength;
-
-                /* Translate the position in txStream to an offset from the tail
-                marker. */
+                /* Translate the position in txStream to an offset from the tail marker. */
                 uxOffset = uxStreamBufferDistance( pxSocket->u.xTCP.txStream, pxSocket->u.xTCP.txStream->uxTail, ( size_t ) lStreamPos );
-
-                /* Here data is copied from the txStream in 'peek' mode.  Only
-                when the packets are acked, the tail marker will be updated. */
+                /* Here data is copied from the txStream in 'peek' mode.  Only when the packets are acked, the tail marker will be updated. */
                 ulDataGot = ( uint32_t ) uxStreamBufferGet( pxSocket->u.xTCP.txStream, uxOffset, pucSendData, ( size_t ) lDataLen, pdTRUE );
-
                 #if( ipconfigHAS_DEBUG_PRINTF != 0 )
                 {
                     if( ulDataGot != ( uint32_t ) lDataLen )
@@ -1440,7 +1439,6 @@ int32_t lStreamPos;
                 if( ( pxSocket->u.xTCP.bits.bCloseRequested != pdFALSE_UNSIGNED ) && ( pxSocket->u.xTCP.bits.bFinSent == pdFALSE_UNSIGNED ) )
                 {
                     ulDistance = ( uint32_t ) uxStreamBufferDistance( pxSocket->u.xTCP.txStream, ( size_t ) lStreamPos, pxSocket->u.xTCP.txStream->uxHead );
-
                     if( ulDistance == ulDataGot )
                     {
                         #if (ipconfigHAS_DEBUG_PRINTF == 1)
@@ -1573,7 +1571,6 @@ TickType_t ulDelayMs = ( TickType_t ) 20000;
         }
         else
         {
-            /* Still in the ARP phase: check every half second. */
             /* 依然在ARP阶段，每半秒检查 */
             ulDelayMs = 500UL;
         }
