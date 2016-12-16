@@ -1,59 +1,3 @@
-/*
- * FreeRTOS+TCP Labs Build 160919 (C) 2016 Real Time Engineers ltd.
- * Authors include Hein Tibosch and Richard Barry
- *
- *******************************************************************************
- ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
- ***                                                                         ***
- ***                                                                         ***
- ***   FREERTOS+TCP IS STILL IN THE LAB (mainly because the FTP and HTTP     ***
- ***   demos have a dependency on FreeRTOS+FAT, which is only in the Labs    ***
- ***   download):                                                            ***
- ***                                                                         ***
- ***   FreeRTOS+TCP is functional and has been used in commercial products   ***
- ***   for some time.  Be aware however that we are still refining its       ***
- ***   design, the source code does not yet quite conform to the strict      ***
- ***   coding and style standards mandated by Real Time Engineers ltd., and  ***
- ***   the documentation and testing is not necessarily complete.            ***
- ***                                                                         ***
- ***   PLEASE REPORT EXPERIENCES USING THE SUPPORT RESOURCES FOUND ON THE    ***
- ***   URL: http://www.FreeRTOS.org/contact  Active early adopters may, at   ***
- ***   the sole discretion of Real Time Engineers Ltd., be offered versions  ***
- ***   under a license other than that described below.                      ***
- ***                                                                         ***
- ***                                                                         ***
- ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
- *******************************************************************************
- *
- * FreeRTOS+TCP can be used under two different free open source licenses.  The
- * license that applies is dependent on the processor on which FreeRTOS+TCP is
- * executed, as follows:
- *
- * If FreeRTOS+TCP is executed on one of the processors listed under the Special
- * License Arrangements heading of the FreeRTOS+TCP license information web
- * page, then it can be used under the terms of the FreeRTOS Open Source
- * License.  If FreeRTOS+TCP is used on any other processor, then it can be used
- * under the terms of the GNU General Public License V2.  Links to the relevant
- * licenses follow:
- *
- * The FreeRTOS+TCP License Information Page: http://www.FreeRTOS.org/tcp_license
- * The FreeRTOS Open Source License: http://www.FreeRTOS.org/license
- * The GNU General Public License Version 2: http://www.FreeRTOS.org/gpl-2.0.txt
- *
- * FreeRTOS+TCP is distributed in the hope that it will be useful.  You cannot
- * use FreeRTOS+TCP unless you agree that you use the software 'as is'.
- * FreeRTOS+TCP is provided WITHOUT ANY WARRANTY; without even the implied
- * warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A PARTICULAR
- * PURPOSE. Real Time Engineers Ltd. disclaims all conditions and terms, be they
- * implied, expressed, or statutory.
- *
- * 1 tab == 4 spaces!
- *
- * http://www.FreeRTOS.org
- * http://www.FreeRTOS.org/plus
- * http://www.FreeRTOS.org/labs
- *
- */
 
 #ifndef FREERTOS_IP_PRIVATE_H
 #define FREERTOS_IP_PRIVATE_H
@@ -62,7 +6,7 @@
 extern "C" {
 #endif
 
-/* Application level configuration options. */
+/* 用户层配置选项 */
 #include "FreeRTOSIPConfig.h"
 #include "FreeRTOSIPConfigDefaults.h"
 #include "FreeRTOS_Sockets.h"
@@ -87,14 +31,17 @@ typedef struct xNetworkAddressingParameters
 extern BaseType_t xTCPWindowLoggingLevel;
 
 /*-----------------------------------------------------------*/
-/* Protocol headers.                                         */
+/* 协议头                                                    */
 /*-----------------------------------------------------------*/
 
 #include "pack_struct_start.h"
 struct xETH_HEADER
 {
+    /* 目的地址 */
     MACAddress_t xDestinationAddress; /*  0 + 6 = 6  */
+    /* 源地址 */
     MACAddress_t xSourceAddress;      /*  6 + 6 = 12 */
+    /* 帧类型 */
     uint16_t usFrameType;              /* 12 + 2 = 14 */
 }
 #include "pack_struct_end.h"
@@ -103,14 +50,23 @@ typedef struct xETH_HEADER EthernetHeader_t;
 #include "pack_struct_start.h"
 struct xARP_HEADER
 {
+    /* 硬件类型 */
     uint16_t usHardwareType;                /*  0 +  2 =  2 */
+    /* 协议类型 */
     uint16_t usProtocolType;                /*  2 +  2 =  4 */
+    /* 硬件地址长度 */
     uint8_t ucHardwareAddressLength;        /*  4 +  1 =  5 */
+    /* 协议地址长度 */
     uint8_t ucProtocolAddressLength;        /*  5 +  1 =  6 */
+    /* 操作类型 */
     uint16_t usOperation;                   /*  6 +  2 =  8 */
+    /* 发送者硬件地址 */
     MACAddress_t xSenderHardwareAddress;    /*  8 +  6 = 14 */
+    /* 发送者协议地址 */
     uint32_t ulSenderProtocolAddress;       /* 14 +  4 = 18  */
+    /* 目标硬件地址 */
     MACAddress_t xTargetHardwareAddress;    /* 18 +  6 = 24  */
+    /* 目标协议地址 */
     uint32_t ulTargetProtocolAddress;       /* 24 +  4 = 28  */
 }
 #include "pack_struct_end.h"
@@ -119,15 +75,25 @@ typedef struct xARP_HEADER ARPHeader_t;
 #include "pack_struct_start.h"
 struct xIP_HEADER
 {
+    /* 版本以及头部长度 */
     uint8_t ucVersionHeaderLength;        /*  0 + 1 =  1 */
+    /* 服务类型 */
     uint8_t ucDifferentiatedServicesCode; /*  1 + 1 =  2 */
+    /* 封包总长度 */
     uint16_t usLength;                    /*  2 + 2 =  4 */
+    /* 封包标识 */
     uint16_t usIdentification;            /*  4 + 2 =  6 */
+    /* 片段偏移地址 */
     uint16_t usFragmentOffset;            /*  6 + 2 =  8 */
+    /* TTL */
     uint8_t ucTimeToLive;                 /*  8 + 1 =  9 */
+    /* 协议 */
     uint8_t ucProtocol;                   /*  9 + 1 = 10 */
+    /* 头部校验 */
     uint16_t usHeaderChecksum;            /* 10 + 2 = 12 */
+    /* 源IP地址 */
     uint32_t ulSourceIPAddress;           /* 12 + 4 = 16 */
+    /* 目的IP地址 */
     uint32_t ulDestinationIPAddress;      /* 16 + 4 = 20 */
 }
 #include "pack_struct_end.h"
@@ -136,6 +102,7 @@ typedef struct xIP_HEADER IPHeader_t;
 #include "pack_struct_start.h"
 struct xIGMP_HEADER
 {
+    /*  */
     uint8_t ucVersionType;     /* 0 + 1 = 1 */
     uint8_t ucMaxResponseTime; /* 1 + 1 = 2 */
     uint16_t usChecksum;       /* 2 + 2 = 4 */
@@ -159,9 +126,13 @@ typedef struct xICMP_HEADER ICMPHeader_t;
 #include "pack_struct_start.h"
 struct xUDP_HEADER
 {
+    /* 源端口 */
     uint16_t usSourcePort;      /* 0 + 2 = 2 */
+    /* 目的端口 */
     uint16_t usDestinationPort; /* 2 + 2 = 4 */
+    /* 长度 */
     uint16_t usLength;          /* 4 + 2 = 6 */
+    /* 校验 */
     uint16_t usChecksum;        /* 6 + 2 = 8 */
 }
 #include "pack_struct_end.h"
@@ -170,17 +141,26 @@ typedef struct xUDP_HEADER UDPHeader_t;
 #include "pack_struct_start.h"
 struct xTCP_HEADER
 {
+    /* 源端口 */
     uint16_t usSourcePort;      /* +  2 =  2 */
+    /* 目的端口 */
     uint16_t usDestinationPort; /* +  2 =  4 */
+    /* 序列号 */
     uint32_t ulSequenceNumber;  /* +  4 =  8 */
+    /* 应答号 */
     uint32_t ulAckNr;           /* +  4 = 12 */
+    /* 首部长度 */
     uint8_t  ucTCPOffset;       /* +  1 = 13 */
+    /* 标志 */
     uint8_t  ucTCPFlags;        /* +  1 = 14 */
+    /* 窗口大小 */
     uint16_t usWindow;          /* +  2 = 15 */
+    /* 校验和 */
     uint16_t usChecksum;        /* +  2 = 18 */
+    /* 紧急指针 */
     uint16_t usUrgent;          /* +  2 = 20 */
 #if ipconfigUSE_TCP == 1
-    /* the option data is not a part of the TCP header */
+    /* 选项字节不属于头部 */
     uint8_t  ucOptdata[ipSIZE_TCP_OPTIONS];     /* + 12 = 32 */
 #endif
 }
@@ -206,7 +186,9 @@ typedef struct xPSEUDO_HEADER PseudoHeader_t;
 #include "pack_struct_start.h"
 struct xARP_PACKET
 {
+    /* 以太网头 */
     EthernetHeader_t xEthernetHeader;   /*  0 + 14 = 14 */
+    /* ARP头 */
     ARPHeader_t xARPHeader;         /* 14 + 28 = 42 */
 }
 #include "pack_struct_end.h"
@@ -215,7 +197,9 @@ typedef struct xARP_PACKET ARPPacket_t;
 #include "pack_struct_start.h"
 struct xIP_PACKET
 {
+    /* 以太网头 */
     EthernetHeader_t xEthernetHeader;
+    /* IP头 */
     IPHeader_t xIPHeader;
 }
 #include "pack_struct_end.h"
@@ -224,8 +208,11 @@ typedef struct xIP_PACKET IPPacket_t;
 #include "pack_struct_start.h"
 struct xICMP_PACKET
 {
+    /* 以太网头 */
     EthernetHeader_t xEthernetHeader;
+    /* IP头 */
     IPHeader_t xIPHeader;
+    /* ICMP报文头 */
     ICMPHeader_t xICMPHeader;
 }
 #include "pack_struct_end.h"
@@ -234,8 +221,11 @@ typedef struct xICMP_PACKET ICMPPacket_t;
 #include "pack_struct_start.h"
 struct xUDP_PACKET
 {
+    /* 以太网头 */
     EthernetHeader_t xEthernetHeader; /*  0 + 14 = 14 */
+    /* IP头 */
     IPHeader_t xIPHeader;             /* 14 + 20 = 34 */
+    /* UDP头 */
     UDPHeader_t xUDPHeader;           /* 34 +  8 = 42 */
 }
 #include "pack_struct_end.h"
@@ -244,8 +234,11 @@ typedef struct xUDP_PACKET UDPPacket_t;
 #include "pack_struct_start.h"
 struct xTCP_PACKET
 {
+    /* 以太网头 */
     EthernetHeader_t xEthernetHeader; /*  0 + 14 = 14 */
+    /* IP头 */
     IPHeader_t xIPHeader;             /* 14 + 20 = 34 */
+    /* TCP头 */
     TCPHeader_t xTCPHeader;           /* 34 + 32 = 66 */
 }
 #include "pack_struct_end.h"
@@ -260,31 +253,31 @@ typedef union XPROT_PACKET
 } ProtocolPacket_t;
 
 
-/* The maximum UDP payload length. */
+/* UDP负荷最大长度 */
 #define ipMAX_UDP_PAYLOAD_LENGTH ( ( ipconfigNETWORK_MTU - ipSIZE_OF_IPv4_HEADER ) - ipSIZE_OF_UDP_HEADER )
 
 typedef enum
 {
-    eReleaseBuffer = 0,     /* Processing the frame did not find anything to do - just release the buffer. */
-    eProcessBuffer,         /* An Ethernet frame has a valid address - continue process its contents. */
-    eReturnEthernetFrame,   /* The Ethernet frame contains an ARP or ICMP packet that can be returned to its source. */
-    eFrameConsumed          /* Processing the Ethernet packet contents resulted in the payload being sent to the stack. */
+    eReleaseBuffer = 0,     /* 处理 帧 没有发现是什么事情可做--直接释放缓冲 */
+    eProcessBuffer,         /* 一个以太网帧没有有效的地址--继续处理其内容 */
+    eReturnEthernetFrame,   /* 这个以太网帧包含ARP或者ICMP包 报文可以返回到源头 */
+    eFrameConsumed          /* 处理以太网包内容，导致数据符合被传入协议栈 */
 } eFrameProcessingResult_t;
 
 typedef enum
 {
     eNoEvent = -1,
-    eNetworkDownEvent,      /* 0: The network interface has been lost and/or needs [re]connecting. */
-    eNetworkRxEvent,        /* 1: The network interface has queued a received Ethernet frame. */
-    eARPTimerEvent,         /* 2: The ARP timer expired. */
-    eStackTxEvent,          /* 3: The software stack has queued a packet to transmit. */
-    eDHCPEvent,             /* 4: Process the DHCP state machine. */
-    eTCPTimerEvent,         /* 5: See if any TCP socket needs attention. */
-    eTCPAcceptEvent,        /* 6: Client API FreeRTOS_accept() waiting for client connections. */
+    eNetworkDownEvent,      /* 0: 网络接口已经断开或者是需要重新连接 */
+    eNetworkRxEvent,        /* 1: 网络接口已经入队一以太网帧 */
+    eARPTimerEvent,         /* 2: ARP定时器到期 */
+    eStackTxEvent,          /* 3: 软件已经入队一个包等待发送 */
+    eDHCPEvent,             /* 4: 处理DHCP状态机 */
+    eTCPTimerEvent,         /* 5: 看看是否有TCP套接字需要注意 */
+    eTCPAcceptEvent,        /* 6: 用户接口 FreeRTOS_accept()等待客户端连接 */
     eTCPNetStat,            /* 7: IP-task is asked to produce a netstat listing. */
-    eSocketBindEvent,       /* 8: Send a message to the IP-task to bind a socket to a port. */
-    eSocketCloseEvent,      /* 9: Send a message to the IP-task to close a socket. */
-    eSocketSelectEvent,     /*10: Send a message to the IP-task for select(). */
+    eSocketBindEvent,       /* 8: 发送消息到 IP-task 来把套接字与端口绑定 */
+    eSocketCloseEvent,      /* 9: 发送消息到 IP-task 关闭套接字 */
+    eSocketSelectEvent,     /*10: 发送消息到 IP-task 来 select(). */
     eSocketSignalEvent,     /*11: A socket must be signalled. */
 } eIPEvent_t;
 

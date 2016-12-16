@@ -94,46 +94,42 @@ in case an operation would block */
 #define FREERTOS_SO_STOP_RX             ( 15 )      /* 简单的挂起接收，用于流媒体客户端 */
 
 #if( ipconfigUDP_MAX_RX_PACKETS > 0 )
-    #define FREERTOS_SO_UDP_MAX_RX_PACKETS  ( 16 )      /* This option helps to limit the maximum number of packets a UDP socket will buffer */
+    #define FREERTOS_SO_UDP_MAX_RX_PACKETS  ( 16 )      /* 此选项帮助与限制UDP套接字的将会缓存的最大包个数 */
 #endif
 
-#define FREERTOS_NOT_LAST_IN_FRAGMENTED_PACKET  ( 0x80 )  /* For internal use only, but also part of an 8-bit bitwise value. */
-#define FREERTOS_FRAGMENTED_PACKET              ( 0x40 )  /* For internal use only, but also part of an 8-bit bitwise value. */
+#define FREERTOS_NOT_LAST_IN_FRAGMENTED_PACKET  ( 0x80 )  /* 仅供内部使用，但也有一部分是8位值。 */
+#define FREERTOS_FRAGMENTED_PACKET              ( 0x40 )  /* 仅供内部使用，但也有一部分是8位值。 */
 
 /* Values for flag for FreeRTOS_shutdown(). */
-#define FREERTOS_SHUT_RD                ( 0 )       /* Not really at this moment, just for compatibility of the interface */
+#define FREERTOS_SHUT_RD                ( 0 )       /* Not really at this moment, 只是为了接口的兼容性 */
 #define FREERTOS_SHUT_WR                ( 1 )
 #define FREERTOS_SHUT_RDWR              ( 2 )
 
 /* Values for flag for FreeRTOS_recv(). */
-#define FREERTOS_MSG_OOB                ( 2 )       /* process out-of-band data */
-#define FREERTOS_MSG_PEEK               ( 4 )       /* peek at incoming message */
-#define FREERTOS_MSG_DONTROUTE          ( 8 )       /* send without using routing tables */
-#define FREERTOS_MSG_DONTWAIT           ( 16 )      /* Can be used with recvfrom(), sendto(), recv(), and send(). */
+#define FREERTOS_MSG_OOB                ( 2 )       /* 处理带外数据 */
+#define FREERTOS_MSG_PEEK               ( 4 )       /* 偷看进来的信息 */
+#define FREERTOS_MSG_DONTROUTE          ( 8 )       /* 不使用路由表发送 */
+#define FREERTOS_MSG_DONTWAIT           ( 16 )      /* 可以被 recvfrom(), sendto(), recv(), and send().使用 */
 
 typedef struct xWIN_PROPS {
-    /* Properties of the Tx buffer and Tx window */
-    int32_t lTxBufSize; /* Unit: bytes */
-    int32_t lTxWinSize; /* Unit: MSS */
+    /* Tx Buffer 和 windows 的属性 */
+    int32_t lTxBufSize; /* 单位：字节 */
+    int32_t lTxWinSize; /* 单位：MSS */
 
-    /* Properties of the Rx buffer and Rx window */
-    int32_t lRxBufSize; /* Unit: bytes */
-    int32_t lRxWinSize; /* Unit: MSS */
+    /* Rx Buffer 和 windows 的属性 */
+    int32_t lRxBufSize; /* 单位：字节 */
+    int32_t lRxWinSize; /* 单位：MSS */
 } WinProperties_t;
 
-/* For compatibility with the expected Berkeley sockets naming. */
+/* 为了与预期伯克利套接字命名兼容 */
 #define socklen_t uint32_t
 
-/* For this limited implementation, only two members are required in the
-Berkeley style sockaddr structure. */
+/* 对于这个有限的实现, 在伯力克风格的套接字结构中只有两个成员是必须的 */
 struct freertos_sockaddr
 {
-    /* _HT_ On 32- and 64-bit architectures, the addition of the two uint8_t
-    fields doesn't make the structure bigger, due to alignment.
-    The fields are inserted as a preparation for IPv6. */
-
-    /* sin_len and sin_family not used in the IPv4-only release. */
-    uint8_t sin_len;        /* length of this structure. */
+    /* 在32位和64位架构上，添加的两个uint8_t区域不会使得结构体变大，由于对其的原因，这区域为IPv6为准备 */
+    /* sin_len 和 sin_family 只在IPv4中使用 */
+    uint8_t sin_len;        /* 结构体长度 */
     uint8_t sin_family;     /* FREERTOS_AF_INET. */
     uint16_t sin_port;
     uint32_t sin_addr;
@@ -171,27 +167,22 @@ struct freertos_sockaddr
 
 #endif /* ipconfigBYTE_ORDER */
 
-/* The socket type itself. */
+/* 套接字类型. */
 typedef void *Socket_t;
 
-/* The SocketSet_t type is the equivalent to the fd_set type used by the
-Berkeley API. */
+/* 套接字集合 */
 typedef void *SocketSet_t;
 
-/**
- * FULL, UP-TO-DATE AND MAINTAINED REFERENCE DOCUMENTATION FOR ALL THESE
- * FUNCTIONS IS AVAILABLE ON THE FOLLOWING URL:
- * http://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_TCP/FreeRTOS_TCP_API_Functions.html
- */
+/* 完整的 最新的和**的参考文档在如下的URL中有效：http://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_TCP/FreeRTOS_TCP_API_Functions.html */
 Socket_t FreeRTOS_socket( BaseType_t xDomain, BaseType_t xType, BaseType_t xProtocol );
 int32_t FreeRTOS_recvfrom( Socket_t xSocket, void *pvBuffer, size_t xBufferLength, BaseType_t xFlags, struct freertos_sockaddr *pxSourceAddress, socklen_t *pxSourceAddressLength );
 int32_t FreeRTOS_sendto( Socket_t xSocket, const void *pvBuffer, size_t xTotalDataLength, BaseType_t xFlags, const struct freertos_sockaddr *pxDestinationAddress, socklen_t xDestinationAddressLength );
 BaseType_t FreeRTOS_bind( Socket_t xSocket, struct freertos_sockaddr *pxAddress, socklen_t xAddressLength );
 
-/* function to get the local address and IP port */
+/* 获取本地地址和端口的函数 */
 size_t FreeRTOS_GetLocalAddress( Socket_t xSocket, struct freertos_sockaddr *pxAddress );
 
-/* Made available when ipconfigETHERNET_DRIVER_FILTERS_PACKETS is set to 1. */
+/* 当ipconfigETHERNET_DRIVER_FILTERS_PACKETS为1时有效 */
 BaseType_t xPortHasUDPSocket( uint16_t usPortNr );
 
 #if ipconfigUSE_TCP == 1
@@ -204,53 +195,33 @@ Socket_t FreeRTOS_accept( Socket_t xServerSocket, struct freertos_sockaddr *pxAd
 BaseType_t FreeRTOS_shutdown (Socket_t xSocket, BaseType_t xHow);
 
 #if( ipconfigSUPPORT_SIGNALS != 0 )
-    /* Send a signal to the task which is waiting for a given socket. */
+    /* 给等待给定套接字的任务一个信号 */
     BaseType_t FreeRTOS_SignalSocket( Socket_t xSocket );
-
-    /* Send a signal to the task which reads from this socket (FromISR
-    version). */
+    /* 给从这个套接字读取数据的 任务 一个信号（FromISR 版本） */
     BaseType_t FreeRTOS_SignalSocketFromISR( Socket_t xSocket, BaseType_t *pxHigherPriorityTaskWoken );
 #endif /* ipconfigSUPPORT_SIGNALS */
-
-/* Return the remote address and IP port. */
+/* 返回远程的地址和端口号 */
 BaseType_t FreeRTOS_GetRemoteAddress( Socket_t xSocket, struct freertos_sockaddr *pxAddress );
-
-/* returns pdTRUE if TCP socket is connected */
+/* 如果TCP套接字连接，返回 pdTRUE*/
 BaseType_t FreeRTOS_issocketconnected( Socket_t xSocket );
-
-/* returns the actual size of MSS being used */
+/* 返回被使用的实际的MSS值 */
 BaseType_t FreeRTOS_mss( Socket_t xSocket );
-
-/* for internal use only: return the connection status */
+/* 只是内部使用，返回连接状态 */
 BaseType_t FreeRTOS_connstatus( Socket_t xSocket );
-
-/* Returns the number of bytes that may be added to txStream */
+/* 返回可以加入到txStream的字节数 */
 BaseType_t FreeRTOS_maywrite( Socket_t xSocket );
-
-/*
- * Two helper functions, mostly for testing
- * rx_size returns the number of bytes available in the Rx buffer
- * tx_space returns the free space in the Tx buffer
- */
+/* 两个辅助函数主要是用于测试 rx_size返回Rx缓冲区中可利用的字节数，
+tx_space 返回 Tx 缓冲中的空闲大小*/
 BaseType_t FreeRTOS_rx_size( Socket_t xSocket );
 BaseType_t FreeRTOS_tx_space( Socket_t xSocket );
 BaseType_t FreeRTOS_tx_size( Socket_t xSocket );
-
-/* Returns the number of outstanding bytes in txStream. */
-/* The function FreeRTOS_outstanding() was already implemented
-FreeRTOS_tx_size(). */
+/* 返回txStream等待 确认的字节数 */
+/* 函数 FreeRTOS_outstanding() 用 FreeRTOS_tx_size()实现*/
 #define FreeRTOS_outstanding( xSocket ) FreeRTOS_tx_size( xSocket )
-
-/* Returns the number of bytes in the socket's rxStream. */
-/* The function FreeRTOS_recvcount() was already implemented
-FreeRTOS_rx_size(). */
+/* 返回 rxStream 中的字节数，函数 FreeRTOS_recvcount() 用 FreeRTOS_rx_size()实现 */
 #define FreeRTOS_recvcount( xSocket )   FreeRTOS_rx_size( xSocket )
-
-/*
- * For advanced applications only:
- * Get a direct pointer to the circular transmit buffer.
- * '*pxLength' will contain the number of bytes that may be written.
- */
+/* 为高级用户使用：
+获取指向环形缓冲器的指针 *pxLength 会指明可写的字节数 */
 uint8_t *FreeRTOS_get_tx_head( Socket_t xSocket, BaseType_t *pxLength );
 
 #endif /* ipconfigUSE_TCP */
@@ -264,7 +235,7 @@ uint8_t *FreeRTOS_get_tx_head( Socket_t xSocket, BaseType_t *pxLength );
  *      F_TCP_UDP_Handler_t xHnd = { vMyConnectHandler };
  *      FreeRTOS_setsockopt( sock, 0, FREERTOS_SO_TCP_CONN_HANDLER, ( void * ) &xHnd, sizeof( xHnd ) );
  */
-
+/* TCP 套接字的 连接/断开 句柄 */
 typedef void (* FOnConnected_t )( Socket_t /* xSocket */, BaseType_t /* ulConnected */ );
 
 /*
@@ -280,6 +251,7 @@ typedef void (* FOnConnected_t )( Socket_t /* xSocket */, BaseType_t /* ulConnec
  *      F_TCP_UDP_Handler_t xHand = { xOnTCPReceive };
  *      FreeRTOS_setsockopt( sock, 0, FREERTOS_SO_TCP_RECV_HANDLER, ( void * ) &xHand, sizeof( xHand ) );
  */
+/* TCP 套接字的 接收句柄 */
 typedef BaseType_t (* FOnTCPReceive_t )( Socket_t /* xSocket */, void * /* pData */, size_t /* xLength */ );
 typedef void (* FOnTCPSent_t )( Socket_t /* xSocket */, size_t /* xLength */ );
 
@@ -288,6 +260,7 @@ typedef void (* FOnTCPSent_t )( Socket_t /* xSocket */, size_t /* xLength */ );
  * A user-proved function will be called on reception of a message
  * If the handler returns a positive number, the messages will not be stored
  */
+/* UDP 套接字的 接收句柄 */
 typedef BaseType_t (* FOnUDPReceive_t ) (Socket_t /* xSocket */, void * /* pData */, size_t /* xLength */,
     const struct freertos_sockaddr * /* pxFrom */, const struct freertos_sockaddr * /* pxDest */ );
 typedef void (* FOnUDPSent_t )( Socket_t /* xSocket */, size_t /* xLength */ );
@@ -306,26 +279,20 @@ BaseType_t FreeRTOS_setsockopt( Socket_t xSocket, int32_t lLevel, int32_t lOptio
 BaseType_t FreeRTOS_closesocket( Socket_t xSocket );
 uint32_t FreeRTOS_gethostbyname( const char *pcHostName );
 uint32_t FreeRTOS_inet_addr( const char * pcIPAddress );
-
-/*
- * For the web server: borrow the circular Rx buffer for inspection
- * HTML driver wants to see if a sequence of 13/10/13/10 is available
- */
+/* 对于网络服务器，借环形缓冲来检查，HTML驱动想看一看是否序列13/10/13/10可用 */
 const struct xSTREAM_BUFFER *FreeRTOS_get_rx_buf( Socket_t xSocket );
 
 void FreeRTOS_netstat( void );
 
 #if ipconfigSUPPORT_SELECT_FUNCTION == 1
-
-    /* For FD_SET and FD_CLR, a combination of the following bits can be used: */
-
+    /* 对于 FD_SET 和 FD_CLR 如下的结合可以被使用*/
     typedef enum eSELECT_EVENT {
         eSELECT_READ    = 0x0001,
         eSELECT_WRITE   = 0x0002,
         eSELECT_EXCEPT  = 0x0004,
         eSELECT_INTR    = 0x0008,
         eSELECT_ALL     = 0x000F,
-        /* Reserved for internal use: */
+        /* 保留为内部使用 */
         eSELECT_CALL_IP = 0x0010,
         /* end */
     } eSelectEvent_t;
