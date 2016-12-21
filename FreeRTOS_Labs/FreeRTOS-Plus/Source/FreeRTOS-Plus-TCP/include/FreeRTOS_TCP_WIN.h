@@ -1,59 +1,3 @@
-/*
- * FreeRTOS+TCP Labs Build 160919 (C) 2016 Real Time Engineers ltd.
- * Authors include Hein Tibosch and Richard Barry
- *
- *******************************************************************************
- ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
- ***                                                                         ***
- ***                                                                         ***
- ***   FREERTOS+TCP IS STILL IN THE LAB (mainly because the FTP and HTTP     ***
- ***   demos have a dependency on FreeRTOS+FAT, which is only in the Labs    ***
- ***   download):                                                            ***
- ***                                                                         ***
- ***   FreeRTOS+TCP is functional and has been used in commercial products   ***
- ***   for some time.  Be aware however that we are still refining its       ***
- ***   design, the source code does not yet quite conform to the strict      ***
- ***   coding and style standards mandated by Real Time Engineers ltd., and  ***
- ***   the documentation and testing is not necessarily complete.            ***
- ***                                                                         ***
- ***   PLEASE REPORT EXPERIENCES USING THE SUPPORT RESOURCES FOUND ON THE    ***
- ***   URL: http://www.FreeRTOS.org/contact  Active early adopters may, at   ***
- ***   the sole discretion of Real Time Engineers Ltd., be offered versions  ***
- ***   under a license other than that described below.                      ***
- ***                                                                         ***
- ***                                                                         ***
- ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
- *******************************************************************************
- *
- * FreeRTOS+TCP can be used under two different free open source licenses.  The
- * license that applies is dependent on the processor on which FreeRTOS+TCP is
- * executed, as follows:
- *
- * If FreeRTOS+TCP is executed on one of the processors listed under the Special
- * License Arrangements heading of the FreeRTOS+TCP license information web
- * page, then it can be used under the terms of the FreeRTOS Open Source
- * License.  If FreeRTOS+TCP is used on any other processor, then it can be used
- * under the terms of the GNU General Public License V2.  Links to the relevant
- * licenses follow:
- *
- * The FreeRTOS+TCP License Information Page: http://www.FreeRTOS.org/tcp_license
- * The FreeRTOS Open Source License: http://www.FreeRTOS.org/license
- * The GNU General Public License Version 2: http://www.FreeRTOS.org/gpl-2.0.txt
- *
- * FreeRTOS+TCP is distributed in the hope that it will be useful.  You cannot
- * use FreeRTOS+TCP unless you agree that you use the software 'as is'.
- * FreeRTOS+TCP is provided WITHOUT ANY WARRANTY; without even the implied
- * warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A PARTICULAR
- * PURPOSE. Real Time Engineers Ltd. disclaims all conditions and terms, be they
- * implied, expressed, or statutory.
- *
- * 1 tab == 4 spaces!
- *
- * http://www.FreeRTOS.org
- * http://www.FreeRTOS.org/plus
- * http://www.FreeRTOS.org/labs
- *
- */
 
 /*
  *  FreeRTOS_TCP_WIN.c
@@ -76,20 +20,20 @@ typedef struct xTCPTimer
 
 typedef struct xTCP_SEGMENT
 {
-    uint32_t ulSequenceNumber;      /* The sequence number of the first byte in this packet */
-    int32_t lMaxLength;             /* Maximum space, number of bytes which can be stored in this segment */
-    int32_t lDataLength;            /* Actual number of bytes */
-    int32_t lStreamPos;             /* reference to the [t|r]xStream of the socket */
-    TCPTimer_t xTransmitTimer;      /* saves a timestamp at the moment this segment gets transmitted (TX only) */
+    uint32_t ulSequenceNumber;      /* 本包中第一字节的序列号 */
+    int32_t lMaxLength;             /* 最大空间, 能被存储在本段的字节数 */
+    int32_t lDataLength;            /* 实际的字节数 */
+    int32_t lStreamPos;             /* 套接字发送/接收流的索引 */
+    TCPTimer_t xTransmitTimer;      /* 本段被发送时存储一下时间 (TX only) */
     union
     {
         struct
         {
             uint32_t
-                ucTransmitCount : 8,/* Number of times the segment has been transmitted, used to calculate the RTT */
+                ucTransmitCount : 8,/* 本段被发送了多少次（重传）,用于计算RTT*/
                 ucDupAckCount : 8,  /* Counts the number of times that a higher segment was ACK'd. After 3 times a Fast Retransmission takes place */
-                bOutstanding : 1,   /* It the peer's turn, we're just waiting for an ACK */
-                bAcked : 1,         /* This segment has been acknowledged */
+                bOutstanding : 1,   /* 等待对方应答 */
+                bAcked : 1,         /* 本段已被确认 */
                 bIsForRx : 1;       /* pdTRUE if segment is used for reception */
         } bits;
         uint32_t ulFlags;
