@@ -106,31 +106,31 @@ typedef struct xTCP_WINDOW
     int32_t lSRTT;                      /* Smoothed Round Trip Time, it may increment quickly and it decrements slower */
     uint8_t ucOptionLength;             /* Number of valid bytes in ulOptionsData[] */
 #if( ipconfigUSE_TCP_WIN == 1 )
-    List_t xPriorityQueue;              /* Priority queue: segments which must be sent immediately */
-    List_t xTxQueue;                    /* Transmit queue: segments queued for transmission */
-    List_t xWaitQueue;                  /* Waiting queue:  outstanding segments */
-    TCPSegment_t *pxHeadSegment;        /* points to a segment which has not been transmitted and it's size is still growing (user data being added) */
-    uint32_t ulOptionsData[ipSIZE_TCP_OPTIONS/sizeof(uint32_t)];    /* Contains the options we send out */
+    List_t xPriorityQueue;              /* 优先组: 必须被立即发送的段 */
+    List_t xTxQueue;                    /* 发送段: 传输的段 */
+    List_t xWaitQueue;                  /* 等待段: 等待确认的段 */
+    TCPSegment_t *pxHeadSegment;        /* 指向一个段，没有被发送但是大小在增长(用户增加了数据) */
+    uint32_t ulOptionsData[ipSIZE_TCP_OPTIONS/sizeof(uint32_t)];    /* 包含了我们发出的选项字段 */
     List_t xTxSegments;                 /*2016--12--02--18--36--48(ZJYC): 所有发送段的链表，通过序列号排列   */ 
-    List_t xRxSegments;                 /* A linked list of reception segments, order depends on sequence of arrival */
+    List_t xRxSegments;                 /* 所有发送段的链表，通过序列号排列 */
 #else
-    /* For tiny TCP, there is only 1 outstanding TX segment */
-    TCPSegment_t xTxSegment;            /* Priority queue */
+    /* 对于微型TCP，只有一个等待确认的段 */
+    TCPSegment_t xTxSegment;            /* 优先组 */
 #endif
-    uint16_t usOurPortNumber;           /* Mostly for debugging/logging: our TCP port number */
-    uint16_t usPeerPortNumber;          /* debugging/logging: the peer's TCP port number */
-    uint16_t usMSS;                     /* Current accepted MSS */
-    uint16_t usMSSInit;                 /* MSS as configured by the socket owner */
+    uint16_t usOurPortNumber;           /* 为了调试和日志:我们自己的端口 */
+    uint16_t usPeerPortNumber;          /* 调试和日志: 对方的TCP端口号 */
+    uint16_t usMSS;                     /* 当前接受的 MSS */
+    uint16_t usMSSInit;                 /* 套接字拥有者设置的MSS值 */
 } TCPWindow_t;
 
 
 /*=============================================================================
  *
- * Creation and destruction
+ * 创建和摧毁
  *
  *=============================================================================*/
 
-/* Create and initialize a window */
+/* 创建并初始化一个窗口 */
 void vTCPWindowCreate( TCPWindow_t *pxWindow, uint32_t ulRxWindowLength,
     uint32_t ulTxWindowLength, uint32_t ulAckNumber, uint32_t ulSequenceNumber, uint32_t ulMSS );
 
