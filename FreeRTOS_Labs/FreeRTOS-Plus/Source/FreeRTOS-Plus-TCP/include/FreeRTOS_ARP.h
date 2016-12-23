@@ -6,35 +6,35 @@
 extern "C" {
 #endif
 
-/* Application level configuration options. */
+/* 用户层配置选项 */
 #include "FreeRTOSIPConfig.h"
 #include "FreeRTOSIPConfigDefaults.h"
 #include "IPTraceMacroDefaults.h"
 
 /*-----------------------------------------------------------*/
-/* Miscellaneous structure and definitions. */
+/* 杂项结构体和定义 */
 /*-----------------------------------------------------------*/
 //ARP缓存表结构
 typedef struct xARP_CACHE_TABLE_ROW
 {
-    uint32_t ulIPAddress;       /* The IP address of an ARP cache entry. */
-    MACAddress_t xMACAddress;  /* The MAC address of an ARP cache entry. */
-    uint8_t ucAge;              /* A value that is periodically decremented but can also be refreshed by active communication.  The ARP cache entry is removed if the value reaches zero. */
-    uint8_t ucValid;            /* pdTRUE: xMACAddress is valid, pdFALSE: waiting for ARP reply */
+    uint32_t ulIPAddress;       /* IP地址 */
+    MACAddress_t xMACAddress;  /* MAC地址 */
+    uint8_t ucAge;              /* 一个数值，被周期性递减，被交流刷新  如果为0，缓存被清除 */
+    uint8_t ucValid;            /* pdTRUE: MAC地址有效, pdFALSE: 等待ARP回复 */
 } ARPCacheRow_t;
 //ARP查询结果
 typedef enum
 {
-    eARPCacheMiss = 0,          /* 0 An ARP table lookup did not find a valid entry. */
-    eARPCacheHit,               /* 1 An ARP table lookup found a valid entry. */
-    eCantSendPacket             /* 2 There is no IP address, or an ARP is still in progress, so the packet cannot be sent. */
+    eARPCacheMiss = 0,          /* 0 没有发现有效的项 */
+    eARPCacheHit,               /* 1 发现了一个有效的项 */
+    eCantSendPacket             /* 2 没有IP地址，或者是ARP仍然在处理中，所以包不能被发送 */
 } eARPLookupResult_t;
 
 typedef enum
 {
-    eNotFragment = 0,           /* The IP packet being sent is not part of a fragment. */
-    eFirstFragment,             /* The IP packet being sent is the first in a set of fragmented packets. */
-    eFollowingFragment          /* The IP packet being sent is part of a set of fragmented packets. */
+    eNotFragment = 0,           /* 正在发送的IP数据包不是片段的一部分。 */
+    eFirstFragment,             /* 正在发送的IP包是一组支离破碎的数据包中的第一个 */
+    eFollowingFragment          /* 正在发送的IP包是一组支离破碎的数据包的一部分 */
 } eIPFragmentStatus_t;
 
 /*
@@ -43,6 +43,7 @@ typedef enum
  * cache table then add it - replacing the oldest current entry if there is not
  * a free space available.
  */
+/*  */
 void vARPRefreshCacheEntry( const MACAddress_t * pxMACAddress, const uint32_t ulIPAddress );
 
 #if( ipconfigARP_USE_CLASH_DETECTION != 0 )
