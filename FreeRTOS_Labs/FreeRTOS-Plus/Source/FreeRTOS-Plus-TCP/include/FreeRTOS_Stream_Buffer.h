@@ -31,7 +31,7 @@ static portINLINE void vStreamBufferClear( StreamBuffer_t *pxBuffer )
 static portINLINE size_t uxStreamBufferSpace( const StreamBuffer_t *pxBuffer, const size_t uxLower, const size_t uxUpper );
 static portINLINE size_t uxStreamBufferSpace( const StreamBuffer_t *pxBuffer, const size_t uxLower, const size_t uxUpper )
 {
-/* Returns the space between uxLower and uxUpper, which equals to the distance minus 1 */
+/* 返回uxLower和uxUpper之间的空间*/
 size_t uxCount;
 
     uxCount = pxBuffer->LENGTH + uxUpper - uxLower - 1u;

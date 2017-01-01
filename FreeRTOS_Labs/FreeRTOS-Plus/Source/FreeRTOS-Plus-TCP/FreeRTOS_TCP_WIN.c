@@ -602,9 +602,7 @@ const int32_t l500ms = 500;
  *=============================================================================*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-    /*2016--12--02--18--41--19(ZJYC): 收到一个带着ulSequenceNumber的段，当ulCurrentSequenceNumber =  ulSequenceNumber
-    表示这确实是我们所期望的。本函数用于检查是否存在序列号介于ulSequenceNumber和(ulSequenceNumber+ulLength)的包，
-    一般情况下是没有的，先一个应该接受的段的序列号应等于(ulSequenceNumber+ulLength)*/ 
+    /*2016--12--02--18--41--19(ZJYC): 收到一个带着ulSequenceNumber的段，当ulCurrentSequenceNumber =  ulSequenceNumber表示这确实是我们所期望的。本函数用于检查是否存在序列号介于ulSequenceNumber和(ulSequenceNumber+ulLength)的包，一般情况下是没有的，先一个应该接受的段的序列号应等于(ulSequenceNumber+ulLength)*/ 
     static TCPSegment_t *xTCPWindowRxConfirm( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength )
     {
     TCPSegment_t *pxBest = NULL;
@@ -1520,6 +1518,23 @@ const int32_t l500ms = 500;
  #### ##### #    #     #        ####   ####  ####
                       #
                    ###
+*/
+/*
+****************************************************
+*  函数名         : lTCPWindowRxCheck
+*  函数描述       : 
+                    返回0,ulCurrentSequenceNumber增加了ulLength
+*  参数           : 
+                    pxWindow：窗口
+                    ulSequenceNumber：接收到的序列号
+                    ulLength：接收到的数据长度
+                    ulSpace：接收缓冲区可用空间
+*  返回值         : 
+                    -1：序列号非期望或者是存储空间不足
+                    0：序号好正常并且空间充足
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
 */
 #if( ipconfigUSE_TCP_WIN == 0 )
 
