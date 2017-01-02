@@ -666,8 +666,7 @@ NetworkBufferDescriptor_t xTempBuffer;
             }
             #endif /* ipconfigHAS_DEBUG_PRINTF != 0 */
             /* 新的窗口已经被公布，关闭标志 */
-            pxSocket->u.xTCP.bits.bWinChange = pdFALSE_UNSIGNED;
-            /* 后来，当决定延迟一个应答，空闲接收大小需要一个精确地评估，在这时，ulHighestRxAllowed将会是套接字能接收到的最高序列号减一*/
+            pxSocket->u.xTCP.bits.bWinChange = pdFALSE_UNSIGNED;/*后来，当决定延迟一个应答，空闲接收大小需要一个精确地评估，在这时，ulHighestRxAllowed将会是套接字能接收到的最高序列号减一*/
             pxSocket->u.xTCP.ulHighestRxAllowed = pxTCPWindow->rx.ulCurrentSequenceNumber + ulSpace;
             #if( ipconfigTCP_KEEP_ALIVE == 1 )
                 if( pxSocket->u.xTCP.bits.bSendKeepAlive != pdFALSE_UNSIGNED )

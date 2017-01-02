@@ -699,7 +699,7 @@ const int32_t l500ms = 500;
  *=============================================================================*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-    /*2016--12--02--18--41--19(ZJYC): 收到一个带着ulSequenceNumber的段，当ulCurrentSequenceNumber =  ulSequenceNumber表示这确实是我们所期望的。本函数用于检查是否存在序列号介于ulSequenceNumber和(ulSequenceNumber+ulLength)的包，一般情况下是没有的，先一个应该接受的段的序列号应等于(ulSequenceNumber+ulLength)*/ 
+    /*2016--12--02--18--41--19(ZJYC): 收到一个带着ulSequenceNumber的段，当ulCurrentSequenceNumber =  ulSequenceNumber表示这确实是我们所期望的。本函数用于检查是否存在序列号介于ulSequenceNumber和(ulSequenceNumber+ulLength)的包，一般情况下是没有的，下一个应该接受的段的序列号应等于(ulSequenceNumber+ulLength)*/ 
     static TCPSegment_t *xTCPWindowRxConfirm( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength )
     {
     TCPSegment_t *pxBest = NULL;
@@ -993,7 +993,20 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : lTCPWindowTxAdd
+*  函数描述       : 我们有ulLength数据要发送，
+*  参数           : 
+                    pxWindow：窗口
+                    ulLength：需要发送的数据长度
+                    lPosition：缓冲区位置
+                    lMax：缓冲区长度
+*  返回值         : 
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     int32_t lTCPWindowTxAdd( TCPWindow_t *pxWindow, uint32_t ulLength, int32_t lPosition, int32_t lMax )
     {
     int32_t lBytesLeft = ( int32_t ) ulLength, lToWrite;
@@ -1004,24 +1017,27 @@ const int32_t l500ms = 500;
         verified). */
         if( pxSegment != NULL )
         {
+            /* 此段还有空闲空间 */
             if( pxSegment->lDataLength < pxSegment->lMaxLength )
             {
+                /* 此段没有等待应答 && 此段数据非空 */
                 if( ( pxSegment->u.bits.bOutstanding == pdFALSE_UNSIGNED ) && ( pxSegment->lDataLength != 0 ) )
                 {
                     /*2016--12--02--18--50--21(ZJYC): 把数据添加到TX队列，将会被调整到MSS   */ 
                     /*2016--12--02--18--54--13(ZJYC): 寻找待发送数据和pool空闲值之中的最小值   */ 
+                    /* 计算此段可以存储多少字节 */
                     lToWrite = FreeRTOS_min_int32( lBytesLeft, pxSegment->lMaxLength - pxSegment->lDataLength );
                     pxSegment->lDataLength += lToWrite;
                     if( pxSegment->lDataLength >= pxSegment->lMaxLength )
                     {
-                        /* This segment is full, don't add more bytes. */
+                        /* 本段已经填满了 */
                         pxWindow->pxHeadSegment = NULL;
                     }
+                    /* 总字节数减少lToWrite */
                     lBytesLeft -= lToWrite;
-                    /* ulNextTxSequenceNumber is the sequence number of the next byte to
-                    be stored for transmission. */
+                    /* 计算下一次发送的序列号 */
                     pxWindow->ulNextTxSequenceNumber += ( uint32_t ) lToWrite;
-                    /* Increased the return value. */
+                    /* 我们填入了多少字节 */
                     lDone += lToWrite;
 
                     /* Some detailed logging, for those who're interested. */
@@ -1036,13 +1052,12 @@ const int32_t l500ms = 500;
                         FreeRTOS_flush_logging( );
                     }
 
-                    /* Calculate the next position in the circular data buffer, knowing
-                    its maximum length 'lMax'. */
+                    /* 在已知最大为lMax的情况下计算下一次需要写入的位置 */
                     lPosition = lTCPIncrementTxPosition( lPosition, lMax, lToWrite );
                 }
             }
         }
-
+        /* 还有数据需要发送 */
         while( lBytesLeft > 0 )
         {
             /*2016--12--02--18--54--45(ZJYC): Pool并没有城下所有的待发送数据，需要新建   */ 
@@ -1052,7 +1067,6 @@ const int32_t l500ms = 500;
                 /* Store as many as needed, but no more than the maximum
                 (MSS). */
                 lToWrite = FreeRTOS_min_int32( lBytesLeft, pxSegment->lMaxLength );
-
                 pxSegment->lDataLength = lToWrite;
                 pxSegment->lStreamPos = lPosition;
                 lBytesLeft -= lToWrite;
@@ -1117,6 +1131,7 @@ const int32_t l500ms = 500;
 
 #if( ipconfigUSE_TCP_WIN == 1 )
     /*2016--12--02--18--56--30(ZJYC): 看看是否还有数据需要发送，是返回true   */ 
+    /* 看看滑动窗口是否还有发送的空间 */
     static BaseType_t prvTCPWindowTxHasSpace( TCPWindow_t *pxWindow, uint32_t ulWindowSize )
     {
     uint32_t ulTxOutstanding;
@@ -1169,7 +1184,21 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : xTCPWindowTxHasData
+*  函数描述       : 确认是否有数据要发送，并计算发送延迟时间
+*  参数           : 
+                    pxWindow：窗口
+                    ulWindowSize：窗口大小
+                    pulDelay：等待时间
+*  返回值         : 
+                    pdTRUE：有数据需要发送
+                    pdFALSE：没有数据需要发送
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     BaseType_t xTCPWindowTxHasData( TCPWindow_t *pxWindow, uint32_t ulWindowSize, TickType_t *pulDelay )
     {
     TCPSegment_t *pxSegment;
@@ -1230,7 +1259,19 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : ulTCPWindowTxGet
+*  函数描述       : 得到现在需要发送的数据
+*  参数           : 
+                    ulTCPWindowTxGet：
+                    ulWindowSize：
+                    plPosition：
+*  返回值         : 
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     uint32_t ulTCPWindowTxGet( TCPWindow_t *pxWindow, uint32_t ulWindowSize, int32_t *plPosition )
     {
     TCPSegment_t *pxSegment;
@@ -1380,6 +1421,16 @@ const int32_t l500ms = 500;
 
 #if( ipconfigUSE_TCP_WIN == 1 )
     /*2016--12--05--14--00--46(ZJYC): ulFirst和ulLast指明了确认的范围，在此范围内的数据被确认   */ 
+/*
+****************************************************
+*  函数名         : prvTCPWindowTxCheckAck
+*  函数描述       : 收到一SACK，处理之
+*  参数           : 
+*  返回值         : 被应答的数据长度
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     static uint32_t prvTCPWindowTxCheckAck( TCPWindow_t *pxWindow, uint32_t ulFirst, uint32_t ulLast )
     {
     uint32_t ulBytesConfirmed = 0u;
@@ -1414,6 +1465,7 @@ const int32_t l500ms = 500;
             {
                 if( xSequenceGreaterThan( pxSegment->ulSequenceNumber + ( uint32_t )ulDataLength, ulLast ) != pdFALSE )
                 {
+                    /* 后边的数据我们还没发送，却应答了 */
                     /* What happens?  Only part of this segment was accepted,
                     probably due to WND limits
 
@@ -1493,7 +1545,16 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : prvTCPWindowFastRetransmit
+*  函数描述       : 从xWaitQueue寻找需要重传的段
+*  参数           : 
+*  返回值         : 需要重传的段的个数
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     static uint32_t prvTCPWindowFastRetransmit( TCPWindow_t *pxWindow, uint32_t ulFirst )
     {
     const ListItem_t *pxIterator;
@@ -1551,7 +1612,20 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : ulTCPWindowTxAck
+*  函数描述       : 收到一个常规应答
+*  参数           : 
+                    pxWindow：窗口
+                    ulSequenceNumber：收到的序列号
+*  返回值         : 
+                    0：
+                    被应答的字节数
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     uint32_t ulTCPWindowTxAck( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber )
     {
     uint32_t ulFirstSequence, ulReturn;
@@ -1576,7 +1650,19 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : ulTCPWindowTxSack
+*  函数描述       : 收到一选择性应答
+*  参数           : 
+                    pxWindow：窗口
+                    ulFirst：起始序列号
+                    ulLast：结束序列号
+*  返回值         : 被应答的字节数
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     uint32_t ulTCPWindowTxSack( TCPWindow_t *pxWindow, uint32_t ulFirst, uint32_t ulLast )
     {
     uint32_t ulAckCount = 0UL;
@@ -1619,8 +1705,7 @@ const int32_t l500ms = 500;
 /*
 ****************************************************
 *  函数名         : lTCPWindowRxCheck
-*  函数描述       : 
-                    返回0,ulCurrentSequenceNumber增加了ulLength
+*  函数描述       : 根据接收尝试着增加pxWindow->rx.ulCurrentSequenceNumber
 *  参数           : 
                     pxWindow：窗口
                     ulSequenceNumber：接收到的序列号
