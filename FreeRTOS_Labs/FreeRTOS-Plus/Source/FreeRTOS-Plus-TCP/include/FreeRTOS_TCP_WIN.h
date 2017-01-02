@@ -40,7 +40,7 @@ typedef struct xTCP_SEGMENT
     } u;
 #if( ipconfigUSE_TCP_WIN != 0 )
     struct xLIST_ITEM xQueueItem;  /* 只用于发送，段可以被连接到三种链表中：xPriorityQueue, xTxQueue, and xWaitQueue */ 
-    struct xLIST_ITEM xListItem;    /* With this item the segment can be connected to a list, depending on who is owning it */
+    struct xLIST_ITEM xListItem;   /* 通过这个所有的段连接到内存池 */
 #endif
 } TCPSegment_t;
 

@@ -119,16 +119,8 @@ extern void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewL
 #endif /* ipconfigUSE_TCP_WIN == 1 */
 
 /*
- * A segment has been received with sequence number 'ulSequenceNumber', where
- * 'ulCurrentSequenceNumber == ulSequenceNumber', which means that exactly this
- * segment was expected.  xTCPWindowRxConfirm() will check if there is already
- * another segment with a sequence number between (ulSequenceNumber) and
- * (ulSequenceNumber+xLength).  Normally none will be found, because the next Rx
- * segment should have a sequence number equal to '(ulSequenceNumber+xLength)'.
- */
-/*
 ****************************************************
-*  函数名         : 
+*  函数名         : xTCPWindowRxConfirm
 *  函数描述       :     一个序列号为ulSequenceNumber的段已被接收，如果ulCurrentSequenceNumber == 
                         ulSequenceNumber表示这正是我们所期望的，我们查看在ulSequenceNumber和
                         (ulSequenceNumber+xLength)之间是否存在另一个段的序列号，通常没有。
@@ -146,10 +138,6 @@ extern void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewL
     static TCPSegment_t *xTCPWindowRxConfirm( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength );
 #endif /* ipconfigUSE_TCP_WIN == 1 */
 
-/*
- * FreeRTOS+TCP stores data in circular buffers.  Calculate the next position to
- * store.
- */
 /*
 ****************************************************
 *  函数名         : lTCPIncrementTxPosition

@@ -9,10 +9,10 @@ extern "C" {
 #endif
 
 typedef struct xSTREAM_BUFFER {
-    volatile size_t uxTail;     /* 下一个要读的项 */
-    volatile size_t uxMid;      /* 有效项的迭代器 */
-    volatile size_t uxHead;     /* 存储新项的下一个地址 */
-    volatile size_t uxFront;    /* 空闲空间的迭代器 */
+    volatile size_t uxTail;     /* 下一个要读的项 */       /* 读指针 */
+    volatile size_t uxMid;      /* 有效项的迭代器 */       /* 读指针迭代器 */
+    volatile size_t uxHead;     /* 存储新项的下一个地址 */  /* 写指针 */
+    volatile size_t uxFront;    /* 空闲空间的迭代器 */      /* 写指针迭代器 */
     size_t LENGTH;              /* 常量:保留项数量 */
     uint8_t ucArray[ sizeof( size_t ) ];
 } StreamBuffer_t;
@@ -47,7 +47,7 @@ size_t uxCount;
 static portINLINE size_t uxStreamBufferDistance( const StreamBuffer_t *pxBuffer, const size_t uxLower, const size_t uxUpper );
 static portINLINE size_t uxStreamBufferDistance( const StreamBuffer_t *pxBuffer, const size_t uxLower, const size_t uxUpper )
 {
-/* Returns the distance between uxLower and uxUpper */
+/* 返回uxLower and uxUpper之间的距离 */
 size_t uxCount;
 
     uxCount = pxBuffer->LENGTH + uxUpper - uxLower;
