@@ -31,15 +31,15 @@ typedef struct xTCP_SEGMENT
         {
             uint32_t
                 ucTransmitCount : 8,/* 本段被发送了多少次（重传）,用于计算RTT*/
-                ucDupAckCount : 8,  /* Counts the number of times that a higher segment was ACK'd. After 3 times a Fast Retransmission takes place */
+                ucDupAckCount : 8,  /* 记录一个比本段更高的序列号被应答的次数，3次之后会发送快速重传 */
                 bOutstanding : 1,   /* 等待对方应答 */
                 bAcked : 1,         /* 本段已被确认 */
-                bIsForRx : 1;       /* pdTRUE if segment is used for reception */
+                bIsForRx : 1;       /* pdTRUE 如果段用来接收 */
         } bits;
         uint32_t ulFlags;
     } u;
 #if( ipconfigUSE_TCP_WIN != 0 )
-    struct xLIST_ITEM xQueueItem;   /* TX only: segments can be linked in one of three queues: xPriorityQueue, xTxQueue, and xWaitQueue */
+    struct xLIST_ITEM xQueueItem;  /* 只用于发送，段可以被连接到三种链表中：xPriorityQueue, xTxQueue, and xWaitQueue */ 
     struct xLIST_ITEM xListItem;    /* With this item the segment can be connected to a list, depending on who is owning it */
 #endif
 } TCPSegment_t;
@@ -80,9 +80,9 @@ typedef struct xTCP_WINDOW
         struct
         {
             uint32_t
-                bHasInit : 1,       /* The window structure has been initialised */
-                bSendFullSize : 1,  /* May only send packets with a size equal to MSS (for optimisation) */
-                bTimeStamps : 1;    /* Socket is supposed to use TCP time-stamps. This depends on the */
+                bHasInit : 1,       /* 窗口结构体已被初始化 */
+                bSendFullSize : 1,  /* 只发送大小为MSS的段 */
+                bTimeStamps : 1;    /* 套接字使用时间戳 */
         } bits;                     /* party which opens the connection */
         uint32_t ulFlags;
     } u;
@@ -90,21 +90,20 @@ typedef struct xTCP_WINDOW
     struct
     {
         uint32_t ulFirstSequenceNumber;  /* Logging & debug: the first segment received/sent in this connection
-                                          * for Tx: initial send sequence number (ISS)
-                                          * for Rx: initial receive sequence number (IRS) */
-        uint32_t ulCurrentSequenceNumber;/* Tx/Rx: the oldest sequence number not yet confirmed, also SND.UNA / RCV.NXT
-                                          * In other words: the sequence number of the left side of the sliding window */
-        uint32_t ulFINSequenceNumber;    /* The sequence number which carried the FIN flag */
-        uint32_t ulHighestSequenceNumber;/* Sequence number of the right-most byte + 1 */
+                                          * for Tx: 初始序列号 (ISS)
+                                          * for Rx: 初始接收序列号 (IRS) */
+        uint32_t ulCurrentSequenceNumber;/* Tx/Rx: 滑动窗口的左边值 */
+        uint32_t ulFINSequenceNumber;    /* 带有FIN标志的序列号 */
+        uint32_t ulHighestSequenceNumber;/* 最右边的字节加一的序列号 */
 #if( ipconfigUSE_TCP_TIMESTAMPS == 1 )
-        uint32_t ulTimeStamp;            /* The value of the TCP timestamp, transmitted or received */
+        uint32_t ulTimeStamp;            /* 时间戳 */
 #endif
     } rx, tx;
-    uint32_t ulOurSequenceNumber;       /* The SEQ number we're sending out */
+    uint32_t ulOurSequenceNumber;       /* 我们发送的序列号 */
     uint32_t ulUserDataLength;          /* Number of bytes in Rx buffer which may be passed to the user, after having received a 'missing packet' */
-    uint32_t ulNextTxSequenceNumber;    /* The sequence number given to the next byte to be added for transmission */
-    int32_t lSRTT;                      /* Smoothed Round Trip Time, it may increment quickly and it decrements slower */
-    uint8_t ucOptionLength;             /* Number of valid bytes in ulOptionsData[] */
+    uint32_t ulNextTxSequenceNumber;    /* 下一次要发送的序列号 */
+    int32_t lSRTT;                      /* 滑动拥塞控制 */
+    uint8_t ucOptionLength;             /* 选项字段长度*/
 #if( ipconfigUSE_TCP_WIN == 1 )
     List_t xPriorityQueue;              /* 优先组: 必须被立即发送的段 */
     List_t xTxQueue;                    /* 发送段: 传输的段 */

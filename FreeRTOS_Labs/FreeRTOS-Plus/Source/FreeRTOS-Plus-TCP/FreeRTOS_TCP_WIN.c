@@ -126,6 +126,22 @@ extern void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewL
  * (ulSequenceNumber+xLength).  Normally none will be found, because the next Rx
  * segment should have a sequence number equal to '(ulSequenceNumber+xLength)'.
  */
+/*
+****************************************************
+*  函数名         : 
+*  函数描述       :     一个序列号为ulSequenceNumber的段已被接收，如果ulCurrentSequenceNumber == 
+                        ulSequenceNumber表示这正是我们所期望的，我们查看在ulSequenceNumber和
+                        (ulSequenceNumber+xLength)之间是否存在另一个段的序列号，通常没有。
+
+*  参数           : 
+                    pxWindow：
+                    ulSequenceNumber：
+                    ulLength：接收数据长度
+*  返回值         : 
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
 #if( ipconfigUSE_TCP_WIN == 1 )
     static TCPSegment_t *xTCPWindowRxConfirm( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength );
 #endif /* ipconfigUSE_TCP_WIN == 1 */
@@ -134,6 +150,19 @@ extern void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewL
  * FreeRTOS+TCP stores data in circular buffers.  Calculate the next position to
  * store.
  */
+/*
+****************************************************
+*  函数名         : lTCPIncrementTxPosition
+*  函数描述       : 
+*  参数           : 
+                    lPosition：当前位置
+                    lMax：缓冲区最大长度
+                    lCount：存储字节数
+*  返回值         : 存储完之后的位置
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
 #if( ipconfigUSE_TCP_WIN == 1 )
     static int32_t lTCPIncrementTxPosition( int32_t lPosition, int32_t lMax, int32_t lCount );
 #endif /* ipconfigUSE_TCP_WIN == 1 */
@@ -297,7 +326,18 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : xTCPWindowRxFind
+*  函数描述       : 找到接收断机和中对应于序列号ulSequenceNumber的段
+*  参数           : ulSequenceNumber序列号
+*  返回值         : 
+                    找到：返回对应的短
+                    否则：返回NULL
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     static TCPSegment_t *xTCPWindowRxFind( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber )
     {
     const ListItem_t *pxIterator;
@@ -322,7 +362,22 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : xTCPWindowNew
+*  函数描述       : (Rx/Tx)创建新的段，
+*  参数           : 
+                    pxWindow：窗口
+                    ulSequenceNumber：本包中第一字节的序列号
+                    lCount：存储在本段的字节数
+                    xIsForRx：是不是接受缓冲还是发送缓冲
+*  返回值         : 
+                    成功：返回新创建的段
+                    失败：返回NULL
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     static TCPSegment_t *xTCPWindowNew( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, int32_t lCount, BaseType_t xIsForRx )
     {
     TCPSegment_t *pxSegment;
@@ -372,7 +427,18 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : xTCPWindowRxEmpty
+*  函数描述       : 查看接收窗口是否为空
+*  参数           : pxWindow：窗口
+*  返回值         : 
+                    pdFALSE：不为空
+                    pdTRUE：为空
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     BaseType_t xTCPWindowRxEmpty( TCPWindow_t *pxWindow )
     {
     BaseType_t xReturn;
@@ -403,7 +469,18 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : xTCPWindowGetHead
+*  函数描述       : 从pxList拿走一个段，并将其返回，
+*  参数           : pxList：列表
+*  返回值         : 
+                    成功：返回拿到的段
+                    失败：返回NULL
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     static TCPSegment_t *xTCPWindowGetHead( List_t *pxList )
     {
     TCPSegment_t *pxSegment;
@@ -427,7 +504,18 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : xTCPWindowPeekHead
+*  函数描述       : 看一看pxList的首部，并不真正的拿走
+*  参数           : pxList：列表
+*  返回值         : 
+                    成功：返回拿到的段
+                    失败：返回NULL
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     static TCPSegment_t *xTCPWindowPeekHead( List_t *pxList )
     {
     ListItem_t *pxItem;
@@ -451,7 +539,16 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-
+/*
+****************************************************
+*  函数名         : vTCPWindowFree
+*  函数描述       : 
+*  参数           : 
+*  返回值         : 
+*  作者           : -5A4A5943-
+*  历史版本       : 
+*****************************************************
+*/
     static void vTCPWindowFree( TCPSegment_t *pxSegment )
     {
         /*2016--12--02--17--30--37(ZJYC): 将内存返回到segment pool中   */ 
