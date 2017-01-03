@@ -16,94 +16,94 @@
 #include "FreeRTOS_IP_Private.h"
 #include "FreeRTOS_DNS.h"
 #include "NetworkBufferManagement.h"
-/*2016--11--26--20--18--19(ZJYC):xBoundSocketListItemçš„æˆå‘˜å«æœ‰å¥—æŽ¥å­—çš„ç«¯å£å·    */ 
+/*2016--11--26--20--18--19(ZJYC):xBoundSocketListItemµÄ³ÉÔ±º¬ÓÐÌ×½Ó×ÖµÄ¶Ë¿ÚºÅ    */ 
 #define socketSET_SOCKET_PORT( pxSocket, usPort ) listSET_LIST_ITEM_VALUE( ( &( ( pxSocket )->xBoundSocketListItem ) ), ( usPort ) )
 #define socketGET_SOCKET_PORT( pxSocket ) listGET_LIST_ITEM_VALUE( ( &( ( pxSocket )->xBoundSocketListItem ) ) )
-/*2016--11--26--20--19--34(ZJYC):æµ‹è¯•ä¸€ä¸ªå¥—æŽ¥å­—æ˜¯å¦ç»‘å®šæ„å‘³ç€ä»–å­˜åœ¨äºŽxBoundUDPSocketsList
-æˆ–è€…æ˜¯xBoundTCPSocketsListä¸­    */ 
+/*2016--11--26--20--19--34(ZJYC):²âÊÔÒ»¸öÌ×½Ó×ÖÊÇ·ñ°ó¶¨ÒâÎ¶×ÅËû´æÔÚÓÚxBoundUDPSocketsList
+»òÕßÊÇxBoundTCPSocketsListÖÐ    */ 
 #define socketSOCKET_IS_BOUND( pxSocket )      ( listLIST_ITEM_CONTAINER( & ( pxSocket )->xBoundSocketListItem ) != NULL )
-/*2016--11--26--20--20--54(ZJYC):å¦‚æžœFreeRTOS_sendto()åœ¨ä¸€ä¸ªæ²¡æœ‰ç»‘å®šç«¯å£å·çš„
-å¥—æŽ¥å­—ä¸Šä½¿ç”¨ï¼Œå–å†³äºŽFreeRTOSIPConfig.hè®¾ç½®ï¼Œä»–æˆ–è®¸ä¼šè‡ªåŠ¨ç»‘å®šä¸€éšæœºç«¯å£ï¼Œ
-è¯¥éšæœºç«¯å£å·å°†ä¼šä»‹äºŽsocketAUTO_PORT_ALLOCATION_START_NUMBERå’Œ0xffffä¹‹é—´    */ 
+/*2016--11--26--20--20--54(ZJYC):Èç¹ûFreeRTOS_sendto()ÔÚÒ»¸öÃ»ÓÐ°ó¶¨¶Ë¿ÚºÅµÄ
+Ì×½Ó×ÖÉÏÊ¹ÓÃ£¬È¡¾öÓÚFreeRTOSIPConfig.hÉèÖÃ£¬Ëû»òÐí»á×Ô¶¯°ó¶¨Ò»Ëæ»ú¶Ë¿Ú£¬
+¸ÃËæ»ú¶Ë¿ÚºÅ½«»á½éÓÚsocketAUTO_PORT_ALLOCATION_START_NUMBERºÍ0xffffÖ®¼ä    */ 
 /* _HT_ thinks that the default of 0xc000 is pretty high */
 #if !defined( socketAUTO_PORT_ALLOCATION_START_NUMBER )
     #define socketAUTO_PORT_ALLOCATION_START_NUMBER ( ( uint16_t ) 0xc000 )
 #endif
-/*2016--11--26--20--23--00(ZJYC):å½“è‡ªåŠ¨äº§ç”Ÿçš„ç«¯å£å·æº¢å‡ºï¼Œç”±äºŽå…ˆå‰çš„å‡ ä¸ªè‡ªåŠ¨ç«¯å£å·å¯èƒ½
-è¿˜åœ¨ä½¿ç”¨ä¸­ï¼Œè¿™äº›ç«¯å£å·å°†ä¸ä¼šå›žå½’socketAUTO_PORT_ALLOCATION_START_NUMBERï¼Œä»–ä¼šå›žå½’å¦‚ä¸‹å¸¸å€¼    */ 
+/*2016--11--26--20--23--00(ZJYC):µ±×Ô¶¯²úÉúµÄ¶Ë¿ÚºÅÒç³ö£¬ÓÉÓÚÏÈÇ°µÄ¼¸¸ö×Ô¶¯¶Ë¿ÚºÅ¿ÉÄÜ
+»¹ÔÚÊ¹ÓÃÖÐ£¬ÕâÐ©¶Ë¿ÚºÅ½«²»»á»Ø¹ésocketAUTO_PORT_ALLOCATION_START_NUMBER£¬Ëû»á»Ø¹éÈçÏÂ³£Öµ    */ 
 #define socketAUTO_PORT_ALLOCATION_RESET_NUMBER ( ( uint16_t ) 0xc100 )
 #define socketAUTO_PORT_ALLOCATION_MAX_NUMBER   ( ( uint16_t ) 0xff00 )
-/*2016--11--26--20--26--29(ZJYC):å‡ ä¸ªoctetsç»„æˆä¸€IPåœ°å€    */ 
+/*2016--11--26--20--26--29(ZJYC):¼¸¸öoctets×é³ÉÒ»IPµØÖ·    */ 
 #define socketMAX_IP_ADDRESS_OCTETS     4u
-/*2016--11--26--20--26--51(ZJYC):é˜»å¡žæ—¶é—´ä¸º0æ„å‘³ç€ä¸è¦å µå¡ž    */ 
+/*2016--11--26--20--26--51(ZJYC):×èÈûÊ±¼äÎª0ÒâÎ¶×Å²»Òª¶ÂÈû    */ 
 #define socketDONT_BLOCK                ( ( TickType_t ) 0 )
 
 #if( ( ipconfigUSE_TCP == 1 ) && !defined( ipTCP_TIMER_PERIOD_MS ) )
     #define ipTCP_TIMER_PERIOD_MS   ( 1000 )
 #endif
-/*2016--11--26--20--27--24(ZJYC):ä¸‹ä¸€ä¸ªç»‘å®šå®¢æˆ·ç«¯æ—¶ä½¿ç”¨çš„ç§æœ‰ç«¯å£å·å­˜å‚¨åœ¨æ•°ç»„usNextPortToUse[]
-ä¸­ï¼Œä»–æœ‰ä¸€ä¸ªæˆ–è€…æ˜¯äºŒä¸ªç´¢å¼•å–å†³äºŽæ˜¯å¦ä½¿èƒ½TCPåŠŸèƒ½    */ 
+/*2016--11--26--20--27--24(ZJYC):ÏÂÒ»¸ö°ó¶¨¿Í»§¶ËÊ±Ê¹ÓÃµÄË½ÓÐ¶Ë¿ÚºÅ´æ´¢ÔÚÊý×éusNextPortToUse[]
+ÖÐ£¬ËûÓÐÒ»¸ö»òÕßÊÇ¶þ¸öË÷ÒýÈ¡¾öÓÚÊÇ·ñÊ¹ÄÜTCP¹¦ÄÜ    */ 
 #if( ipconfigUSE_TCP == 1 )
     #define socketPROTOCOL_COUNT        2
 #else
     #define socketPROTOCOL_COUNT        1
 #endif
-/*2016--11--26--20--29--04(ZJYC):UDPå’ŒTCå¯¹äºŽusNextPortToUse[]å„è‡ªçš„ç´¢å¼•å€¼    */ 
+/*2016--11--26--20--29--04(ZJYC):UDPºÍTC¶ÔÓÚusNextPortToUse[]¸÷×ÔµÄË÷ÒýÖµ    */ 
 #define socketNEXT_UDP_PORT_NUMBER_INDEX    0
 #define socketNEXT_TCP_PORT_NUMBER_INDEX    1
 
 
 /*-----------------------------------------------------------*/
-/*2016--11--26--20--30--42(ZJYC):ä»Žå„è‡ªçš„ç”³è¯·èŒƒå›´å†…ç”³è¯·ç«¯å£å·ï¼ŒTCPå’ŒUDPæœ‰ä»–ä»¬è‡ªå·±çš„
-ä¸€ç³»åˆ—ç«¯å£å·ï¼ŒulProtocolä¸ºipPROTOCOL_UDPæˆ–è€…ipPROTOCOL_TCP    */ 
+/*2016--11--26--20--30--42(ZJYC):´Ó¸÷×ÔµÄÉêÇë·¶Î§ÄÚÉêÇë¶Ë¿ÚºÅ£¬TCPºÍUDPÓÐËûÃÇ×Ô¼ºµÄ
+Ò»ÏµÁÐ¶Ë¿ÚºÅ£¬ulProtocolÎªipPROTOCOL_UDP»òÕßipPROTOCOL_TCP    */ 
 static uint16_t prvGetPrivatePortNumber( BaseType_t xProtocol );
-/*2016--11--26--20--32--15(ZJYC):åœ¨pxListä¸­æœç´¢xWantedItemValueï¼Œæ²¡æœ‰è¿”å›žNULL    */ 
+/*2016--11--26--20--32--15(ZJYC):ÔÚpxListÖÐËÑË÷xWantedItemValue£¬Ã»ÓÐ·µ»ØNULL    */ 
 static const ListItem_t * pxListFindListItemWithValue( const List_t *pxList, TickType_t xWantedItemValue );
-/*2016--11--26--20--34--28(ZJYC):åªæœ‰pxSocketæœ‰æ•ˆå¹¶ä¸”ç»‘å®šæ‰ä¼šè¿”å›žpdTRUE    */ 
+/*2016--11--26--20--34--28(ZJYC):Ö»ÓÐpxSocketÓÐÐ§²¢ÇÒ°ó¶¨²Å»á·µ»ØpdTRUE    */ 
 static BaseType_t prvValidSocket( FreeRTOS_Socket_t *pxSocket, BaseType_t xProtocol, BaseType_t xIsBound );
-/*2016--11--26--20--35--07(ZJYC):åœ¨åˆ›å»ºå¥—æŽ¥å­—ä¹‹å‰ï¼Œæ£€æŸ¥å‚æ•°çš„æœ‰æ•ˆæ€§å¹¶ä¸”æ‰¾åˆ°å¥—æŽ¥å­—çš„ç©ºé—´ï¼Œ
-è¿™ä¸ªç©ºé—´å¯¹äºŽUDPå’ŒTCPæ˜¯ä¸ä¸€æ ·çš„    */ 
+/*2016--11--26--20--35--07(ZJYC):ÔÚ´´½¨Ì×½Ó×ÖÖ®Ç°£¬¼ì²é²ÎÊýµÄÓÐÐ§ÐÔ²¢ÇÒÕÒµ½Ì×½Ó×ÖµÄ¿Õ¼ä£¬
+Õâ¸ö¿Õ¼ä¶ÔÓÚUDPºÍTCPÊÇ²»Ò»ÑùµÄ    */ 
 static BaseType_t prvDetermineSocketSize( BaseType_t xDomain, BaseType_t xType, BaseType_t xProtocol, size_t *pxSocketSize );
 
 #if( ipconfigUSE_TCP == 1 )
-    /*2016--11--26--20--36--23(ZJYC):æ ¹æ®xIsInputStreamåˆ›å»ºä¸€txStreamæˆ–è€…æ˜¯rxStream    */ 
+    /*2016--11--26--20--36--23(ZJYC):¸ù¾ÝxIsInputStream´´½¨Ò»txStream»òÕßÊÇrxStream    */ 
     static StreamBuffer_t *prvTCPCreateStream (FreeRTOS_Socket_t *pxSocket, BaseType_t xIsInputStream );
 #endif /* ipconfigUSE_TCP == 1 */
 
 #if( ipconfigUSE_TCP == 1 )
-    /*2016--11--26--20--37--06(ZJYC):è¢«FreeRTOS_send()è°ƒç”¨ï¼Œåœ¨å‘é€TCPåŒ…ä¹‹å‰ä¼šåšä¸€äº›æ£€æŸ¥    */ 
+    /*2016--11--26--20--37--06(ZJYC):±»FreeRTOS_send()µ÷ÓÃ£¬ÔÚ·¢ËÍTCP°üÖ®Ç°»á×öÒ»Ð©¼ì²é    */ 
     static int32_t prvTCPSendCheck( FreeRTOS_Socket_t *pxSocket, size_t xDataLength );
 #endif /* ipconfigUSE_TCP */
 
 #if( ipconfigUSE_TCP == 1 )
-    /*2016--11--26--20--38--13(ZJYC):å½“ä¸€ä¸ªå­å¥—æŽ¥å­—å…³é—­ï¼Œç¡®ä¿æ›´æ–°çˆ¶å¥—æŽ¥å­—çš„å­©å­è®¡æ•°å€¼    */ 
+    /*2016--11--26--20--38--13(ZJYC):µ±Ò»¸ö×ÓÌ×½Ó×Ö¹Ø±Õ£¬È·±£¸üÐÂ¸¸Ì×½Ó×ÖµÄº¢×Ó¼ÆÊýÖµ    */ 
     static void prvTCPSetSocketCount( FreeRTOS_Socket_t *pxSocketToDelete );
 #endif  /* ipconfigUSE_TCP == 1 */
 
 #if( ipconfigUSE_TCP == 1 )
-    /*2016--11--26--20--39--06(ZJYC):è¢«FreeRTOS_connect()è°ƒç”¨ï¼Œåšä¸€äº›æ£€æŸ¥ï¼Œå¦‚æžœé€šè¿‡äº†ï¼Œå°±å‘é€æ¶ˆæ¯
-    ç»™IP-Taskæ¥å¯åŠ¨è¿žæŽ¥åˆ°è¿œç¨‹å¥—æŽ¥å­—*/ 
+    /*2016--11--26--20--39--06(ZJYC):±»FreeRTOS_connect()µ÷ÓÃ£¬×öÒ»Ð©¼ì²é£¬Èç¹ûÍ¨¹ýÁË£¬¾Í·¢ËÍÏûÏ¢
+    ¸øIP-TaskÀ´Æô¶¯Á¬½Óµ½Ô¶³ÌÌ×½Ó×Ö*/ 
     static BaseType_t prvTCPConnectStart( FreeRTOS_Socket_t *pxSocket, struct freertos_sockaddr *pxAddress );
 #endif /* ipconfigUSE_TCP */
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
-    /*2016--11--26--20--40--46(ZJYC):è¢«IP-Taskæ£€æŸ¥ï¼Œä»–ä¼šæ£€æŸ¥æ‰€æœ‰çš„å¥—æŽ¥å­—éš¶å±žäºŽä¸€ä¸ªé›†åˆ    */ 
+    /*2016--11--26--20--40--46(ZJYC):±»IP-Task¼ì²é£¬Ëû»á¼ì²éËùÓÐµÄÌ×½Ó×ÖÁ¥ÊôÓÚÒ»¸ö¼¯ºÏ    */ 
     static FreeRTOS_Socket_t *prvFindSelectedSocket( SocketSelect_t *pxSocketSet );
 
 #endif /* ipconfigSUPPORT_SELECT_FUNCTION == 1 */
 /*-----------------------------------------------------------*/
-/*2016--11--26--20--41--33(ZJYC):ä¿å­˜å¥—æŽ¥å­—ä¸Žç«¯å£å·çš„åˆ—è¡¨ï¼Œè®¿é—®è¯¥åˆ—è¡¨å¿…é¡»é€šè¿‡ä¸´ç•ŒåŒº
-ä¿æŠ¤    */ 
+/*2016--11--26--20--41--33(ZJYC):±£´æÌ×½Ó×ÖÓë¶Ë¿ÚºÅµÄÁÐ±í£¬·ÃÎÊ¸ÃÁÐ±í±ØÐëÍ¨¹ýÁÙ½çÇø
+±£»¤    */ 
 List_t xBoundUDPSocketsList;
 
 #if ipconfigUSE_TCP == 1
     List_t xBoundTCPSocketsList;
 #endif /* ipconfigUSE_TCP == 1 */
-/*2016--11--26--20--42--38(ZJYC):å¯¹äºŽUDPï¼Œå½“ç»‘å®šä¸€å®¢æˆ·ç«¯æ—¶ï¼ŒæŽŒæ¡ç€ä¸‹ä¸€ä¸ªç§äººç«¯å£å·
-å¦‚æžœä½¿èƒ½TCPï¼Œå¯¹äºŽTCPä¹Ÿæ˜¯è¿™æ ·çš„ï¼Œå½“IP-Taskè¢«åˆå§‹åŒ–ï¼ŒUDPä½¿ç”¨ç´¢å¼•
-socketNEXT_UDP_PORT_NUMBER_INDEXè€ŒTCPä½¿ç”¨ç´¢å¼•socketNEXT_TCP_PORT_NUMBER_INDEXï¼Œ
-åˆå§‹æ•°å€¼ä»‹äºŽsocketAUTO_PORT_ALLOCATION_RESET_NUMBERå’Œ
-socketAUTO_PORT_ALLOCATION_MAX_NUMBERä¹‹é—´ã€‚æ³¨æ„ï¼šipconfigRAND32()åº”åœ¨IP-Taskå¯åŠ¨ä¹‹å‰å¼€å§‹ï¼Œ    */ 
+/*2016--11--26--20--42--38(ZJYC):¶ÔÓÚUDP£¬µ±°ó¶¨Ò»¿Í»§¶ËÊ±£¬ÕÆÎÕ×ÅÏÂÒ»¸öË½ÈË¶Ë¿ÚºÅ
+Èç¹ûÊ¹ÄÜTCP£¬¶ÔÓÚTCPÒ²ÊÇÕâÑùµÄ£¬µ±IP-Task±»³õÊ¼»¯£¬UDPÊ¹ÓÃË÷Òý
+socketNEXT_UDP_PORT_NUMBER_INDEX¶øTCPÊ¹ÓÃË÷ÒýsocketNEXT_TCP_PORT_NUMBER_INDEX£¬
+³õÊ¼ÊýÖµ½éÓÚsocketAUTO_PORT_ALLOCATION_RESET_NUMBERºÍ
+socketAUTO_PORT_ALLOCATION_MAX_NUMBERÖ®¼ä¡£×¢Òâ£ºipconfigRAND32()Ó¦ÔÚIP-TaskÆô¶¯Ö®Ç°¿ªÊ¼£¬    */ 
 static uint16_t usNextPortToUse[ socketPROTOCOL_COUNT ] = { 0 };
 
 /*-----------------------------------------------------------*/
@@ -137,9 +137,9 @@ const uint32_t ulAutoPortRange = socketAUTO_PORT_ALLOCATION_MAX_NUMBER - socketA
 uint32_t ulRandomPort;
 
     vListInitialise( &xBoundUDPSocketsList );
-    /*2016--11--26--20--50--27(ZJYC):å†³å®šç¬¬ä¸€ä¸ªè¢«æ´¾å‡ºçš„æœªå‘½åUDPç«¯å£å·ï¼Œç»™ä»–ä¸€ä¸ª
-    éšæœºæ•°å€¼ä»¥é¿å…ä¸Žä¹‹å‰ä½¿ç”¨çš„ç«¯å£å·æ··æ·†ï¼Œä»Žç¬¬ä¸€ä¸ªè‡ªåŠ¨ç«¯å£å·å¼€å§‹ï¼Œç„¶åŽæ·»åŠ ä»‹äºŽ
-    æœ€å¤§èŒƒå›´çš„éšæœºçš„åç§»*/ 
+    /*2016--11--26--20--50--27(ZJYC):¾ö¶¨µÚÒ»¸ö±»ÅÉ³öµÄÎ´ÃüÃûUDP¶Ë¿ÚºÅ£¬¸øËûÒ»¸ö
+    Ëæ»úÊýÖµÒÔ±ÜÃâÓëÖ®Ç°Ê¹ÓÃµÄ¶Ë¿ÚºÅ»ìÏý£¬´ÓµÚÒ»¸ö×Ô¶¯¶Ë¿ÚºÅ¿ªÊ¼£¬È»ºóÌí¼Ó½éÓÚ
+    ×î´ó·¶Î§µÄËæ»úµÄÆ«ÒÆ*/ 
     ulRandomPort = socketAUTO_PORT_ALLOCATION_START_NUMBER;
     ulRandomPort += ( ipconfigRAND32() % ulAutoPortRange );
     usNextPortToUse[ socketNEXT_UDP_PORT_NUMBER_INDEX ] = ( uint16_t ) ulRandomPort;
@@ -150,7 +150,7 @@ uint32_t ulRandomPort;
 
         ulNextInitialSequenceNumber = ipconfigRAND32();
 
-        /*2016--11--26--20--54--01(ZJYC):åŒç†ï¼ŒTCPä¹Ÿå¾—ä½¿ç”¨ä¸€ä¸ªç«¯å£å·    */ 
+        /*2016--11--26--20--54--01(ZJYC):Í¬Àí£¬TCPÒ²µÃÊ¹ÓÃÒ»¸ö¶Ë¿ÚºÅ    */ 
         ulRandomPort = socketAUTO_PORT_ALLOCATION_START_NUMBER;
         ulRandomPort += ( ipconfigRAND32() % ulAutoPortRange );
         usNextPortToUse[ socketNEXT_TCP_PORT_NUMBER_INDEX ] = ( uint16_t ) ulRandomPort;
@@ -174,14 +174,14 @@ FreeRTOS_Socket_t *pxSocket;
     }
     else
     {
-        /*2016--11--26--20--55--04(ZJYC):ç›®å‰åªæŒ‡å‡ºä»¥å¤ªç½‘    */ 
+        /*2016--11--26--20--55--04(ZJYC):Ä¿Ç°Ö»Ö¸³öÒÔÌ«Íø    */ 
         configASSERT( xDomain == FREERTOS_AF_INET );
 
-        /*2016--11--26--20--55--27(ZJYC):æ£€æŸ¥UDPå¥—æŽ¥å­—åˆ—è¡¨æ˜¯å¦è¢«åˆå§‹åŒ–    */ 
+        /*2016--11--26--20--55--27(ZJYC):¼ì²éUDPÌ×½Ó×ÖÁÐ±íÊÇ·ñ±»³õÊ¼»¯    */ 
         configASSERT( listLIST_IS_INITIALISED( &xBoundUDPSocketsList ) );
         #if( ipconfigUSE_TCP == 1 )
         {
-            /*2016--11--26--20--55--53(ZJYC):åŒç†æ£€æŸ¥TCPã€‚ã€‚ã€‚    */ 
+            /*2016--11--26--20--55--53(ZJYC):Í¬Àí¼ì²éTCP¡£¡£¡£    */ 
             configASSERT( listLIST_IS_INITIALISED( &xBoundTCPSocketsList ) );
         }
         #endif  /* ipconfigUSE_TCP == 1 */
@@ -231,8 +231,8 @@ Socket_t xReturn;
     }
     else
     {
-        /*2016--11--26--20--57--43(ZJYC):ç”³è¯·å¯ä»¥å­˜å‚¨å¥—æŽ¥å­—ä¿¡æ¯çš„ç»“æž„ä½“ï¼Œå¤§å°å–å†³äºŽ
-        å¥—æŽ¥å­—ç±»åž‹ï¼ˆUDP/TCPï¼‰ï¼ŒpvPortMallocSocketä¼šè¢«è°ƒç”¨ï¼Œé»˜è®¤çš„ï¼Œä»–ä¼šæŒ‡å‘pvPortMalloc()*/ 
+        /*2016--11--26--20--57--43(ZJYC):ÉêÇë¿ÉÒÔ´æ´¢Ì×½Ó×ÖÐÅÏ¢µÄ½á¹¹Ìå£¬´óÐ¡È¡¾öÓÚ
+        Ì×½Ó×ÖÀàÐÍ£¨UDP/TCP£©£¬pvPortMallocSocket»á±»µ÷ÓÃ£¬Ä¬ÈÏµÄ£¬Ëû»áÖ¸ÏòpvPortMalloc()*/ 
         pxSocket = ( FreeRTOS_Socket_t * ) pvPortMallocSocket( uxSocketSize );
 
         if( pxSocket == NULL )
@@ -252,8 +252,8 @@ Socket_t xReturn;
             memset( pxSocket, '\0', uxSocketSize );
 
             pxSocket->xEventGroup = xEventGroup;
-            /*2016--11--26--20--59--53(ZJYC):åˆå§‹åŒ–å¥—æŽ¥å­—çš„ä¿¡æ¯ï¼Œå¦‚æžœå¥—æŽ¥å­—
-            ç»‘å®šäº†åœ°å€ï¼Œä¿¡å·é‡ä¼šè¢«åˆ›å»ºï¼Œä½†æ˜¯çŽ°åœ¨ï¼Œä¿¡å·é‡æ˜¯ç©ºçš„    */ 
+            /*2016--11--26--20--59--53(ZJYC):³õÊ¼»¯Ì×½Ó×ÖµÄÐÅÏ¢£¬Èç¹ûÌ×½Ó×Ö
+            °ó¶¨ÁËµØÖ·£¬ÐÅºÅÁ¿»á±»´´½¨£¬µ«ÊÇÏÖÔÚ£¬ÐÅºÅÁ¿ÊÇ¿ÕµÄ    */ 
             if( xProtocol == FREERTOS_IPPROTO_UDP )
             {
                 vListInitialise( &( pxSocket->u.xUDP.xWaitingPacketsList ) );
@@ -294,8 +294,8 @@ Socket_t xReturn;
                         pxSocket->u.xTCP.uxTxWinSize  = 1u;
                     }
                     #endif
-                    /*2016--11--26--21--01--49(ZJYC):ä»¥ä¸Šä¿¡æ¯æ˜¯é»˜è®¤çš„ï¼Œå¯ä»¥é€šè¿‡FreeRTOS_setsockopt
-                    æ¥ä¿®æ”¹ï¼Œç›´åˆ°å¥—æŽ¥å­—è¿žæŽ¥å¹¶ä¸”æ•°æ®å‘ç”Ÿäº¤æ¢ï¼Œç½‘ç»œç¼“å­˜æ‰ä¼šè¢«åˆ›å»º*/ 
+                    /*2016--11--26--21--01--49(ZJYC):ÒÔÉÏÐÅÏ¢ÊÇÄ¬ÈÏµÄ£¬¿ÉÒÔÍ¨¹ýFreeRTOS_setsockopt
+                    À´ÐÞ¸Ä£¬Ö±µ½Ì×½Ó×ÖÁ¬½Ó²¢ÇÒÊý¾Ý·¢Éú½»»»£¬ÍøÂç»º´æ²Å»á±»´´½¨*/ 
                 }
             }
             #endif  /* ipconfigUSE_TCP == 1 */
@@ -352,7 +352,7 @@ Socket_t xReturn;
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
 
-    /*2016--11--26--21--03--39(ZJYC):æ·»åŠ å¥—æŽ¥å­—åˆ°é›†åˆ    */ 
+    /*2016--11--26--21--03--39(ZJYC):Ìí¼ÓÌ×½Ó×Öµ½¼¯ºÏ    */ 
     void FreeRTOS_FD_SET( Socket_t xSocket, SocketSet_t xSocketSet, EventBits_t xSelectBits )
     {
     FreeRTOS_Socket_t *pxSocket = ( FreeRTOS_Socket_t * ) xSocket;
@@ -361,7 +361,7 @@ Socket_t xReturn;
         configASSERT( pxSocket != NULL );
         configASSERT( xSocketSet != NULL );
 
-        /*2016--11--26--21--16--19(ZJYC):ç¡®ä¿æˆ‘ä»¬ä¸ç½®ä½å†…éƒ¨ä½¿ç”¨çš„ä½ï¼Œæ¯”å¦‚eSELECT_CALL_IP    */ 
+        /*2016--11--26--21--16--19(ZJYC):È·±£ÎÒÃÇ²»ÖÃÎ»ÄÚ²¿Ê¹ÓÃµÄÎ»£¬±ÈÈçeSELECT_CALL_IP    */ 
         pxSocket->xSelectBits |= ( xSelectBits & eSELECT_ALL );
 
         if( ( pxSocket->xSelectBits & eSELECT_ALL ) != 0 )
@@ -369,8 +369,8 @@ Socket_t xReturn;
             /* Adding a socket to a socket set. */
             pxSocket->pxSocketSet = ( SocketSelect_t * ) xSocketSet;
 
-            /*2016--11--26--21--18--10(ZJYC):çŽ°åœ¨ç”±vSocketSelectæŸ¥çœ‹é›†åˆä¸­æ˜¯å¦æœ‰
-            å¥—æŽ¥å­—å‡†å¤‡å°±ç»ªå¹¶ç½®ä½åˆé€‚çš„ä½ï¼ŒbApiCalled = falseæ²¡è¢«ç”¨æˆ·APIè°ƒç”¨è¿‡    */ 
+            /*2016--11--26--21--18--10(ZJYC):ÏÖÔÚÓÉvSocketSelect²é¿´¼¯ºÏÖÐÊÇ·ñÓÐ
+            Ì×½Ó×Ö×¼±¸¾ÍÐ÷²¢ÖÃÎ»ºÏÊÊµÄÎ»£¬bApiCalled = falseÃ»±»ÓÃ»§APIµ÷ÓÃ¹ý    */ 
             pxSocketSet->bApiCalled = pdFALSE;
             prvFindSelectedSocket( pxSocketSet );
         }
@@ -380,7 +380,7 @@ Socket_t xReturn;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
-    /*2016--11--26--21--20--31(ZJYC):æ¸…é™¤æŽ‰æŸäº›ä½ï¼Œå¦‚æžœæ ‡å¿—ä¸º0ï¼Œåˆ™ä»Žè¯¥é›†åˆä¸­åˆ é™¤    */ 
+    /*2016--11--26--21--20--31(ZJYC):Çå³ýµôÄ³Ð©Î»£¬Èç¹û±êÖ¾Îª0£¬Ôò´Ó¸Ã¼¯ºÏÖÐÉ¾³ý    */ 
     void FreeRTOS_FD_CLR( Socket_t xSocket, SocketSet_t xSocketSet, EventBits_t xSelectBits )
     {
     FreeRTOS_Socket_t *pxSocket = ( FreeRTOS_Socket_t * ) xSocket;
@@ -406,7 +406,7 @@ Socket_t xReturn;
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
 
-    /*2016--11--26--21--21--14(ZJYC):åˆ¤æ–­ä¸€ä¸ªå¥—æŽ¥å­—æ˜¯å¦å±žäºŽæŸä¸ªé›†åˆ    */ 
+    /*2016--11--26--21--21--14(ZJYC):ÅÐ¶ÏÒ»¸öÌ×½Ó×ÖÊÇ·ñÊôÓÚÄ³¸ö¼¯ºÏ    */ 
     EventBits_t FreeRTOS_FD_ISSET( Socket_t xSocket, SocketSet_t xSocketSet )
     {
     EventBits_t xReturn;
@@ -434,7 +434,7 @@ Socket_t xReturn;
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
 
-    /*2016--11--26--21--21--47(ZJYC):ç­‰å¾…é›†åˆä¸­çš„ä»»ä½•ä¸€ä¸ªå¥—æŽ¥å­—å‘ç”Ÿäº‹ä»¶    */ 
+    /*2016--11--26--21--21--47(ZJYC):µÈ´ý¼¯ºÏÖÐµÄÈÎºÎÒ»¸öÌ×½Ó×Ö·¢ÉúÊÂ¼þ    */ 
     BaseType_t FreeRTOS_select( SocketSet_t xSocketSet, TickType_t xBlockTimeTicks )
     {
     TimeOut_t xTimeOut;
@@ -492,7 +492,7 @@ Socket_t xReturn;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
-    /*2016--11--26--21--23--44(ZJYC):å‘IP-Taskå‘é€æ¶ˆæ¯åŽ»æ£€æŸ¥æ˜¯å¦å¤šæœ‰çš„å¥—æŽ¥å­—å±žäºŽpxSocketSet    */ 
+    /*2016--11--26--21--23--44(ZJYC):ÏòIP-Task·¢ËÍÏûÏ¢È¥¼ì²éÊÇ·ñ¶àÓÐµÄÌ×½Ó×ÖÊôÓÚpxSocketSet    */ 
     static FreeRTOS_Socket_t *prvFindSelectedSocket( SocketSelect_t *pxSocketSet )
     {
     IPStackEvent_t xSelectEvent;
@@ -501,20 +501,20 @@ Socket_t xReturn;
         xSelectEvent.eEventType = eSocketSelectEvent;
         xSelectEvent.pvData = ( void * ) pxSocketSet;
 
-        /*2016--11--26--21--25--37(ZJYC):å½“IP-Taskå“åº”è¯¥è¯·æ±‚æ—¶ï¼Œä¼šå µå¡žåœ¨eSELECT_CALL_IPï¼Œæ¸…æŽ‰å®ƒ    */ 
+        /*2016--11--26--21--25--37(ZJYC):µ±IP-TaskÏìÓ¦¸ÃÇëÇóÊ±£¬»á¶ÂÈûÔÚeSELECT_CALL_IP£¬ÇåµôËü    */ 
         xEventGroupClearBits( pxSocketSet->xSelectGroup, eSELECT_CALL_IP );
 
         /* Now send the socket select event */
         if( xSendEventStructToIPTask( &xSelectEvent, ( TickType_t ) portMAX_DELAY ) == pdFAIL )
         {
-            /*2016--11--26--21--26--40(ZJYC):å‘µå‘µå‘µ    */ 
+            /*2016--11--26--21--26--40(ZJYC):ºÇºÇºÇ    */ 
             /* Oops, we failed to wake-up the IP task. No use to wait for it. */
             FreeRTOS_debug_printf( ( "prvFindSelectedSocket: failed\n" ) );
             xReturn = NULL;
         }
         else
         {
-            /*2016--11--26--21--27--31(ZJYC):å½“IP-Taskå¤„ç†å®Œæˆï¼Œä»–è®¾ç½®eSELECT_CALL_IPæ¥å”¤é†’è°ƒç”¨API*/ 
+            /*2016--11--26--21--27--31(ZJYC):µ±IP-Task´¦ÀíÍê³É£¬ËûÉèÖÃeSELECT_CALL_IPÀ´»½ÐÑµ÷ÓÃAPI*/ 
             xEventGroupWaitBits( pxSocketSet->xSelectGroup, eSELECT_CALL_IP, pdTRUE, pdFALSE, portMAX_DELAY );
 
             /* Return 'pxSocket' which is set by the IP-task */
@@ -527,8 +527,8 @@ Socket_t xReturn;
 #endif /* ipconfigSUPPORT_SELECT_FUNCTION == 1 */
 /*-----------------------------------------------------------*/
 
-/*2016--11--26--21--28--52(ZJYC):ä»Žç»‘å®šçš„å¥—æŽ¥å­—è¿”å›žæ•°æ®
-åœ¨è¿™ä¸ªåº“ä¸­ï¼Œæœ¬å‡½æ•°åªèƒ½ä½¿ç”¨åœ¨æœªè¿žæŽ¥çš„å¥—æŽ¥å­—ä¸Šï¼ˆUDPï¼‰    */ 
+/*2016--11--26--21--28--52(ZJYC):´Ó°ó¶¨µÄÌ×½Ó×Ö·µ»ØÊý¾Ý
+ÔÚÕâ¸ö¿âÖÐ£¬±¾º¯ÊýÖ»ÄÜÊ¹ÓÃÔÚÎ´Á¬½ÓµÄÌ×½Ó×ÖÉÏ£¨UDP£©    */ 
 int32_t FreeRTOS_recvfrom( Socket_t xSocket, void *pvBuffer, size_t xBufferLength, BaseType_t xFlags, struct freertos_sockaddr *pxSourceAddress, socklen_t *pxSourceAddressLength )
 {
 BaseType_t lPacketCount = 0;
@@ -828,10 +828,10 @@ FreeRTOS_Socket_t *pxSocket;
     return lReturn;
 } /* Tested */
 /*-----------------------------------------------------------*/
-/*2016--11--27--10--45--29(ZJYC):FreeRTOS_bind()æŠŠå¥—æŽ¥å­—ä¸Žæœ¬åœ°ç«¯å£å·ç»‘å®šï¼Œ
-å¦‚æžœæä¾›ç«¯å£å·0ï¼Œä¸€ä¸ªç³»ç»ŸæŒ‡å®šçš„ç«¯å£å·ä¼šè¢«åˆ†é…ã€‚æœ¬å‡½æ•°å¯ä»¥è¢«UDPå’ŒTCPä½¿ç”¨
-å®žé™…çš„æ“ä½œæœ‰IPä»»åŠ¡å®Œæˆï¼Œä»¥é˜²æ­¢å¤šçº¿ç¨‹è®¿é—®ç»‘å®šåˆ—è¡¨ï¼ˆxBoundUDPSocketsList æˆ–
-xBoundTCPSocketsListï¼‰    */ 
+/*2016--11--27--10--45--29(ZJYC):FreeRTOS_bind()°ÑÌ×½Ó×ÖÓë±¾µØ¶Ë¿ÚºÅ°ó¶¨£¬
+Èç¹ûÌá¹©¶Ë¿ÚºÅ0£¬Ò»¸öÏµÍ³Ö¸¶¨µÄ¶Ë¿ÚºÅ»á±»·ÖÅä¡£±¾º¯Êý¿ÉÒÔ±»UDPºÍTCPÊ¹ÓÃ
+Êµ¼ÊµÄ²Ù×÷ÓÐIPÈÎÎñÍê³É£¬ÒÔ·ÀÖ¹¶àÏß³Ì·ÃÎÊ°ó¶¨ÁÐ±í£¨xBoundUDPSocketsList »ò
+xBoundTCPSocketsList£©    */ 
 BaseType_t FreeRTOS_bind( Socket_t xSocket, struct freertos_sockaddr * pxAddress, socklen_t xAddressLength )
 {
 IPStackEvent_t xBindEvent;
@@ -844,7 +844,7 @@ BaseType_t xReturn = 0;
     {
         xReturn = -pdFREERTOS_ERRNO_EINVAL;
     }
-    /*2016--11--27--10--48--22(ZJYC):ä¸€æ—¦å¥—æŽ¥å­—ä¸Žç«¯å£å·ç»‘å®šï¼Œä¾¿ä¸å¯åœ¨äºŽå…¶ä»–ç«¯å£å·ç»‘å®š    */ 
+    /*2016--11--27--10--48--22(ZJYC):Ò»µ©Ì×½Ó×ÖÓë¶Ë¿ÚºÅ°ó¶¨£¬±ã²»¿ÉÔÚÓÚÆäËû¶Ë¿ÚºÅ°ó¶¨    */ 
     else if( socketSOCKET_IS_BOUND( pxSocket) != pdFALSE )
     {
         /* The socket is already bound. */
@@ -853,7 +853,7 @@ BaseType_t xReturn = 0;
     }
     else
     {
-        /*2016--11--27--10--49--08(ZJYC):å‘IPä»»åŠ¡å‘é€æ¶ˆæ¯ä½¿ä¹‹ç»‘å®šï¼ˆusLocalPortä¸ºç«¯å£å·ï¼‰    */ 
+        /*2016--11--27--10--49--08(ZJYC):ÏòIPÈÎÎñ·¢ËÍÏûÏ¢Ê¹Ö®°ó¶¨£¨usLocalPortÎª¶Ë¿ÚºÅ£©    */ 
         xBindEvent.eEventType = eSocketBindEvent;
         xBindEvent.pvData = ( void * ) xSocket;
         if( pxAddress != NULL )
@@ -877,7 +877,7 @@ BaseType_t xReturn = 0;
         }
         else
         {
-            /*2016--11--27--10--50--54(ZJYC):å½“IPä»»åŠ¡å®Œæˆç»‘å®šï¼Œä¼šç½®ä½eSOCKET_BOUND    */ 
+            /*2016--11--27--10--50--54(ZJYC):µ±IPÈÎÎñÍê³É°ó¶¨£¬»áÖÃÎ»eSOCKET_BOUND    */ 
             xEventGroupWaitBits( pxSocket->xEventGroup, eSOCKET_BOUND, pdTRUE /*xClearOnExit*/, pdFALSE /*xWaitAllBits*/, portMAX_DELAY );
             if( socketSOCKET_IS_BOUND( pxSocket ) == pdFALSE )
             {
@@ -888,8 +888,8 @@ BaseType_t xReturn = 0;
 
     return xReturn;
 }
-/*2016--11--27--10--51--36(ZJYC):å†…éƒ¨ç»‘å®šå‡½æ•°ï¼Œä¸åº”ç›´æŽ¥è°ƒç”¨ï¼ŒxInternalåªç”¨äºŽ
-TCPï¼šå®ƒå…è®¸åŒä¸€ä¸ªç«¯å£å·æœ‰è‹¥å¹²ä¸ªå­å¥—æŽ¥å­—    */ 
+/*2016--11--27--10--51--36(ZJYC):ÄÚ²¿°ó¶¨º¯Êý£¬²»Ó¦Ö±½Óµ÷ÓÃ£¬xInternalÖ»ÓÃÓÚ
+TCP£ºËüÔÊÐíÍ¬Ò»¸ö¶Ë¿ÚºÅÓÐÈô¸É¸ö×ÓÌ×½Ó×Ö    */ 
 BaseType_t vSocketBind( FreeRTOS_Socket_t *pxSocket, struct freertos_sockaddr * pxAddress, size_t uxAddressLength, BaseType_t xInternal )
 {
 BaseType_t xReturn = 0; /* In Berkeley sockets, 0 means pass for bind(). */
@@ -918,9 +918,9 @@ List_t *pxSocketList;
 
     #if( ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND == 1 )
     {
-        /*2016--11--27--11--00--58(ZJYC):å¦‚æžœsendto()è¢«è°ƒç”¨åœ¨ä¸€ä¸ªæ²¡æœ‰ç»‘å®šç«¯å£å·çš„å¥—æŽ¥å­—ä¸Š
-        pxAddresså°†ä¸ºNULLï¼Œè¿™ç§æƒ…å†µå…ˆï¼Œè‡ªåŠ¨ç”³è¯·å¥—æŽ¥å­—ã€‚ç”³è¯·çš„å¥—æŽ¥å­—æœ‰å¾ˆå°çš„å‡ çŽ‡ä¸Žåœ¨ä½¿ç”¨
-        çš„ç«¯å£å·é‡å¤ï¼Œå¦‚æžœå‡ºçŽ°è¿™ç§æƒ…å†µï¼Œæ£€æŸ¥pxListFindListItemWithValue()ä¼šè¿”å›žä¸€ä¸ªé”™è¯¯*/ 
+        /*2016--11--27--11--00--58(ZJYC):Èç¹ûsendto()±»µ÷ÓÃÔÚÒ»¸öÃ»ÓÐ°ó¶¨¶Ë¿ÚºÅµÄÌ×½Ó×ÖÉÏ
+        pxAddress½«ÎªNULL£¬ÕâÖÖÇé¿öÏÈ£¬×Ô¶¯ÉêÇëÌ×½Ó×Ö¡£ÉêÇëµÄÌ×½Ó×ÖÓÐºÜÐ¡µÄ¼¸ÂÊÓëÔÚÊ¹ÓÃ
+        µÄ¶Ë¿ÚºÅÖØ¸´£¬Èç¹û³öÏÖÕâÖÖÇé¿ö£¬¼ì²épxListFindListItemWithValue()»á·µ»ØÒ»¸ö´íÎó*/ 
         if( pxAddress == NULL )
         {
             pxAddress = &xAddress;
@@ -940,10 +940,10 @@ List_t *pxSocketList;
         {
             pxAddress->sin_port = prvGetPrivatePortNumber( ( BaseType_t ) pxSocket->ucProtocol );
         }
-        /*2016--11--27--11--05--03(ZJYC):å¦‚æžœvSocketBind()è¢«API-FreeRTOS_bind()è°ƒç”¨ï¼Œ
-        ä¾¿å·²ç»ç¡®å®šå¥—æŽ¥å­—æ²¡æœ‰ç»‘å®šç«¯å£å·ï¼Œå¦‚æžœä»–è¢«IPä»»åŠ¡è°ƒç”¨ï¼Œä¾¿æ²¡æœ‰è¯¥é¡¹æ£€æŸ¥*/ 
-        /*2016--11--27--11--06--43(ZJYC):æ£€æŸ¥ä»¥ç¡®å®šç«¯å£å·æ²¡æœ‰è¢«ä½¿ç”¨ï¼Œå¦‚æžœç»‘å®šæ˜¯å†…
-        éƒ¨è°ƒç”¨çš„ï¼Œä¸€ä¸ªç«¯å£å·æœ‰å¯èƒ½è¢«ä¸æ­¢ä¸€ä¸ªå¥—æŽ¥å­—ä½¿ç”¨    */ 
+        /*2016--11--27--11--05--03(ZJYC):Èç¹ûvSocketBind()±»API-FreeRTOS_bind()µ÷ÓÃ£¬
+        ±ãÒÑ¾­È·¶¨Ì×½Ó×ÖÃ»ÓÐ°ó¶¨¶Ë¿ÚºÅ£¬Èç¹ûËû±»IPÈÎÎñµ÷ÓÃ£¬±ãÃ»ÓÐ¸ÃÏî¼ì²é*/ 
+        /*2016--11--27--11--06--43(ZJYC):¼ì²éÒÔÈ·¶¨¶Ë¿ÚºÅÃ»ÓÐ±»Ê¹ÓÃ£¬Èç¹û°ó¶¨ÊÇÄÚ
+        ²¿µ÷ÓÃµÄ£¬Ò»¸ö¶Ë¿ÚºÅÓÐ¿ÉÄÜ±»²»Ö¹Ò»¸öÌ×½Ó×ÖÊ¹ÓÃ    */ 
         if( ( ( xInternal == pdFALSE ) || ( pxSocket->ucProtocol != ( uint8_t ) FREERTOS_IPPROTO_TCP ) ) &&
             ( pxListFindListItemWithValue( pxSocketList, ( TickType_t ) pxAddress->sin_port ) != NULL ) )
         {
@@ -3233,7 +3233,7 @@ void vSocketWakeUpUser( FreeRTOS_Socket_t *pxSocket )
                 char ucChildText[16] = "";
                 if (pxSocket->u.xTCP.ucTCPState == eTCP_LISTEN)
                 {
-                    snprintf( ucChildText, sizeof( ucChildText ), " %d/%d",
+                    _snprintf( ucChildText, sizeof( ucChildText ), " %d/%d",
                         pxSocket->u.xTCP.usChildCount,
                         pxSocket->u.xTCP.usBacklog);
                 }

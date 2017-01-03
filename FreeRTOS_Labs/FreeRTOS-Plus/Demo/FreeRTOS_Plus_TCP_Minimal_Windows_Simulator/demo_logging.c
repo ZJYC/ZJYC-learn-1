@@ -322,7 +322,7 @@ HANDLE xCurrentTask;
 
 		if( strcmp( pcFormat, "\n" ) != 0 )
 		{
-			xLength = snprintf( cPrintString, dlMAX_PRINT_STRING_LENGTH, "%lu %lu [%s] ",
+			xLength = _snprintf( cPrintString, dlMAX_PRINT_STRING_LENGTH, "%lu %lu [%s] ",
 				xMessageNumber++,
 				( unsigned long ) xTaskGetTickCount(),
 				pcTaskName );

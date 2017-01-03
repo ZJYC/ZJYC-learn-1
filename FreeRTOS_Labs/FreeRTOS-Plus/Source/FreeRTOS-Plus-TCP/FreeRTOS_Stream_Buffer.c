@@ -15,17 +15,17 @@
 
 /*
 ****************************************************
-*  å‡½æ•°å         : uxStreamBufferAdd
-*  å‡½æ•°æè¿°       : æ·»åŠ æ•°æ®åˆ°ç¼“å†²åŒºï¼Œå¦‚æœuxOffset>0ï¼Œæ•°æ®ä¼šè¢«å†™å…¥uxHead+uxOffsetçš„ä½ç½®
-                    ç„¶è€ŒuxHeadä¸ä¼šç§»åŠ¨ï¼Œè¿™åœ¨TCPæ”¶åˆ°éé¡ºåºæ•°æ®æ—¶ååˆ†æœ‰ç”¨
-*  å‚æ•°           : 
-                    pxBufferï¼šç¼“å†²åŒº
-                    uxOffsetï¼šåç§»é‡
-                    pucDataï¼šæ•°æ®åœ°å€
-                    uxCountï¼šæ•°æ®ä¸ªæ•°
-*  è¿”å›å€¼         : è¢«å†™å…¥çš„ä¸ªæ•°
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : uxStreamBufferAdd
+*  º¯ÊıÃèÊö       : Ìí¼ÓÊı¾İµ½»º³åÇø£¬Èç¹ûuxOffset>0£¬Êı¾İ»á±»Ğ´ÈëuxHead+uxOffsetµÄÎ»ÖÃ
+                    È»¶øuxHead²»»áÒÆ¶¯£¬ÕâÔÚTCPÊÕµ½·ÇË³ĞòÊı¾İÊ±Ê®·ÖÓĞÓÃ
+*  ²ÎÊı           : 
+                    pxBuffer£º»º³åÇø
+                    uxOffset£ºÆ«ÒÆÁ¿
+                    pucData£ºÊı¾İµØÖ·
+                    uxCount£ºÊı¾İ¸öÊı
+*  ·µ»ØÖµ         : ±»Ğ´ÈëµÄ¸öÊı
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 size_t uxStreamBufferAdd( StreamBuffer_t *pxBuffer, size_t uxOffset, const uint8_t *pucData, size_t uxCount )
@@ -105,12 +105,12 @@ size_t uxSpace, uxNextHead, uxFirst;
 
 /*
 ****************************************************
-*  å‡½æ•°å         : uxStreamBufferGet
-*  å‡½æ•°æè¿°       : åŸºæœ¬åŒuxStreamBufferAdd
-*  å‚æ•°           : 
-*  è¿”å›å€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : uxStreamBufferGet
+*  º¯ÊıÃèÊö       : »ù±¾Í¬uxStreamBufferAdd
+*  ²ÎÊı           : 
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 size_t uxStreamBufferGet( StreamBuffer_t *pxBuffer, size_t uxOffset, uint8_t *pucData, size_t uxMaxCount, BaseType_t xPeek )

@@ -1,15 +1,15 @@
 
-/*2016--12--02--09--44--48(ZJYC): æ ‡å‡†å¤´æ–‡ä»¶   */ 
+/*2016--12--02--09--44--48(ZJYC): ±ê×¼Í·ÎÄ¼ş   */ 
 #include <stdint.h>
 
-/*2016--12--02--09--45--00(ZJYC): FREERTOSå¤´æ–‡ä»¶   */ 
+/*2016--12--02--09--45--00(ZJYC): FREERTOSÍ·ÎÄ¼ş   */ 
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 #include "list.h"
 #include "semphr.h"
 
-/*2016--12--02--09--45--12(ZJYC): FREERTOS+TCPå¤´æ–‡ä»¶   */ 
+/*2016--12--02--09--45--12(ZJYC): FREERTOS+TCPÍ·ÎÄ¼ş   */ 
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 #include "FreeRTOS_IP_Private.h"
@@ -19,35 +19,35 @@
 #include "NetworkInterface.h"
 #include "IPTraceMacroDefaults.h"
 
-/*2016--12--02--09--45--28(ZJYC): å¦‚æœDNSä¸æ˜¯èƒ½åˆ™æ’é™¤æ‰€æœ‰   */ 
+/*2016--12--02--09--45--28(ZJYC): Èç¹ûDNS²»ÊÇÄÜÔòÅÅ³ıËùÓĞ   */ 
 #if( ipconfigUSE_DNS != 0 )
 
 #if( ipconfigBYTE_ORDER == pdFREERTOS_LITTLE_ENDIAN )
     #define dnsDNS_PORT                     0x3500
     #define dnsONE_QUESTION                 0x0100
-    #define dnsOUTGOING_FLAGS               0x0001 /*2016--12--02--09--45--53(ZJYC): æ ‡å‡†è¯·æ±‚   */ 
-    #define dnsRX_FLAGS_MASK                0x0f80 /*2016--12--02--09--46--11(ZJYC): æ ‡å¿—ä½æ©ç    */ 
-    #define dnsEXPECTED_RX_FLAGS            0x0080 /*2016--12--02--09--46--37(ZJYC): DNSå›å¤æ ‡å¿—ï¼Œå¹¶ä¸”æ²¡æœ‰ä»»ä½•é”™è¯¯   */ 
+    #define dnsOUTGOING_FLAGS               0x0001 /*2016--12--02--09--45--53(ZJYC): ±ê×¼ÇëÇó   */ 
+    #define dnsRX_FLAGS_MASK                0x0f80 /*2016--12--02--09--46--11(ZJYC): ±êÖ¾Î»ÑÚÂë   */ 
+    #define dnsEXPECTED_RX_FLAGS            0x0080 /*2016--12--02--09--46--37(ZJYC): DNS»Ø¸´±êÖ¾£¬²¢ÇÒÃ»ÓĞÈÎºÎ´íÎó   */ 
 #else
     #define dnsDNS_PORT                     0x0035
     #define dnsONE_QUESTION                 0x0001
-    #define dnsOUTGOING_FLAGS               0x0100 /*2016--12--02--09--45--53(ZJYC): æ ‡å‡†è¯·æ±‚   */ 
-    #define dnsRX_FLAGS_MASK                0x800f /*2016--12--02--09--46--11(ZJYC): æ ‡å¿—ä½æ©ç    */ 
-    #define dnsEXPECTED_RX_FLAGS            0x8000 /*2016--12--02--09--46--37(ZJYC): DNSå›å¤æ ‡å¿—ï¼Œå¹¶ä¸”æ²¡æœ‰ä»»ä½•é”™è¯¯   */ 
+    #define dnsOUTGOING_FLAGS               0x0100 /*2016--12--02--09--45--53(ZJYC): ±ê×¼ÇëÇó   */ 
+    #define dnsRX_FLAGS_MASK                0x800f /*2016--12--02--09--46--11(ZJYC): ±êÖ¾Î»ÑÚÂë   */ 
+    #define dnsEXPECTED_RX_FLAGS            0x8000 /*2016--12--02--09--46--37(ZJYC): DNS»Ø¸´±êÖ¾£¬²¢ÇÒÃ»ÓĞÈÎºÎ´íÎó   */ 
 
 #endif /* ipconfigBYTE_ORDER */
 
-/*2016--12--02--09--47--55(ZJYC): åœ¨æœªæ”¾å¼ƒä¹‹å‰ï¼Œæ”¶ä¸åˆ°å›å¤çš„æƒ…å†µä¸‹ï¼Œå¤šé•¿æ—¶é—´å†æ¬¡å‘é€è¯·æ±‚   */ 
+/*2016--12--02--09--47--55(ZJYC): ÔÚÎ´·ÅÆúÖ®Ç°£¬ÊÕ²»µ½»Ø¸´µÄÇé¿öÏÂ£¬¶à³¤Ê±¼äÔÙ´Î·¢ËÍÇëÇó   */ 
 #ifndef ipconfigDNS_REQUEST_ATTEMPTS
     #define ipconfigDNS_REQUEST_ATTEMPTS        5
 #endif
 
-/*2016--12--02--09--49--12(ZJYC): åå­—åŒºåŸŸçš„ç¬¬ä¸€å­—èŠ‚çš„é«˜ä¸¤ä½è¢«ç½®ä½ï¼Œåˆ™æ ‡æ˜
-æ­¤ä¸ºåˆ°è¾¾å­—ç¬¦ä¸²çš„åç§»è€Œä¸æ˜¯çœŸçš„å­—ç¬¦ä¸²   */ 
-/*2016--12--02--10--31--37(ZJYC): è¿™æ˜¯ä¸€ç§å‹ç¼©DNSæŠ¥æ–‡ï¼Œå³å°†é‡å¤çš„å­—ç¬¦ä½¿ç”¨ç´¢å¼•è¡¨ç¤º   */ 
+/*2016--12--02--09--49--12(ZJYC): Ãû×ÖÇøÓòµÄµÚÒ»×Ö½ÚµÄ¸ßÁ½Î»±»ÖÃÎ»£¬Ôò±êÃ÷
+´ËÎªµ½´ï×Ö·û´®µÄÆ«ÒÆ¶ø²»ÊÇÕæµÄ×Ö·û´®   */ 
+/*2016--12--02--10--31--37(ZJYC): ÕâÊÇÒ»ÖÖÑ¹ËõDNS±¨ÎÄ£¬¼´½«ÖØ¸´µÄ×Ö·ûÊ¹ÓÃË÷Òı±íÊ¾   */ 
 #define dnsNAME_IS_OFFSET                   ( ( uint8_t ) 0xc0 )
 
-/*2016--12--02--09--50--46(ZJYC): NBNSæ ‡å¿—   */ 
+/*2016--12--02--09--50--46(ZJYC): NBNS±êÖ¾   */ 
 #define dnsNBNS_FLAGS_RESPONSE              0x8000
 #define dnsNBNS_FLAGS_OPCODE_MASK           0x7800
 #define dnsNBNS_FLAGS_OPCODE_QUERY          0x0000
@@ -68,27 +68,27 @@
 #define dnsNBNS_NAME_FLAGS                  0x6000
 #define dnsNBNS_ENCODED_NAME_LENGTH         32
 
-/*2016--12--02--10--54--00(ZJYC): å¦‚æœè¯·æ±‚çš„åå­—ä¸å™¨ä»¶åå­—åŒ¹é…ï¼Œå›å¤ä¸­å°†ä¼šå¸¦ç€æ­¤æ ‡å¿—   */ 
+/*2016--12--02--10--54--00(ZJYC): Èç¹ûÇëÇóµÄÃû×ÖÓëÆ÷¼şÃû×ÖÆ¥Åä£¬»Ø¸´ÖĞ½«»á´ø×Å´Ë±êÖ¾   */ 
 #define dnsNBNS_QUERY_RESPONSE_FLAGS    ( 0x8500 )
 
-/*2016--12--02--10--54--40(ZJYC): åˆ›å»ºå¥—æ¥å­—å¹¶ç»‘å®šåˆ°æ ‡å‡†DNSç«¯å£ï¼Œè¿”å›åˆ›å»ºçš„å¥—æ¥å­—
-å¦‚æœä¸ºNULLï¼Œï¼Œï¼Œåˆ™ä¸ç»‘å®š   */ 
+/*2016--12--02--10--54--40(ZJYC): ´´½¨Ì×½Ó×Ö²¢°ó¶¨µ½±ê×¼DNS¶Ë¿Ú£¬·µ»Ø´´½¨µÄÌ×½Ó×Ö
+Èç¹ûÎªNULL£¬£¬£¬Ôò²»°ó¶¨   */ 
 static Socket_t prvCreateDNSSocket( void );
 
-/*2016--12--02--10--55--41(ZJYC): åœ¨ç¬¬ä¸€ä¸ªå‚æ•°ä¼ é€’çš„é›¶å¤åˆ¶ç¼“å†²åŒºä¸­åˆ›å»ºDNSä¿¡æ¯   */ 
+/*2016--12--02--10--55--41(ZJYC): ÔÚµÚÒ»¸ö²ÎÊı´«µİµÄÁã¸´ÖÆ»º³åÇøÖĞ´´½¨DNSĞÅÏ¢   */ 
 static size_t prvCreateDNSMessage( uint8_t *pucUDPPayloadBuffer, const char *pcHostName, TickType_t xIdentifier );
 
-/*2016--12--02--10--56--31(ZJYC): è·³è¿‡èµ„æºè®°å½•ä¸­çš„åå­—åŒºåŸŸ   */ 
+/*2016--12--02--10--56--31(ZJYC): Ìø¹ı×ÊÔ´¼ÇÂ¼ÖĞµÄÃû×ÖÇøÓò   */ 
 static uint8_t *prvSkipNameField( uint8_t *pucByte );
 
-/*2016--12--02--10--57--28(ZJYC): å¤„ç†æ¥è‡ªDNSæœåŠ¡å™¨çš„å›å¤   */ 
+/*2016--12--02--10--57--28(ZJYC): ´¦ÀíÀ´×ÔDNS·şÎñÆ÷µÄ»Ø¸´   */ 
 static uint32_t prvParseDNSReply( uint8_t *pucUDPPayloadBuffer, TickType_t xIdentifier );
 
-/*2016--12--02--10--57--55(ZJYC): å‡†å¤‡å‘é€DNSæ¶ˆæ¯åˆ°DNSæœåŠ¡å™¨ï¼ŒxReadTimeOut_msä¸º0 ä»¥é˜²
-ç”¨æˆ·æä¾›äº†å›è°ƒå‡½æ•°   */ 
+/*2016--12--02--10--57--55(ZJYC): ×¼±¸·¢ËÍDNSÏûÏ¢µ½DNS·şÎñÆ÷£¬xReadTimeOut_msÎª0 ÒÔ·À
+ÓÃ»§Ìá¹©ÁË»Øµ÷º¯Êı   */ 
 static uint32_t prvGetHostByName( const char *pcHostName, TickType_t xIdentifier, TickType_t xReadTimeOut_ms );
 
-/*2016--12--02--10--59--02(ZJYC): NBNSåè®®å’ŒLLMNRåè®®å…±äº«å›å¤å‡½æ•°   */ 
+/*2016--12--02--10--59--02(ZJYC): NBNSĞ­ÒéºÍLLMNRĞ­Òé¹²Ïí»Ø¸´º¯Êı   */ 
 #if( ( ipconfigUSE_NBNS == 1 ) || ( ipconfigUSE_LLMNR == 1 ) )
     static void prvReplyDNSMessage( NetworkBufferDescriptor_t *pxNetworkBuffer, BaseType_t lNetLength );
 #endif
@@ -103,9 +103,9 @@ static uint32_t prvGetHostByName( const char *pcHostName, TickType_t xIdentifier
 
     typedef struct xDNS_CACHE_TABLE_ROW
     {
-        uint32_t ulIPAddress;       /*2016--12--02--11--00--00(ZJYC): ARPç¼“å­˜å…¥å£çš„IPåœ°å€   */ 
-        char pcName[ipconfigDNS_CACHE_NAME_LENGTH];  /*2016--12--02--11--00--30(ZJYC): ä¸»æœºåç§°   */ 
-        uint8_t ucAge;              /*2016--12--02--11--01--41(ZJYC): å‘¨æœŸé€’å‡çš„æ•°å€¼ï¼Œå¯ä»¥è¢«æ²Ÿé€šåˆ·æ–°ï¼Œå¦‚æœåˆ°è¾¾0ï¼ŒARPç¼“å­˜è¡¨ä¸­å¯¹åº”çš„é¡¹ä¼šè¢«æ¸…é™¤   */ 
+        uint32_t ulIPAddress;       /*2016--12--02--11--00--00(ZJYC): ARP»º´æÈë¿ÚµÄIPµØÖ·   */ 
+        char pcName[ipconfigDNS_CACHE_NAME_LENGTH];  /*2016--12--02--11--00--30(ZJYC): Ö÷»úÃû³Æ   */ 
+        uint8_t ucAge;              /*2016--12--02--11--01--41(ZJYC): ÖÜÆÚµİ¼õµÄÊıÖµ£¬¿ÉÒÔ±»¹µÍ¨Ë¢ĞÂ£¬Èç¹ûµ½´ï0£¬ARP»º´æ±íÖĞ¶ÔÓ¦µÄÏî»á±»Çå³ı   */ 
     } DNSCacheRow_t;
 
     static DNSCacheRow_t xDNSCache[ ipconfigDNS_CACHE_ENTRIES ];
@@ -130,8 +130,8 @@ struct xDNSMessage
 #include "pack_struct_end.h"
 typedef struct xDNSMessage DNSMessage_t;
 
-/*2016--12--02--11--02--53(ZJYC): DNSæŸ¥è¯¢åŒ…æ‹¬å¤´éƒ¨ï¼ˆå¦‚xDNSMessageæè¿°ï¼‰ï¼Œç´§éšå…¶åçš„äº‹1æˆ–å¤šä¸ªé—®é¢˜
-æ¯ä¸€ä¸ªåŒ…æ‹¬åç§°å’Œç±»å‹å’Œclass   */ 
+/*2016--12--02--11--02--53(ZJYC): DNS²éÑ¯°üÀ¨Í·²¿£¨ÈçxDNSMessageÃèÊö£©£¬½ôËæÆäºóµÄÊÂ1»ò¶à¸öÎÊÌâ
+Ã¿Ò»¸ö°üÀ¨Ãû³ÆºÍÀàĞÍºÍclass   */ 
 #include "pack_struct_start.h"
 struct xDNSTail
 {
@@ -147,7 +147,7 @@ typedef struct xDNSTail DNSTail_t;
     struct xLLMNRAnswer
     {
         uint8_t ucNameCode;
-        uint8_t ucNameOffset;   /*2016--12--02--13--39--40(ZJYC): åç§°ä¸ä¼šé‡å¤å‡ºç°ï¼Œåªä¼šç»™ä¸ä¸€åç§»é‡   */ 
+        uint8_t ucNameOffset;   /*2016--12--02--13--39--40(ZJYC): Ãû³Æ²»»áÖØ¸´³öÏÖ£¬Ö»»á¸øÓëÒ»Æ«ÒÆÁ¿   */ 
         uint16_t usType;
         uint16_t usClass;
         uint32_t ulTTL;
@@ -209,8 +209,8 @@ typedef struct xDNSTail DNSTail_t;
 #if( ipconfigDNS_USE_CALLBACKS != 0 )
 
     typedef struct xDNS_Callback {
-        TickType_t xRemaningTime;       /*2016--12--02--13--40--31(ZJYC): è¶…æ—¶mså•ä½   */ 
-        FOnDNSEvent pCallbackFunction;  /*2016--12--02--13--40--47(ZJYC): å½“è¶…æ—¶æˆ–è€…è·å–ä¸€IPåœ°å€ä¹‹åè°ƒç”¨çš„å‡½æ•°   */ 
+        TickType_t xRemaningTime;       /*2016--12--02--13--40--31(ZJYC): ³¬Ê±msµ¥Î»   */ 
+        FOnDNSEvent pCallbackFunction;  /*2016--12--02--13--40--47(ZJYC): µ±³¬Ê±»òÕß»ñÈ¡Ò»IPµØÖ·Ö®ºóµ÷ÓÃµÄº¯Êı   */ 
         TimeOut_t xTimeoutState;
         void *pvSearchID;
         struct xLIST_ITEM xListItem;
@@ -223,15 +223,15 @@ typedef struct xDNSTail DNSTail_t;
         return FreeRTOS_gethostbyname_a( pcHostName, ( FOnDNSEvent ) NULL, ( void* )NULL, 0 );
     }
     /*-----------------------------------------------------------*/
-    /*2016--12--02--13--41--48(ZJYC): åˆå§‹åŒ–å›è°ƒç»“æ„   */ 
+    /*2016--12--02--13--41--48(ZJYC): ³õÊ¼»¯»Øµ÷½á¹¹   */ 
     void vDNSInitialise( void );
     void vDNSInitialise( void )
     {
         vListInitialise( &xCallbackList );
     }
     /*-----------------------------------------------------------*/
-    /*2016--12--02--14--06--08(ZJYC): éå†å›è°ƒç»“æ„ä½“å¹¶ä¸”åˆ é™¤æ—§çš„è¶…æ—¶çš„
-    ä¸€æ—¦åˆ—è¡¨å˜ä¸ºç©ºï¼ŒDNSè®¡æ—¶å™¨å°†ä¼šåœæ­¢ï¼Œç”¨æˆ·å–æ¶ˆDNSè¯·æ±‚ï¼Œåˆ™ä¼šæä¾›pvSearchID
+    /*2016--12--02--14--06--08(ZJYC): ±éÀú»Øµ÷½á¹¹Ìå²¢ÇÒÉ¾³ı¾ÉµÄ³¬Ê±µÄ
+    Ò»µ©ÁĞ±í±äÎª¿Õ£¬DNS¼ÆÊ±Æ÷½«»áÍ£Ö¹£¬ÓÃ»§È¡ÏûDNSÇëÇó£¬Ôò»áÌá¹©pvSearchID
     */ 
     void vDNSCheckCallBack( void *pvSearchID );
     void vDNSCheckCallBack( void *pvSearchID )
@@ -246,7 +246,7 @@ typedef struct xDNSTail DNSTail_t;
                   )
             {
                 DNSCallback_t *pxCallback = ( DNSCallback_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
-                /*2016--12--02--14--08--31(ZJYC): èµ°åˆ°ä¸‹ä¸€ä¸ªåˆ—è¡¨å› ä¸ºæˆ‘ä»¬è¦åˆ æ‰è¿™ä¸ªåˆ—è¡¨   */ 
+                /*2016--12--02--14--08--31(ZJYC): ×ßµ½ÏÂÒ»¸öÁĞ±íÒòÎªÎÒÃÇÒªÉ¾µôÕâ¸öÁĞ±í   */ 
                 pxIterator  = ( const ListItem_t * ) listGET_NEXT( pxIterator );
                 if( ( pvSearchID != NULL ) && ( pvSearchID == pxCallback->pvSearchID ) )
                 {
@@ -276,20 +276,20 @@ typedef struct xDNSTail DNSTail_t;
         vDNSCheckCallBack( pvSearchID );
     }
     /*-----------------------------------------------------------*/
-    /*2016--12--02--14--09--16(ZJYC): FreeRTOS_gethostbyname_a()ä¼´éšç€å›è°ƒå‚æ•°è°ƒç”¨
-    å­˜å‚¨ä¹‹ä»¥ä¾¿åç»­ä½¿ç”¨*/ 
+    /*2016--12--02--14--09--16(ZJYC): FreeRTOS_gethostbyname_a()°éËæ×Å»Øµ÷²ÎÊıµ÷ÓÃ
+    ´æ´¢Ö®ÒÔ±ãºóĞøÊ¹ÓÃ*/ 
     static void vDNSSetCallBack( const char *pcHostName, void *pvSearchID, FOnDNSEvent pCallbackFunction, TickType_t xTimeout, TickType_t xIdentifier );
     static void vDNSSetCallBack( const char *pcHostName, void *pvSearchID, FOnDNSEvent pCallbackFunction, TickType_t xTimeout, TickType_t xIdentifier )
     {
         size_t lLength = strlen( pcHostName );
         DNSCallback_t *pxCallback = ( DNSCallback_t * )pvPortMalloc( sizeof( *pxCallback ) + lLength );
-        /*2016--12--02--14--10--26(ZJYC): ç”±msè½¬å˜ä¸ºæ—¶é’Ÿæ»´ç­”   */ 
+        /*2016--12--02--14--10--26(ZJYC): ÓÉms×ª±äÎªÊ±ÖÓµÎ´ğ   */ 
         xTimeout /= portTICK_PERIOD_MS;
         if( pxCallback != NULL )
         {
             if( listLIST_IS_EMPTY( &xCallbackList ) )
             {
-                /*2016--12--02--14--10--54(ZJYC): è¿™æ˜¯ç¬¬ä¸€ä¸ªï¼Œå¯åŠ¨DNSå®šæ—¶å™¨æ¥æ£€æŸ¥æ˜¯å¦è¶…æ—¶   */ 
+                /*2016--12--02--14--10--54(ZJYC): ÕâÊÇµÚÒ»¸ö£¬Æô¶¯DNS¶¨Ê±Æ÷À´¼ì²éÊÇ·ñ³¬Ê±   */ 
                 vIPReloadDNSTimer( FreeRTOS_min_uint32( 1000U, xTimeout ) );
             }
             strcpy( pxCallback->pcName, pcHostName );
@@ -307,8 +307,8 @@ typedef struct xDNSTail DNSTail_t;
         }
     }
     /*-----------------------------------------------------------*/
-    /*2016--12--02--14--11--25(ZJYC): DNSå›å¤è¢«æ¥æ”¶ï¼Œçœ‹çœ‹æ˜¯å¦æœ‰åŒ¹é…çš„
-    å…¥å£å¹¶è°ƒç”¨å¥æŸ„*/ 
+    /*2016--12--02--14--11--25(ZJYC): DNS»Ø¸´±»½ÓÊÕ£¬¿´¿´ÊÇ·ñÓĞÆ¥ÅäµÄ
+    Èë¿Ú²¢µ÷ÓÃ¾ä±ú*/ 
     static void vDNSDoCallback( TickType_t xIdentifier, const char *pcName, uint32_t ulIPAddress );
     static void vDNSDoCallback( TickType_t xIdentifier, const char *pcName, uint32_t ulIPAddress )
     {
@@ -350,10 +350,10 @@ uint32_t FreeRTOS_gethostbyname_a( const char *pcHostName, FOnDNSEvent pCallback
 uint32_t ulIPAddress = 0UL;
 static uint16_t usIdentifier = 0u;
 TickType_t xReadTimeOut_ms = 1200U;
-/*2016--12--02--14--12--15(ZJYC): äº§ç”Ÿä¸€ç‹¬ä¸€çš„æ ‡ç¤ºç¬¦ï¼ŒæŠŠä»–ä¿å­˜åœ¨å±€éƒ¨å˜é‡
-å› ä¸º gethostbyname() ä¼šè¢«ä¸åŒçš„çº¿ç¨‹è°ƒç”¨   */ 
+/*2016--12--02--14--12--15(ZJYC): ²úÉúÒ»¶ÀÒ»µÄ±êÊ¾·û£¬°ÑËû±£´æÔÚ¾Ö²¿±äÁ¿
+ÒòÎª gethostbyname() »á±»²»Í¬µÄÏß³Ìµ÷ÓÃ   */ 
 TickType_t xIdentifier = ( TickType_t )usIdentifier++;
-    /*2016--12--02--14--13--22(ZJYC): å¦‚æœä½¿èƒ½DNSç¼“å­˜ï¼Œé¦–å…ˆä¼šæ£€æŸ¥æ˜¯å¦æœ‰è¿™ä¸ªå­˜å‚¨é¡¹   */ 
+    /*2016--12--02--14--13--22(ZJYC): Èç¹ûÊ¹ÄÜDNS»º´æ£¬Ê×ÏÈ»á¼ì²éÊÇ·ñÓĞÕâ¸ö´æ´¢Ïî   */ 
     #if( ipconfigUSE_DNS_CACHE == 1 )
     {
         ulIPAddress = FreeRTOS_dnslookup( pcHostName );
@@ -374,13 +374,13 @@ TickType_t xIdentifier = ( TickType_t )usIdentifier++;
         {
             if( ulIPAddress == 0UL )
             {
-                /*2016--12--02--14--14--13(ZJYC): ç”¨æˆ·æä¾›äº†å›è°ƒå‡½æ•°ï¼Œæ‰€ä»¥ï¼Œä¸èƒ½åœ¨recvfrom()å µå¡   */ 
+                /*2016--12--02--14--14--13(ZJYC): ÓÃ»§Ìá¹©ÁË»Øµ÷º¯Êı£¬ËùÒÔ£¬²»ÄÜÔÚrecvfrom()¶ÂÈû   */ 
                 xReadTimeOut_ms  = 0;
                 vDNSSetCallBack( pcHostName, pvSearchID, pCallback, xTimeout, ( TickType_t ) xIdentifier );
             }
             else
             {
-                /*2016--12--02--14--14--47(ZJYC): å¦‚æœIPåœ°å€çŸ¥æ™“äº†ï¼Œæ‰§è¡Œå›è°ƒå‡½æ•°   */ 
+                /*2016--12--02--14--14--47(ZJYC): Èç¹ûIPµØÖ·ÖªÏşÁË£¬Ö´ĞĞ»Øµ÷º¯Êı   */ 
                 pCallback( pcHostName, pvSearchID, ulIPAddress );
             }
         }
@@ -411,8 +411,8 @@ TickType_t xWriteTimeOut_ms = 100U;
 #if( ipconfigUSE_LLMNR == 1 )
     BaseType_t bHasDot = pdFALSE;
 #endif /* ipconfigUSE_LLMNR == 1 */
-    /*2016--12--02--14--15--41(ZJYC): å¦‚æœLLMNRè¢«ä½¿ç”¨ï¼Œç„¶ååˆ¤æ–­æ˜¯å¦ä¸»æœºååŒ…æ‹¬'.'ï¼Œ
-    å¦‚æœä¸ï¼ŒLLMNRå¯ä»¥è¢«ä½œä¸ºä¸€ç§æœç´¢æ–¹æ³•*/ 
+    /*2016--12--02--14--15--41(ZJYC): Èç¹ûLLMNR±»Ê¹ÓÃ£¬È»ºóÅĞ¶ÏÊÇ·ñÖ÷»úÃû°üÀ¨'.'£¬
+    Èç¹û²»£¬LLMNR¿ÉÒÔ±»×÷ÎªÒ»ÖÖËÑË÷·½·¨*/ 
     #if( ipconfigUSE_LLMNR == 1 )
     {
         const char *pucPtr;
@@ -426,7 +426,7 @@ TickType_t xWriteTimeOut_ms = 100U;
         }
     }
     #endif /* ipconfigUSE_LLMNR == 1 */
-    /*2016--12--02--14--19--21(ZJYC): åè¾¹é‚£ä¸ª2æ˜¯ç»“æŸç¬¦å’Œ   */ 
+    /*2016--12--02--14--19--21(ZJYC): ºó±ßÄÇ¸ö2ÊÇ½áÊø·ûºÍ   */ 
     /* Two is added at the end for the count of characters in the first
     subdomain part and the string end byte. */
     xExpectedPayloadLength = sizeof( DNSMessage_t ) + strlen( pcHostName ) + sizeof( uint16_t ) + sizeof( uint16_t ) + 2u;
@@ -440,22 +440,22 @@ TickType_t xWriteTimeOut_ms = 100U;
 
         for( xAttempt = 0; xAttempt < ipconfigDNS_REQUEST_ATTEMPTS; xAttempt++ )
         {
-            /*2016--12--02--14--21--06(ZJYC): è·å–ä¸€ç¼“å†²ï¼Œä½¿ç”¨æœ€å¤§çš„å»¶è¿Ÿï¼Œä½†æ˜¯å»¶è¿Ÿä¼šè¢«
-            é™åˆ¶åœ¨ipconfigUDP_MAX_SEND_BLOCK_TIME_TICKSæ‰€ä»¥è¿”å›å€¼éœ€è¦è¢«æ£€æŸ¥*/ 
+            /*2016--12--02--14--21--06(ZJYC): »ñÈ¡Ò»»º³å£¬Ê¹ÓÃ×î´óµÄÑÓ³Ù£¬µ«ÊÇÑÓ³Ù»á±»
+            ÏŞÖÆÔÚipconfigUDP_MAX_SEND_BLOCK_TIME_TICKSËùÒÔ·µ»ØÖµĞèÒª±»¼ì²é*/ 
             pucUDPPayloadBuffer = ( uint8_t * ) FreeRTOS_GetUDPPayloadBuffer( xExpectedPayloadLength, portMAX_DELAY );
             if( pucUDPPayloadBuffer != NULL )
             {
-                /*2016--12--02--14--22--11(ZJYC): åœ¨è·å–çš„ç¼“å†²åŠ›äº§ç”ŸDNSæ¶ˆæ¯   */ 
+                /*2016--12--02--14--22--11(ZJYC): ÔÚ»ñÈ¡µÄ»º³åÁ¦²úÉúDNSÏûÏ¢   */ 
                 xPayloadLength = prvCreateDNSMessage( pucUDPPayloadBuffer, pcHostName, xIdentifier );
                 iptraceSENDING_DNS_REQUEST();
-                /*2016--12--02--14--22--40(ZJYC): è·å–DNSæœåŠ¡å™¨åœ°å€   */ 
+                /*2016--12--02--14--22--40(ZJYC): »ñÈ¡DNS·şÎñÆ÷µØÖ·   */ 
                 FreeRTOS_GetAddressConfiguration( NULL, NULL, NULL, &ulIPAddress );
-                /*2016--12--02--14--22--58(ZJYC): å‘é€DNSæ¶ˆæ¯   */ 
+                /*2016--12--02--14--22--58(ZJYC): ·¢ËÍDNSÏûÏ¢   */ 
                 /* Send the DNS message. */
 #if( ipconfigUSE_LLMNR == 1 )
                 if( bHasDot == pdFALSE )
                 {
-                    /*2016--12--02--14--23--13(ZJYC): ä½¿ç”¨LLMNRåœ°å€   */ 
+                    /*2016--12--02--14--23--13(ZJYC): Ê¹ÓÃLLMNRµØÖ·   */ 
                     ( ( DNSMessage_t * ) pucUDPPayloadBuffer) -> usFlags = 0;
                     xAddress.sin_addr = ipLLMNR_IP_ADDR;    /* Is in network byte order. */
                     xAddress.sin_port = FreeRTOS_ntohs( ipLLMNR_PORT );
@@ -463,20 +463,20 @@ TickType_t xWriteTimeOut_ms = 100U;
                 else
 #endif
                 {
-                    /*2016--12--02--14--23--44(ZJYC): ä½¿ç”¨DNSæœåŠ¡å™¨   */ 
+                    /*2016--12--02--14--23--44(ZJYC): Ê¹ÓÃDNS·şÎñÆ÷   */ 
                     xAddress.sin_addr = ulIPAddress;
                     xAddress.sin_port = dnsDNS_PORT;
                 }
                 ulIPAddress = 0UL;
                 if( FreeRTOS_sendto( xDNSSocket, pucUDPPayloadBuffer, xPayloadLength, FREERTOS_ZERO_COPY, &xAddress, sizeof( xAddress ) ) != 0 )
                 {
-                    /*2016--12--02--14--24--10(ZJYC): ç­‰å¾…å›å¤   */ 
+                    /*2016--12--02--14--24--10(ZJYC): µÈ´ı»Ø¸´   */ 
                     lBytes = FreeRTOS_recvfrom( xDNSSocket, &pucUDPPayloadBuffer, 0, FREERTOS_ZERO_COPY, &xAddress, &ulAddressLength );
                     if( lBytes > 0 )
                     {
-                        /*2016--12--02--14--31--16(ZJYC): æ”¶åˆ°å›å¤ï¼Œå¤„ç†å®ƒ   */ 
+                        /*2016--12--02--14--31--16(ZJYC): ÊÕµ½»Ø¸´£¬´¦ÀíËü   */ 
                         ulIPAddress = prvParseDNSReply( pucUDPPayloadBuffer, xIdentifier );
-                        /*2016--12--02--14--31--32(ZJYC): å¤„ç†å®Œæ¯•ï¼Œé›¶å¤åˆ¶æ¥å£å·²ç»è¢«ä½¿ç”¨ï¼Œæ‰€ä»¥ç¼“å†²å¯ä»¥è¢«é‡Šæ”¾äº†   */ 
+                        /*2016--12--02--14--31--32(ZJYC): ´¦ÀíÍê±Ï£¬Áã¸´ÖÆ½Ó¿ÚÒÑ¾­±»Ê¹ÓÃ£¬ËùÒÔ»º³å¿ÉÒÔ±»ÊÍ·ÅÁË   */ 
                         FreeRTOS_ReleaseUDPPayloadBuffer( ( void * ) pucUDPPayloadBuffer );
                         if( ulIPAddress != 0UL )
                         {
@@ -487,7 +487,7 @@ TickType_t xWriteTimeOut_ms = 100U;
                 }
                 else
                 {
-                    /*2016--12--02--14--42--05(ZJYC): ä¿¡æ¯æ²¡æœ‰è¢«å‘é€ï¼Œæ‰€ä»¥ä¸ä¼šé€šè¿‡é›¶å¤åˆ¶é‡Šæ”¾ï¼Œå¿…é¡»åœ¨è¿™é‡Œé‡Šæ”¾   */ 
+                    /*2016--12--02--14--42--05(ZJYC): ĞÅÏ¢Ã»ÓĞ±»·¢ËÍ£¬ËùÒÔ²»»áÍ¨¹ıÁã¸´ÖÆÊÍ·Å£¬±ØĞëÔÚÕâÀïÊÍ·Å   */ 
                     FreeRTOS_ReleaseUDPPayloadBuffer( ( void * ) pucUDPPayloadBuffer );
                 }
             }
@@ -507,29 +507,29 @@ uint8_t *pucStart, *pucByte;
 DNSTail_t *pxTail;
 static const DNSMessage_t xDefaultPartDNSHeader =
 {
-    0,                  /*2016--12--02--14--44--07(ZJYC): æ ‡ç¤ºç¬¦ä¼šè¢«é‡å†™   */ 
-    dnsOUTGOING_FLAGS,  /*2016--12--02--14--45--33(ZJYC): æ ‡å‡†è¯·æ±‚   */ 
-    dnsONE_QUESTION,    /*2016--12--02--14--45--44(ZJYC): åªæœ‰ä¸€ä¸ªé—®é¢˜   */ 
-    0,                  /*2016--12--02--14--45--55(ZJYC): æ²¡æœ‰å›å¤   */ 
-    0,                  /*2016--12--02--14--46--05(ZJYC): æ²¡æœ‰æƒå¨   */ 
-    0                   /*2016--12--02--14--46--16(ZJYC): æ²¡æœ‰é¢å¤–   */ 
+    0,                  /*2016--12--02--14--44--07(ZJYC): ±êÊ¾·û»á±»ÖØĞ´   */ 
+    dnsOUTGOING_FLAGS,  /*2016--12--02--14--45--33(ZJYC): ±ê×¼ÇëÇó   */ 
+    dnsONE_QUESTION,    /*2016--12--02--14--45--44(ZJYC): Ö»ÓĞÒ»¸öÎÊÌâ   */ 
+    0,                  /*2016--12--02--14--45--55(ZJYC): Ã»ÓĞ»Ø¸´   */ 
+    0,                  /*2016--12--02--14--46--05(ZJYC): Ã»ÓĞÈ¨Íş   */ 
+    0                   /*2016--12--02--14--46--16(ZJYC): Ã»ÓĞ¶îÍâ   */ 
 };
 
-    /*2016--12--02--14--46--33(ZJYC): å¤åˆ¶å¤´éƒ¨å¸¸é‡éƒ¨åˆ†   */ 
+    /*2016--12--02--14--46--33(ZJYC): ¸´ÖÆÍ·²¿³£Á¿²¿·Ö   */ 
     memcpy( ( void * ) pucUDPPayloadBuffer, ( void * ) &xDefaultPartDNSHeader, sizeof( xDefaultPartDNSHeader ) );
-    /*2016--12--02--14--46--51(ZJYC): å†™å…¥å”¯ä¸€æ ‡è¯†å·   */ 
+    /*2016--12--02--14--46--51(ZJYC): Ğ´ÈëÎ¨Ò»±êÊ¶ºÅ   */ 
     pxDNSMessageHeader = ( DNSMessage_t * ) pucUDPPayloadBuffer;
     pxDNSMessageHeader->usIdentifier = ( uint16_t ) xIdentifier;
-    /*2016--12--02--14--47--04(ZJYC): åœ¨å¤´éƒ¨æœ«å°¾åˆ›å»ºèµ„æºè®°å½•ï¼Œé¦–å…ˆæ‰¾åˆ°å¤´çš„å°¾éƒ¨   */ 
+    /*2016--12--02--14--47--04(ZJYC): ÔÚÍ·²¿Ä©Î²´´½¨×ÊÔ´¼ÇÂ¼£¬Ê×ÏÈÕÒµ½Í·µÄÎ²²¿   */ 
     pucStart = pucUDPPayloadBuffer + sizeof( xDefaultPartDNSHeader );
-    /*2016--12--02--14--47--52(ZJYC): ä¸ºé•¿åº¦å­—èŠ‚ç•™å‡ºç©ºé—´   */ 
+    /*2016--12--02--14--47--52(ZJYC): Îª³¤¶È×Ö½ÚÁô³ö¿Õ¼ä   */ 
     pucByte = pucStart + 1;
-    /*2016--12--02--14--48--26(ZJYC): å¤åˆ¶ä¸»æœºå   */ 
+    /*2016--12--02--14--48--26(ZJYC): ¸´ÖÆÖ÷»úÃû   */ 
     strcpy( ( char * ) pucByte, pcHostName );
-    /*2016--12--02--14--48--59(ZJYC): æ ‡è®°å­—ç¬¦ç»“æŸä½   */ 
+    /*2016--12--02--14--48--59(ZJYC): ±ê¼Ç×Ö·û½áÊøÎ»   */ 
     pucByte += strlen( pcHostName );
     *pucByte = 0x00u;
-    /*2016--12--02--14--49--15(ZJYC): éå†å¹¶æ›¿æ¢'.'ä¸ºé•¿åº¦   */ 
+    /*2016--12--02--14--49--15(ZJYC): ±éÀú²¢Ìæ»»'.'Îª³¤¶È   */ 
     pucByte = pucStart;
     do
     {
@@ -538,17 +538,17 @@ static const DNSMessage_t xDefaultPartDNSHeader =
         {
             pucByte++;
         }
-        /*2016--12--02--14--49--40(ZJYC): å¡«å……å­—èŠ‚è®¡æ•°   */ 
+        /*2016--12--02--14--49--40(ZJYC): Ìî³ä×Ö½Ú¼ÆÊı   */ 
         *pucStart = ( uint8_t ) ( ( uint32_t ) pucByte - ( uint32_t ) pucStart );
         ( *pucStart )--;
         pucStart = pucByte;
     } while( *pucByte != 0x00 );
-    /*2016--12--02--14--50--14(ZJYC): å®Œæˆè®°å½•çš„å¡«å……   */ 
+    /*2016--12--02--14--50--14(ZJYC): Íê³É¼ÇÂ¼µÄÌî³ä   */ 
     pxTail = (DNSTail_t *)( pucByte + 1 );
     vSetField16( pxTail, DNSTail_t, usType, dnsTYPE_A_HOST );   /* Type A: host */
     vSetField16( pxTail, DNSTail_t, usClass, dnsCLASS_IN ); /* 1: Class IN */
-    /*2016--12--02--14--50--36(ZJYC): è¿”å›æ‰€äº§ç”Ÿä¿¡æ¯çš„æ€»é•¿åº¦ï¼Œèµ·å§‹äºæœ€åä¸€ä¸ªè¢«å†™å…¥çš„å­—èŠ‚
-    ç»“æŸäºç¼“å†²å¤´éƒ¨*/ 
+    /*2016--12--02--14--50--36(ZJYC): ·µ»ØËù²úÉúĞÅÏ¢µÄ×Ü³¤¶È£¬ÆğÊ¼ÓÚ×îºóÒ»¸ö±»Ğ´ÈëµÄ×Ö½Ú
+    ½áÊøÓÚ»º³åÍ·²¿*/ 
     return ( ( uint32_t ) pucByte - ( uint32_t ) pucUDPPayloadBuffer + 1 ) + sizeof( *pxTail );
 }
 /*-----------------------------------------------------------*/
@@ -557,15 +557,15 @@ static const DNSMessage_t xDefaultPartDNSHeader =
     static uint8_t *prvReadNameField( uint8_t *pucByte, char *pcName, BaseType_t xLen )
     {
     BaseType_t xNameLen = 0;
-        /*2016--12--02--14--51--57(ZJYC): åˆ¤æ–­æ˜¯å¦åå­—ä¸ºå®Œå…¨ç¼–ç åç§°ï¼Œæˆ–è€…æ˜¯ä¸€ä¸ªåç§»æŒ‡å‘å…¶ä»–åœ°æ–¹   */ 
+        /*2016--12--02--14--51--57(ZJYC): ÅĞ¶ÏÊÇ·ñÃû×ÖÎªÍêÈ«±àÂëÃû³Æ£¬»òÕßÊÇÒ»¸öÆ«ÒÆÖ¸ÏòÆäËûµØ·½   */ 
         if( ( *pucByte & dnsNAME_IS_OFFSET ) == dnsNAME_IS_OFFSET )
         {
-            /*2016--12--02--14--53--10(ZJYC): è·³è¿‡ä¸¤å­—èŠ‚åç§»   */ 
+            /*2016--12--02--14--53--10(ZJYC): Ìø¹ıÁ½×Ö½ÚÆ«ÒÆ   */ 
             pucByte += sizeof( uint16_t );
         }
         else
         {
-            /*2016--12--02--14--53--33(ZJYC): pucByteæŒ‡å‘å…¨å­—ç¬¦ç¼–ç ï¼Œéå†å­—ç¬¦ä¸²   */ 
+            /*2016--12--02--14--53--33(ZJYC): pucByteÖ¸ÏòÈ«×Ö·û±àÂë£¬±éÀú×Ö·û´®   */ 
             while( *pucByte != 0x00 )
             {
                 BaseType_t xCount;
@@ -588,7 +588,7 @@ static const DNSMessage_t xDefaultPartDNSHeader =
 
 static uint8_t *prvSkipNameField( uint8_t *pucByte )
 {
-    /*2016--12--02--14--54--10(ZJYC): å†³å®šæ˜¯å¦ä¸ºå…¨å­—ç¬¦åå­—ï¼Œè¿˜æ˜¯ä¸€åç§»æŒ‡å‘å…¶ä»–åœ°æ–¹   */ 
+    /*2016--12--02--14--54--10(ZJYC): ¾ö¶¨ÊÇ·ñÎªÈ«×Ö·ûÃû×Ö£¬»¹ÊÇÒ»Æ«ÒÆÖ¸ÏòÆäËûµØ·½   */ 
     if( ( *pucByte & dnsNAME_IS_OFFSET ) == dnsNAME_IS_OFFSET )
     {
         /* Jump over the two byte offset. */
@@ -596,10 +596,10 @@ static uint8_t *prvSkipNameField( uint8_t *pucByte )
     }
     else
     {
-        /*2016--12--02--14--55--01(ZJYC): æŒ‡å‘å…¨å­—ç¬¦åï¼Œéå†å­—ç¬¦ä¸²   */ 
+        /*2016--12--02--14--55--01(ZJYC): Ö¸ÏòÈ«×Ö·ûÃû£¬±éÀú×Ö·û´®   */ 
         while( *pucByte != 0x00 )
         {
-            /*2016--12--02--14--55--28(ZJYC): æ•°é‡åˆ¶å®šäº†å…¶åçš„å­—ç¬¦ä¸²é•¿åº¦ï¼Œæ–¹ä¾¿æˆ‘ä»¬è·³è¿‡   */ 
+            /*2016--12--02--14--55--28(ZJYC): ÊıÁ¿ÖÆ¶¨ÁËÆäºóµÄ×Ö·û´®³¤¶È£¬·½±ãÎÒÃÇÌø¹ı   */ 
             pucByte += ( *pucByte + 1 );
         }
         pucByte++;
@@ -615,7 +615,7 @@ DNSMessage_t *pxDNSMessageHeader = ( DNSMessage_t * ) pucUDPPayloadBuffer;
 
     prvParseDNSReply( pucUDPPayloadBuffer, ( uint32_t ) pxDNSMessageHeader->usIdentifier );
 
-    /*2016--12--02--15--24--46(ZJYC): åŒ…æ²¡æœ‰è¢«æ¶ˆè€—   */ 
+    /*2016--12--02--15--24--46(ZJYC): °üÃ»ÓĞ±»ÏûºÄ   */ 
     return pdFAIL;
 }
 /*-----------------------------------------------------------*/
@@ -629,7 +629,7 @@ DNSMessage_t *pxDNSMessageHeader = ( DNSMessage_t * ) pucUDPPayloadBuffer;
 
         prvTreatNBNS( pucUDPPayloadBuffer, pxUDPPacket->xIPHeader.ulSourceIPAddress );
 
-        /*2016--12--02--15--24--46(ZJYC): åŒ…æ²¡æœ‰è¢«æ¶ˆè€—   */ 
+        /*2016--12--02--15--24--46(ZJYC): °üÃ»ÓĞ±»ÏûºÄ   */ 
         return pdFAIL;
     }
 
@@ -655,9 +655,9 @@ uint16_t x, usDataLength, usQuestions;
     pxDNSMessageHeader = ( DNSMessage_t * ) pucUDPPayloadBuffer;
     if( pxDNSMessageHeader->usIdentifier == ( uint16_t ) xIdentifier )
     {
-        /*2016--12--02--15--25--24(ZJYC): ä»å¤´éƒ¨ä¹‹åçš„ç¬¬ä¸€ä¸ªå­—èŠ‚å¼€å§‹   */ 
+        /*2016--12--02--15--25--24(ZJYC): ´ÓÍ·²¿Ö®ºóµÄµÚÒ»¸ö×Ö½Ú¿ªÊ¼   */ 
         pucByte = pucUDPPayloadBuffer + sizeof( DNSMessage_t );
-        /*2016--12--02--15--25--42(ZJYC): è·³è¿‡æ‰€æœ‰é—®é¢˜è®°å½•   */ 
+        /*2016--12--02--15--25--42(ZJYC): Ìø¹ıËùÓĞÎÊÌâ¼ÇÂ¼   */ 
         usQuestions = FreeRTOS_ntohs( pxDNSMessageHeader->usQuestions );
         for( x = 0; x < usQuestions; x++ )
         {
@@ -677,7 +677,7 @@ uint16_t x, usDataLength, usQuestions;
             else
 #endif /* ipconfigUSE_DNS_CACHE */
             {
-                /*2016--12--02--15--26--20(ZJYC): è·³è¿‡å˜é‡é•¿   */ 
+                /*2016--12--02--15--26--20(ZJYC): Ìø¹ı±äÁ¿³¤   */ 
                 pucByte = prvSkipNameField( pucByte );
             }
             #if( ipconfigUSE_LLMNR == 1 )
@@ -688,10 +688,10 @@ uint16_t x, usDataLength, usQuestions;
             }
             #endif /* ipconfigUSE_LLMNR */
 
-            /*2016--12--02--15--26--44(ZJYC): è·³è¿‡Typeå’ŒClassåŒºåŸŸ   */ 
+            /*2016--12--02--15--26--44(ZJYC): Ìø¹ıTypeºÍClassÇøÓò   */ 
             pucByte += sizeof( uint32_t );
         }
-        /*2016--12--02--15--27--01(ZJYC): ä»å›ç­”è®°å½•å¼€å§‹å¯»æ‰¾   */ 
+        /*2016--12--02--15--27--01(ZJYC): ´Ó»Ø´ğ¼ÇÂ¼¿ªÊ¼Ñ°ÕÒ   */ 
         pxDNSMessageHeader->usAnswers = FreeRTOS_ntohs( pxDNSMessageHeader->usAnswers );
         if( ( pxDNSMessageHeader->usFlags & dnsRX_FLAGS_MASK ) == dnsEXPECTED_RX_FLAGS )
         {
@@ -699,18 +699,18 @@ uint16_t x, usDataLength, usQuestions;
             {
                 pucByte = prvSkipNameField( pucByte );
 
-                /*2016--12--02--15--28--25(ZJYC): æ˜¯å¦æ˜¯Aç±»å‹   */ 
+                /*2016--12--02--15--28--25(ZJYC): ÊÇ·ñÊÇAÀàĞÍ   */ 
                 if( usChar2u16( pucByte ) == dnsTYPE_A_HOST )
                 {
-                    /*2016--12--02--15--33--13(ZJYC): è¿™æ˜¯æˆ‘ä»¬éœ€è¦çš„è®°å½•ï¼Œè·³è¿‡ç±»å‹ï¼ŒClasså’ŒTTLï¼ŒåŠ ä¸Š
-                    ç¬¬ä¸€ä¸ªé•¿åº¦*/ 
+                    /*2016--12--02--15--33--13(ZJYC): ÕâÊÇÎÒÃÇĞèÒªµÄ¼ÇÂ¼£¬Ìø¹ıÀàĞÍ£¬ClassºÍTTL£¬¼ÓÉÏ
+                    µÚÒ»¸ö³¤¶È*/ 
                     pucByte += ( sizeof( uint32_t ) + sizeof( uint32_t ) + sizeof( uint8_t ) );
-                    /*2016--12--02--15--34--13(ZJYC): å®Œæ•´æ€§æ£€æŸ¥æ•°æ®é•¿åº¦   */ 
+                    /*2016--12--02--15--34--13(ZJYC): ÍêÕûĞÔ¼ì²éÊı¾İ³¤¶È   */ 
                     if( ( size_t ) *pucByte == sizeof( uint32_t ) )
                     {
-                        /*2016--12--02--15--34--28(ZJYC): è·³è¿‡ç¬¬äºŒä¸ªé•¿åº¦   */ 
+                        /*2016--12--02--15--34--28(ZJYC): Ìø¹ıµÚ¶ş¸ö³¤¶È   */ 
                         pucByte++;
-                        /*2016--12--02--15--38--51(ZJYC): å¤åˆ¶IPåœ°å€   */ 
+                        /*2016--12--02--15--38--51(ZJYC): ¸´ÖÆIPµØÖ·   */ 
                         memcpy( ( void * ) &ulIPAddress, ( void * ) pucByte, sizeof( uint32_t ) );
                         #if( ipconfigUSE_DNS_CACHE == 1 )
                         {
@@ -719,7 +719,7 @@ uint16_t x, usDataLength, usQuestions;
                         #endif /* ipconfigUSE_DNS_CACHE */
                         #if( ipconfigDNS_USE_CALLBACKS != 0 )
                         {
-                            /*2016--12--02--15--39--04(ZJYC): æŸ¥çœ‹æ˜¯å¦å‘ç”Ÿå¯¹äºFreeRTOS_gethostbyname_aå¼‚æ­¥è®¿é—®   */ 
+                            /*2016--12--02--15--39--04(ZJYC): ²é¿´ÊÇ·ñ·¢Éú¶ÔÓÚFreeRTOS_gethostbyname_aÒì²½·ÃÎÊ   */ 
                             vDNSDoCallback( ( TickType_t ) pxDNSMessageHeader->usIdentifier, pcName, ulIPAddress );
                         }
                         #endif  /* ipconfigDNS_USE_CALLBACKS != 0 */
@@ -728,12 +728,12 @@ uint16_t x, usDataLength, usQuestions;
                 }
                 else
                 {
-                    /*2016--12--02--15--39--48(ZJYC): è·³è¿‡typeã€classå’ŒTTL   */ 
+                    /*2016--12--02--15--39--48(ZJYC): Ìø¹ıtype¡¢classºÍTTL   */ 
                     pucByte += ( sizeof( uint32_t ) + sizeof( uint32_t ) );
-                    /*2016--12--02--15--40--10(ZJYC): å†³å®šæ•°æ®çš„é•¿åº¦   */ 
+                    /*2016--12--02--15--40--10(ZJYC): ¾ö¶¨Êı¾İµÄ³¤¶È   */ 
                     memcpy( ( void * ) &usDataLength, ( void * ) pucByte, sizeof( uint16_t ) );
                     usDataLength = FreeRTOS_ntohs( usDataLength );
-                    /*2016--12--02--15--40--30(ZJYC): è·³è¿‡æ•°æ®é•¿å’Œæ•°æ®æœ¬èº«   */ 
+                    /*2016--12--02--15--40--30(ZJYC): Ìø¹ıÊı¾İ³¤ºÍÊı¾İ±¾Éí   */ 
                     pucByte += usDataLength + sizeof( uint16_t );
                 }
             }
@@ -741,7 +741,7 @@ uint16_t x, usDataLength, usQuestions;
 #if( ipconfigUSE_LLMNR == 1 )
         else if( usQuestions && ( usType == dnsTYPE_A_HOST ) && ( usClass == dnsCLASS_IN ) )
         {
-            /*2016--12--02--15--41--06(ZJYC): è¿™ä¸æ˜¯å¯¹æˆ‘ä»¬çš„DNSçš„åº”ç­”ï¼Œæœ‰å¯èƒ½æ˜¯LLMNR   */ 
+            /*2016--12--02--15--41--06(ZJYC): Õâ²»ÊÇ¶ÔÎÒÃÇµÄDNSµÄÓ¦´ğ£¬ÓĞ¿ÉÄÜÊÇLLMNR   */ 
             if( xApplicationDNSQueryHook ( ( pcRequestedName + 1 ) ) )
             {
             int16_t usLength;
@@ -956,12 +956,12 @@ struct freertos_sockaddr xAddress;
 BaseType_t xReturn;
 TickType_t xTimeoutTime = pdMS_TO_TICKS( 200 );
 
-    /*2016--12--02--15--42--41(ZJYC): è¿™ä¸€å®šæ˜¯ç¬¬ä¸€æ¬¡è°ƒç”¨æ­¤å‡½æ•°ï¼Œåˆ›å»ºå¥—æ¥å­—   */ 
+    /*2016--12--02--15--42--41(ZJYC): ÕâÒ»¶¨ÊÇµÚÒ»´Îµ÷ÓÃ´Ëº¯Êı£¬´´½¨Ì×½Ó×Ö   */ 
     xSocket = FreeRTOS_socket( FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP );
-    /*2016--12--02--15--41--59(ZJYC): è‡ªåŠ¨ç»‘å®šç«¯å£   */ 
+    /*2016--12--02--15--41--59(ZJYC): ×Ô¶¯°ó¶¨¶Ë¿Ú   */ 
     xAddress.sin_port = 0u;
     xReturn = FreeRTOS_bind( xSocket, &xAddress, sizeof( xAddress ) );
-    /*2016--12--02--15--42--17(ZJYC): æ£€æŸ¥æ˜¯å¦ç»‘å®šæˆåŠŸï¼Œå¦åˆ™æ¸…äº†ä»–ä»¬   */ 
+    /*2016--12--02--15--42--17(ZJYC): ¼ì²éÊÇ·ñ°ó¶¨³É¹¦£¬·ñÔòÇåÁËËûÃÇ   */ 
     if( xReturn != 0 )
     {
         FreeRTOS_closesocket( xSocket );
@@ -969,7 +969,7 @@ TickType_t xTimeoutTime = pdMS_TO_TICKS( 200 );
     }
     else
     {
-        /*2016--12--02--15--43--07(ZJYC): è®¾ç½®æ¥æ”¶å’Œå‘å°„è¶…æ—¶æ—¶é•¿   */ 
+        /*2016--12--02--15--43--07(ZJYC): ÉèÖÃ½ÓÊÕºÍ·¢Éä³¬Ê±Ê±³¤   */ 
         FreeRTOS_setsockopt( xSocket, 0, FREERTOS_SO_RCVTIMEO, ( void * ) &xTimeoutTime, sizeof( TickType_t ) );
         FreeRTOS_setsockopt( xSocket, 0, FREERTOS_SO_SNDTIMEO, ( void * ) &xTimeoutTime, sizeof( TickType_t ) );
     }
@@ -1001,17 +1001,17 @@ TickType_t xTimeoutTime = pdMS_TO_TICKS( 200 );
 
         #if( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 0 )
         {
-            /*2016--12--02--15--44--59(ZJYC): è®¡ç®—IPå¤´æ ¡éªŒå’Œ   */ 
+            /*2016--12--02--15--44--59(ZJYC): ¼ÆËãIPÍ·Ğ£ÑéºÍ   */ 
             pxIPHeader->usHeaderChecksum       = 0x00;
             pxIPHeader->usHeaderChecksum       = usGenerateChecksum( 0UL, ( uint8_t * ) &( pxIPHeader->ucVersionHeaderLength ), ipSIZE_OF_IPv4_HEADER );
             pxIPHeader->usHeaderChecksum       = ~FreeRTOS_htons( pxIPHeader->usHeaderChecksum );
-            /*2016--12--02--15--44--40(ZJYC): è®¡ç®—åŒ…çš„æ£€éªŒå’Œ   */ 
+            /*2016--12--02--15--44--40(ZJYC): ¼ÆËã°üµÄ¼ìÑéºÍ   */ 
             usGenerateProtocolChecksum( ( uint8_t* ) pxUDPPacket, pdTRUE );
         }
         #endif
-        /*2016--12--02--15--43--46(ZJYC): é«˜é€ŸNICé©±åŠ¨ï¼Œå¤šå°‘ä¸ªå­—èŠ‚å¿…é¡»è¢«å‘é€   */ 
+        /*2016--12--02--15--43--46(ZJYC): ¸ßËÙNICÇı¶¯£¬¶àÉÙ¸ö×Ö½Ú±ØĞë±»·¢ËÍ   */ 
         pxNetworkBuffer->xDataLength = ( size_t ) ( lNetLength + ipSIZE_OF_IPv4_HEADER + ipSIZE_OF_UDP_HEADER + ipSIZE_OF_ETH_HEADER );
-        /*2016--12--02--15--44--20(ZJYC): å‡½æ•°å°†ä¼šå¡«å……ä»¥å¤ªç½‘åœ°å€å¹¶å‘é€ä»–   */ 
+        /*2016--12--02--15--44--20(ZJYC): º¯Êı½«»áÌî³äÒÔÌ«ÍøµØÖ·²¢·¢ËÍËû   */ 
         vReturnEthernetFrame( pxNetworkBuffer, pdFALSE );
     }
 
@@ -1026,7 +1026,7 @@ TickType_t xTimeoutTime = pdMS_TO_TICKS( 200 );
     BaseType_t xFound = pdFALSE;
     static BaseType_t xFreeEntry = 0;
 
-        /*2016--12--02--15--45--32(ZJYC): éå†DNSç¼“å­˜   */ 
+        /*2016--12--02--15--45--32(ZJYC): ±éÀúDNS»º´æ   */ 
         for( x = 0; x < ipconfigDNS_CACHE_ENTRIES; x++ )
         {
             if( xDNSCache[ x ].pcName[ 0 ] == 0 )
@@ -1035,7 +1035,7 @@ TickType_t xTimeoutTime = pdMS_TO_TICKS( 200 );
             }
             if( strncmp( xDNSCache[ x ].pcName, pcName, sizeof( xDNSCache[ x ].pcName ) ) == 0 )
             {
-                /*2016--12--02--15--45--54(ZJYC): æŸ¥æ‰¾æˆ–æ·»åŠ    */ 
+                /*2016--12--02--15--45--54(ZJYC): ²éÕÒ»òÌí¼Ó   */ 
                 if( xLookUp != pdFALSE )
                 {
                     *pulIP = xDNSCache[ x ].ulIPAddress;

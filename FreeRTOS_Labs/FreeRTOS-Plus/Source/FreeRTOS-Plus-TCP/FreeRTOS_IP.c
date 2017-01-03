@@ -22,7 +22,7 @@
 #include "NetworkBufferManagement.h"
 #include "FreeRTOS_DNS.h"
 
-/*2016--11--25--10--25--05(ZJYC): ç”¨æ¥ç¡®ä¿ç»“æ„åŒ…å…·æœ‰æœŸæœ›çš„æ•ˆæœï¼Œvolatileç”¨äºé˜²æ­¢ç¼–è¯‘å™¨è­¦å‘Šå¯¹äºå¸¸é‡ä¸å¸¸é‡çš„å¯¹æ¯”   */ 
+/*2016--11--25--10--25--05(ZJYC): ÓÃÀ´È·±£½á¹¹°ü¾ßÓĞÆÚÍûµÄĞ§¹û£¬volatileÓÃÓÚ·ÀÖ¹±àÒëÆ÷¾¯¸æ¶ÔÓÚ³£Á¿Óë³£Á¿µÄ¶Ô±È   */ 
 #define ipEXPECTED_EthernetHeader_t_SIZE    ( ( size_t ) 14 )
 #define ipEXPECTED_ARPHeader_t_SIZE         ( ( size_t ) 28 )
 #define ipEXPECTED_IPHeader_t_SIZE          ( ( size_t ) 20 )
@@ -32,13 +32,13 @@
 #define ipEXPECTED_TCPHeader_t_SIZE         ( ( size_t ) 20 )
 
 
-/*2016--11--25--10--26--48(ZJYC): ICMPåè®®å®šä¹‰   */ 
+/*2016--11--25--10--26--48(ZJYC): ICMPĞ­Òé¶¨Òå   */ 
 #define ipICMP_ECHO_REQUEST             ( ( uint8_t ) 8 )
 #define ipICMP_ECHO_REPLY               ( ( uint8_t ) 0 )
 
-/*2016--11--25--10--27--02(ZJYC):é‡è¯•åˆå§‹åŒ–åº•å±‚ç¡¬ä»¶ä¹‹é—´çš„æ—¶é—´å»¶æ—¶    */ 
+/*2016--11--25--10--27--02(ZJYC):ÖØÊÔ³õÊ¼»¯µ×²ãÓ²¼şÖ®¼äµÄÊ±¼äÑÓÊ±    */ 
 #define ipINITIALISATION_RETRY_DELAY    ( pdMS_TO_TICKS( 3000 ) )
-/*2016--11--25--10--28--21(ZJYC):å®šä¹‰ARPå®šæ—¶å™¨æ‰§è¡Œçš„é¢‘æ¬¡ï¼Œåœ¨æ—¶é—´åœ¨windowsä»¿çœŸä¸­è¦çŸ­ä¸€äº›ï¼Œå› ä¸ºwindowsä¸æ˜¯çœŸæ­£çš„æ—¶é—´    */ 
+/*2016--11--25--10--28--21(ZJYC):¶¨ÒåARP¶¨Ê±Æ÷Ö´ĞĞµÄÆµ´Î£¬ÔÚÊ±¼äÔÚwindows·ÂÕæÖĞÒª¶ÌÒ»Ğ©£¬ÒòÎªwindows²»ÊÇÕæÕıµÄÊ±¼ä    */ 
 #ifndef ipARP_TIMER_PERIOD_MS
     #ifdef _WINDOWS_
         #define ipARP_TIMER_PERIOD_MS   ( 500 ) /* For windows simulator builds. */
@@ -52,46 +52,46 @@
 #endif
 
 #if( ( ipconfigUSE_TCP == 1 ) && !defined( ipTCP_TIMER_PERIOD_MS ) )
-    /*2016--11--25--13--29--48(ZJYC):åˆå§‹åŒ–å®šæ—¶å™¨ï¼Œæˆ‘ä»¬ç»™ä»–ä¸€ä¸ªåˆå§‹çš„1S    */ 
+    /*2016--11--25--13--29--48(ZJYC):³õÊ¼»¯¶¨Ê±Æ÷£¬ÎÒÃÇ¸øËûÒ»¸ö³õÊ¼µÄ1S    */ 
     #define ipTCP_TIMER_PERIOD_MS   ( 1000 )
 #endif
-/*2016--11--25--13--30--43(ZJYC):å¦‚æœipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPESä¸º1ï¼Œ
-ä»¥å¤ªç½‘é©±åŠ¨è¿‡æ»¤åˆ°æ¥çš„æ•°æ®åŒ…ï¼Œåªé€šè¿‡é‚£äº›åè®®æ ˆè®¤ä¸ºéœ€è¦å¤„ç†çš„åŒ…ï¼Œåœ¨è¿™ç§æƒ…å†µä¸‹ï¼Œ
-ipCONSIDER_FRAME_FOR_PROCESSING()å¯ä»¥è¢«éšæ„å¤„ç½®ã€‚ä½†æ˜¯å¦‚æœipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES
-ä¸º0ï¼Œåˆ™ä»¥å¤ªç½‘é©±åŠ¨ä¼šé€šè¿‡æ‰€æœ‰çš„æ•°æ®åŒ…ï¼Œåè®®æ ˆéœ€è¦è‡ªå·±è¿›è¡Œè¿‡æ»¤ï¼Œæ­¤æ—¶ï¼ŒipCONSIDER_FRAME_FOR_PROCESSING
-éœ€è¦è°ƒç”¨eConsiderFrameForProcessing    */
+/*2016--11--25--13--30--43(ZJYC):Èç¹ûipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPESÎª1£¬
+ÒÔÌ«ÍøÇı¶¯¹ıÂËµ½À´µÄÊı¾İ°ü£¬Ö»Í¨¹ıÄÇĞ©Ğ­ÒéÕ»ÈÏÎªĞèÒª´¦ÀíµÄ°ü£¬ÔÚÕâÖÖÇé¿öÏÂ£¬
+ipCONSIDER_FRAME_FOR_PROCESSING()¿ÉÒÔ±»ËæÒâ´¦ÖÃ¡£µ«ÊÇÈç¹ûipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES
+Îª0£¬ÔòÒÔÌ«ÍøÇı¶¯»áÍ¨¹ıËùÓĞµÄÊı¾İ°ü£¬Ğ­ÒéÕ»ĞèÒª×Ô¼º½øĞĞ¹ıÂË£¬´ËÊ±£¬ipCONSIDER_FRAME_FOR_PROCESSING
+ĞèÒªµ÷ÓÃeConsiderFrameForProcessing    */
 #if ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES == 0
     #define ipCONSIDER_FRAME_FOR_PROCESSING( pucEthernetBuffer ) eConsiderFrameForProcessing( ( pucEthernetBuffer ) )
 #else
     #define ipCONSIDER_FRAME_FOR_PROCESSING( pucEthernetBuffer ) eProcessBuffer
 #endif
-/*2016--11--25--13--35--21(ZJYC):ç”¨äºå¡«å……ICMPè¯·æ±‚çš„å­—ç¬¦ï¼Œå› æ­¤ä¹Ÿæ˜¯å›åº”æŠ¥æ–‡çš„æœŸæœ›å­—ç¬¦    */ 
+/*2016--11--25--13--35--21(ZJYC):ÓÃÓÚÌî³äICMPÇëÇóµÄ×Ö·û£¬Òò´ËÒ²ÊÇ»ØÓ¦±¨ÎÄµÄÆÚÍû×Ö·û    */ 
 #define ipECHO_DATA_FILL_BYTE                       'x'
 
 #if( ipconfigBYTE_ORDER == pdFREERTOS_LITTLE_ENDIAN )
-    /*2016--11--25--13--36--26(ZJYC):ï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿ   */ 
+    /*2016--11--25--13--36--26(ZJYC):£¿£¿£¿£¿£¿£¿   */ 
     /* The bits in the two byte IP header field that make up the fragment offset value. */
     #define ipFRAGMENT_OFFSET_BIT_MASK              ( ( uint16_t ) 0xff0f )
 #else
-    /*2016--11--25--13--37--07(ZJYC):ï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿ    */ 
+    /*2016--11--25--13--37--07(ZJYC):£¿£¿£¿£¿£¿£¿    */ 
     /* The bits in the two byte IP header field that make up the fragment offset value. */
     #define ipFRAGMENT_OFFSET_BIT_MASK              ( ( uint16_t ) 0x0fff )
 #endif /* ipconfigBYTE_ORDER */
 
-/*2016--11--25--13--46--28(ZJYC):IPåè®®æ ˆåœ¨é˜»å¡çš„çŠ¶æ€ä¸‹æœ€å¤§ä¿ç•™æ—¶é—´    */ 
+/*2016--11--25--13--46--28(ZJYC):IPĞ­ÒéÕ»ÔÚ×èÈûµÄ×´Ì¬ÏÂ×î´ó±£ÁôÊ±¼ä    */ 
 #ifndef ipconfigMAX_IP_TASK_SLEEP_TIME
     #define ipconfigMAX_IP_TASK_SLEEP_TIME ( pdMS_TO_TICKS( 10000UL ) )
 #endif
-/*2016--11--25--13--47--39(ZJYC):å½“å»ºç«‹ä¸€ä¸ªæ–°çš„TCPè¿æ¥ï¼ŒulNextInitialSequenceNumberå°†ä¼šè¢«ç”¨äº
-åˆå§‹åºåˆ—å·ï¼Œå¼€å§‹çš„æ—¶å€™ulNextInitialSequenceNumberåŒ…å«ä¸€ä¸ªéšæœºçš„æ•°å­—æ˜¯éå¸¸é‡è¦çš„ï¼Œè€Œä¸”å…¶æ•°å€¼
-å¿…é¡»åŠæ—¶å¢åŠ ï¼Œä¸ºäº†é¿å…ç¬¬ä¸‰æ–¹çŒœå‡ºåºåˆ—å·ï¼Œå»ºè®®æ¯4uså¢åŠ 1ï¼Œæ¯ä¸€ç§’256å®šæ—¶å™¨    */ 
+/*2016--11--25--13--47--39(ZJYC):µ±½¨Á¢Ò»¸öĞÂµÄTCPÁ¬½Ó£¬ulNextInitialSequenceNumber½«»á±»ÓÃÓÚ
+³õÊ¼ĞòÁĞºÅ£¬¿ªÊ¼µÄÊ±ºòulNextInitialSequenceNumber°üº¬Ò»¸öËæ»úµÄÊı×ÖÊÇ·Ç³£ÖØÒªµÄ£¬¶øÇÒÆäÊıÖµ
+±ØĞë¼°Ê±Ôö¼Ó£¬ÎªÁË±ÜÃâµÚÈı·½²Â³öĞòÁĞºÅ£¬½¨ÒéÃ¿4usÔö¼Ó1£¬Ã¿Ò»Ãë256¶¨Ê±Æ÷    */ 
 #define ipINITIAL_SEQUENCE_NUMBER_FACTOR    256UL
 
-/*2016--11--25--13--54--05(ZJYC):å½“æ ¡éªŒå¤±è´¥æ—¶è¿”å›çš„æ•°å€¼ï¼Œæ­¤æ•°å€¼åº”å½“å®¹æ˜“åœ¨è°ƒè¯•æ—¶å‘ç°    */ 
+/*2016--11--25--13--54--05(ZJYC):µ±Ğ£ÑéÊ§°ÜÊ±·µ»ØµÄÊıÖµ£¬´ËÊıÖµÓ¦µ±ÈİÒ×ÔÚµ÷ÊÔÊ±·¢ÏÖ    */ 
 #define ipUNHANDLED_PROTOCOL        0x4321u
-/*2016--11--25--14--25--31(ZJYC):è¿”å›è¯´æ˜æ£€éªŒå¤±è´¥ï¼Œä½†æ˜¯æ ¡éªŒä¸éœ€è¦è®¡ç®—    */ 
+/*2016--11--25--14--25--31(ZJYC):·µ»ØËµÃ÷¼ìÑéÊ§°Ü£¬µ«ÊÇĞ£Ñé²»ĞèÒª¼ÆËã    */ 
 #define ipCORRECT_CRC               0xffffu
-/*2016--11--25--14--26--44(ZJYC):è¿”å›ç”±äºæ ¡éªŒå¤±è´¥å½“æ•°æ®çš„é•¿åº¦ä¸å¯¹æ—¶    */
+/*2016--11--25--14--26--44(ZJYC):·µ»ØÓÉÓÚĞ£ÑéÊ§°Üµ±Êı¾İµÄ³¤¶È²»¶ÔÊ±    */
 #define ipINVALID_LENGTH            0x1234u
 
 /*-----------------------------------------------------------*/
@@ -105,14 +105,14 @@ typedef struct xIP_TIMER
     TickType_t ulRemainingTime;
     TickType_t ulReloadTime;
 } IPTimer_t;
-/*2016--11--25--14--27--50(ZJYC):æ ¡éªŒå’Œè®¡ç®—    */ 
+/*2016--11--25--14--27--50(ZJYC):Ğ£ÑéºÍ¼ÆËã    */ 
 typedef union _xUnion32
 {
     uint32_t u32;
     uint16_t u16[ 2 ];
     uint8_t u8[ 4 ];
 } xUnion32;
-/*2016--11--25--14--28--08(ZJYC):ç”¨äºæ ¡éªŒå’Œ    */ 
+/*2016--11--25--14--28--08(ZJYC):ÓÃÓÚĞ£ÑéºÍ    */ 
 typedef union _xUnionPtr
 {
     uint32_t *u32ptr;
@@ -120,39 +120,39 @@ typedef union _xUnionPtr
     uint8_t *u8ptr;
 } xUnionPtr;
 
-/*2016--11--25--14--28--25(ZJYC):TCP/IPåè®®æ ˆä¸»ä½“ä»»åŠ¡ï¼Œè¿™ä¸ªä»»åŠ¡æ¥æ”¶åº•å±‚ç¡¬ä»¶å’Œå¥—æ¥å­—çš„å‘½ä»¤/äº‹ä»¶
-ä»–åŒæ ·æŒç®¡ç€ä¸€å †çš„å®šæ—¶å™¨ã€‚    */
+/*2016--11--25--14--28--25(ZJYC):TCP/IPĞ­ÒéÕ»Ö÷ÌåÈÎÎñ£¬Õâ¸öÈÎÎñ½ÓÊÕµ×²ãÓ²¼şºÍÌ×½Ó×ÖµÄÃüÁî/ÊÂ¼ş
+ËûÍ¬ÑùÕÆ¹Ü×ÅÒ»¶ÑµÄ¶¨Ê±Æ÷¡£    */
 static void prvIPTask( void *pvParameters );
-/*2016--11--25--14--30--23(ZJYC):å½“æ¥è‡ªç½‘ç»œæ¥å£çš„æ–°æ•°æ®å¯ç”¨æ—¶è°ƒç”¨æ­¤å‡½æ•°    */ 
+/*2016--11--25--14--30--23(ZJYC):µ±À´×ÔÍøÂç½Ó¿ÚµÄĞÂÊı¾İ¿ÉÓÃÊ±µ÷ÓÃ´Ëº¯Êı    */ 
 static void prvProcessEthernetPacket( NetworkBufferDescriptor_t * const pxNetworkBuffer );
-/*2016--11--25--14--31--33(ZJYC):å¤„ç†åˆ°æ¥çš„IPåŒ…    */ 
+/*2016--11--25--14--31--33(ZJYC):´¦Àíµ½À´µÄIP°ü    */ 
 static eFrameProcessingResult_t prvProcessIPPacket( const IPPacket_t * const pxIPPacket, NetworkBufferDescriptor_t * const pxNetworkBuffer );
 
 #if ( ipconfigREPLY_TO_INCOMING_PINGS == 1 ) || ( ipconfigSUPPORT_OUTGOING_PINGS == 1 )
-     /*2016--11--25--14--32--26(ZJYC):å¤„ç†åˆ°æ¥çš„ICMPåŒ…    */ 
+     /*2016--11--25--14--32--26(ZJYC):´¦Àíµ½À´µÄICMP°ü    */ 
     static eFrameProcessingResult_t prvProcessICMPPacket( ICMPPacket_t * const pxICMPPacket );
 #endif /* ( ipconfigREPLY_TO_INCOMING_PINGS == 1 ) || ( ipconfigSUPPORT_OUTGOING_PINGS == 1 ) */
-/*2016--11--25--14--33--03(ZJYC):è½¬å˜åˆ°æ¥çš„pingåŒ…ï¼Œå¹¶å°†å…¶è½¬æ¢æˆpingå›å¤    */ 
+/*2016--11--25--14--33--03(ZJYC):×ª±äµ½À´µÄping°ü£¬²¢½«Æä×ª»»³Éping»Ø¸´    */ 
 #if ( ipconfigREPLY_TO_INCOMING_PINGS == 1 )
     static eFrameProcessingResult_t prvProcessICMPEchoRequest( ICMPPacket_t * const pxICMPPacket );
 #endif /* ipconfigREPLY_TO_INCOMING_PINGS */
-/*2016--11--25--14--33--44(ZJYC):å¤„ç†åˆ°æ¥çš„pingå›å¤ï¼Œç»“æœä¼šä¼ é€’ç»™ç”¨æˆ·å›è°ƒå‡½æ•°vApplicationPingReplyHook()    */ 
+/*2016--11--25--14--33--44(ZJYC):´¦Àíµ½À´µÄping»Ø¸´£¬½á¹û»á´«µİ¸øÓÃ»§»Øµ÷º¯ÊıvApplicationPingReplyHook()    */ 
 #if ( ipconfigSUPPORT_OUTGOING_PINGS == 1 )
     static void prvProcessICMPEchoReply( ICMPPacket_t * const pxICMPPacket );
 #endif /* ipconfigSUPPORT_OUTGOING_PINGS */
-/*2016--11--25--14--34--31(ZJYC):å½“åè®®æ ˆå¯åŠ¨æ—¶æˆ–è€…æ˜¯ç½‘ç»œè¿æ¥ä¸¢å¤±æ—¶ï¼Œè¢«è°ƒç”¨å»åˆ›å»ºä¸€ä¸ªç½‘ç»œè¿æ¥    */ 
+/*2016--11--25--14--34--31(ZJYC):µ±Ğ­ÒéÕ»Æô¶¯Ê±»òÕßÊÇÍøÂçÁ¬½Ó¶ªÊ§Ê±£¬±»µ÷ÓÃÈ¥´´½¨Ò»¸öÍøÂçÁ¬½Ó    */ 
 static void prvProcessNetworkDownEvent( void );
-/*2016--11--25--14--35--45(ZJYC):æ£€è½¦ARPã€DHCPå’ŒTCPå®šæ—¶å™¨æ¥çœ‹çœ‹æ˜¯å¦æœ‰åˆ°æœŸéœ€è¦å¤„ç†çš„    */
+/*2016--11--25--14--35--45(ZJYC):¼ì³µARP¡¢DHCPºÍTCP¶¨Ê±Æ÷À´¿´¿´ÊÇ·ñÓĞµ½ÆÚĞèÒª´¦ÀíµÄ    */
 static void prvCheckNetworkTimers( void );
-/*2016--11--25--14--36--41(ZJYC):å†³å®šäº†IPä»»åŠ¡å¯ä»¥ç¡å¤šé•¿æ—¶é—´ï¼Œè¿™å–å†³äºè·ç¦»ä¸‹ä¸€ä¸ªæ‰€å¿…éœ€æ‰§è¡Œçš„æ­¥éª¤éœ€è¦æ‰€é•¿æ—¶é—´    */ 
+/*2016--11--25--14--36--41(ZJYC):¾ö¶¨ÁËIPÈÎÎñ¿ÉÒÔË¯¶à³¤Ê±¼ä£¬ÕâÈ¡¾öÓÚ¾àÀëÏÂÒ»¸öËù±ØĞèÖ´ĞĞµÄ²½ÖèĞèÒªËù³¤Ê±¼ä    */ 
 static TickType_t prvCalculateSleepTime( void );
-/*2016--11--25--14--37--59(ZJYC):ç½‘å¡å·²ç»æ¥å—åˆ°äº†åŒ…ï¼Œ    */ 
+/*2016--11--25--14--37--59(ZJYC):Íø¿¨ÒÑ¾­½ÓÊÜµ½ÁË°ü£¬    */ 
 /*
  * The network card driver has received a packet.  In the case that it is part
  * of a linked packet chain, walk through it to handle every message.
  */
 static void prvHandleEthernetPacket( NetworkBufferDescriptor_t *pxBuffer );
-/*2016--11--25--14--39--26(ZJYC):è½»é‡çº§IPå®šæ—¶å™¨çš„ç›¸å…³å‡½æ•°    */
+/*2016--11--25--14--39--26(ZJYC):ÇáÁ¿¼¶IP¶¨Ê±Æ÷µÄÏà¹Øº¯Êı    */
 static void prvIPTimerStart( IPTimer_t *pxTimer, TickType_t xTime );
 static BaseType_t prvIPTimerCheck( IPTimer_t *pxTimer );
 static void prvIPTimerReload( IPTimer_t *pxTimer, TickType_t xTime );
@@ -161,35 +161,35 @@ static eFrameProcessingResult_t prvAllowIPPacket( const IPPacket_t * const pxIPP
     NetworkBufferDescriptor_t * const pxNetworkBuffer, UBaseType_t uxHeaderLength );
 
 /*-----------------------------------------------------------*/
-/*2016--11--25--14--40--41(ZJYC):ç”¨äºä¼ é€’äº‹ä»¶åˆ°IP-taskçš„é˜Ÿåˆ—    */ 
+/*2016--11--25--14--40--41(ZJYC):ÓÃÓÚ´«µİÊÂ¼şµ½IP-taskµÄ¶ÓÁĞ    */ 
 QueueHandle_t xNetworkEventQueue = NULL;
 
 /*_RB_ Requires comment. */
 uint16_t usPacketIdentifier = 0U;
-/*2016--11--25--14--41--22(ZJYC):ä¸ºäº†æ–¹ä¾¿ï¼Œå…¨FFçš„MACåœ°å€è¢«å®šä¹‰ä¸ºå¸¸é‡ä¾¿äºå¿«é€Ÿæ¯”è¾ƒ    */ 
+/*2016--11--25--14--41--22(ZJYC):ÎªÁË·½±ã£¬È«FFµÄMACµØÖ·±»¶¨ÒåÎª³£Á¿±ãÓÚ¿ìËÙ±È½Ï    */ 
 const MACAddress_t xBroadcastMACAddress = { { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } };
-/*2016--11--25--14--42--09(ZJYC):ç”¨äºå­˜å‚¨æ©ç ã€ç½‘å…³åœ°å€å’ŒDNSæœåŠ¡å™¨åœ°å€çš„ç»“æ„ä½“    */ 
+/*2016--11--25--14--42--09(ZJYC):ÓÃÓÚ´æ´¢ÑÚÂë¡¢Íø¹ØµØÖ·ºÍDNS·şÎñÆ÷µØÖ·µÄ½á¹¹Ìå    */ 
 NetworkAddressingParameters_t xNetworkAddressing = { 0, 0, 0, 0, 0 };
-/*2016--11--25--14--43--19(ZJYC):ä»¥ä¸Šç»“æ„ä½“é»˜è®¤çš„æ•°å€¼ï¼Œä»¥é˜²æ­¢DHCPçš„è¯·æ±‚æ²¡æœ‰ç¡®è®¤    */ 
+/*2016--11--25--14--43--19(ZJYC):ÒÔÉÏ½á¹¹ÌåÄ¬ÈÏµÄÊıÖµ£¬ÒÔ·ÀÖ¹DHCPµÄÇëÇóÃ»ÓĞÈ·ÈÏ    */ 
 NetworkAddressingParameters_t xDefaultAddressing = { 0, 0, 0, 0, 0 };
-/*2016--11--25--14--44--18(ZJYC):ç”¨äºç¡®ä¿ç”±äºé˜Ÿåˆ—å……æ»¡è€Œé€ æˆçš„æ‰ç½‘äº‹ä»¶çš„ä¸¢å¤±   */ 
+/*2016--11--25--14--44--18(ZJYC):ÓÃÓÚÈ·±£ÓÉÓÚ¶ÓÁĞ³äÂú¶øÔì³ÉµÄµôÍøÊÂ¼şµÄ¶ªÊ§   */ 
 static BaseType_t xNetworkDownEventPending = pdFALSE;
-/*2016--11--25--16--21--25(ZJYC):å­˜å‚¨æŒç®¡æ•´ä¸ªåè®®æ ˆçš„ä»»åŠ¡çš„å¥æŸ„ï¼Œå¥æŸ„è¢«ç”¨äºï¼ˆé—´æ¥ï¼‰
-ä¸€äº›å‡½æ•°æ¥åˆ¤æ–­å‡½æ•°æœ¬èº«æ˜¯è¢«å…¶ä»–ä»»åŠ¡è°ƒç”¨ï¼ˆé‚£æˆ‘ä»¬å°±å¯ä»¥é˜»å¡ä»–äº†ï¼‰è¿˜æ˜¯è¢«åè®®æ ˆæœ¬èº«è°ƒç”¨çš„
-ï¼ˆè¿™å°±ä¸èƒ½é˜»å¡äº†ï¼‰    */ 
+/*2016--11--25--16--21--25(ZJYC):´æ´¢ÕÆ¹ÜÕû¸öĞ­ÒéÕ»µÄÈÎÎñµÄ¾ä±ú£¬¾ä±ú±»ÓÃÓÚ£¨¼ä½Ó£©
+Ò»Ğ©º¯ÊıÀ´ÅĞ¶Ïº¯Êı±¾ÉíÊÇ±»ÆäËûÈÎÎñµ÷ÓÃ£¨ÄÇÎÒÃÇ¾Í¿ÉÒÔ×èÈûËûÁË£©»¹ÊÇ±»Ğ­ÒéÕ»±¾Éíµ÷ÓÃµÄ
+£¨Õâ¾Í²»ÄÜ×èÈûÁË£©    */ 
 static TaskHandle_t xIPTaskHandle = NULL;
 
 #if( ipconfigUSE_TCP != 0 )
-    /*2016--11--25--16--27--05(ZJYC):å¦‚æœä¸€ä¸ªæˆ–å¤šä¸ªTCP æ¶ˆæ¯åœ¨æœ€åä¸€è½®è¢«æ‰§è¡Œï¼Œç½®äºéé›¶å€¼    */ 
+    /*2016--11--25--16--27--05(ZJYC):Èç¹ûÒ»¸ö»ò¶à¸öTCP ÏûÏ¢ÔÚ×îºóÒ»ÂÖ±»Ö´ĞĞ£¬ÖÃÓÚ·ÇÁãÖµ    */ 
     static BaseType_t xProcessedTCPMessage;
 #endif
-/*2016--11--25--16--28--21(ZJYC):å–å†³äºç½‘ç»œçš„è¿æ¥å’Œæ–­å¼€ï¼Œç®€å•çš„ç½®äºpdTRUEæˆ–pdFALSE    */ 
+/*2016--11--25--16--28--21(ZJYC):È¡¾öÓÚÍøÂçµÄÁ¬½ÓºÍ¶Ï¿ª£¬¼òµ¥µÄÖÃÓÚpdTRUE»òpdFALSE    */ 
 static BaseType_t xNetworkUp = pdFALSE;
-/*2016--11--25--16--29--22(ZJYC):ä¸€ä¸ªå®šæ—¶å™¨é’ˆå¯¹ä¸‹åˆ—æ¯ä¸€ä¸ªæµç¨‹ï¼Œæ¯ä¸€ä¸ªéƒ½éœ€è¦å¦‚ä¸‹è§„å¾‹çš„å…³æ³¨
-1 ARPï¼šæ£€æŸ¥ç¼“å­˜è¡¨çš„å…¥å£é¡¹
-2 DHCPï¼šå‘é€è¯·æ±‚ï¼Œå¹¶åˆ·æ–°å­˜å‚¨
-3 TCPï¼šæ£€æŸ¥æ˜¯å¦è¶…æ—¶ï¼Œé‡ä¼ 
-4 DNSï¼šæœç´¢åŸŸåæ—¶ï¼Œæ£€æŸ¥æ˜¯å¦è¶…æ—¶ï¼Œ    */ 
+/*2016--11--25--16--29--22(ZJYC):Ò»¸ö¶¨Ê±Æ÷Õë¶ÔÏÂÁĞÃ¿Ò»¸öÁ÷³Ì£¬Ã¿Ò»¸ö¶¼ĞèÒªÈçÏÂ¹æÂÉµÄ¹Ø×¢
+1 ARP£º¼ì²é»º´æ±íµÄÈë¿ÚÏî
+2 DHCP£º·¢ËÍÇëÇó£¬²¢Ë¢ĞÂ´æ´¢
+3 TCP£º¼ì²éÊÇ·ñ³¬Ê±£¬ÖØ´«
+4 DNS£ºËÑË÷ÓòÃûÊ±£¬¼ì²éÊÇ·ñ³¬Ê±£¬    */ 
 static IPTimer_t xARPTimer;
 #if( ipconfigUSE_DHCP != 0 )
     static IPTimer_t xDHCPTimer;
@@ -200,11 +200,11 @@ static IPTimer_t xARPTimer;
 #if( ipconfigDNS_USE_CALLBACKS != 0 )
     static IPTimer_t xDNSTimer;
 #endif
-/*2016--11--25--16--32--44(ZJYC):å½“IP ä»»åŠ¡å‡†å¤‡å¥½å»å‘é€æ•°æ®åŒ…æ˜¯ç½®1    */ 
+/*2016--11--25--16--32--44(ZJYC):µ±IP ÈÎÎñ×¼±¸ºÃÈ¥·¢ËÍÊı¾İ°üÊÇÖÃ1    */ 
 static BaseType_t xIPTaskInitialised = pdFALSE;
 
 #if( ipconfigCHECK_IP_QUEUE_SPACE != 0 )
-    /*2016--11--25--16--33--56(ZJYC):ä¿æŒè·Ÿè¸ªxNetworkEventQueueçš„æœ€ä½ç©ºé—´æ€»æ•°    */ 
+    /*2016--11--25--16--33--56(ZJYC):±£³Ö¸ú×ÙxNetworkEventQueueµÄ×îµÍ¿Õ¼ä×ÜÊı    */ 
     static UBaseType_t uxQueueMinimumSpace = ipconfigEVENT_QUEUE_LENGTH;
 #endif
 
@@ -216,35 +216,35 @@ IPStackEvent_t xReceivedEvent;
 TickType_t xNextIPSleep;
 FreeRTOS_Socket_t *pxSocket;
 struct freertos_sockaddr xAddress;
-/*2016--11--25--16--35--14(ZJYC):åªæ˜¯é˜²æ­¢ç¼–è¯‘å™¨è­¦å‘Š    */ 
+/*2016--11--25--16--35--14(ZJYC):Ö»ÊÇ·ÀÖ¹±àÒëÆ÷¾¯¸æ    */ 
     ( void ) pvParameters;
-/*2016--11--25--16--35--36(ZJYC):æœ‰å¯èƒ½é€å‡ºä¸€äº›ä»»åŠ¡ä¿¡æ¯    */ 
+/*2016--11--25--16--35--36(ZJYC):ÓĞ¿ÉÄÜËÍ³öÒ»Ğ©ÈÎÎñĞÅÏ¢    */ 
     iptraceIP_TASK_STARTING();
-/*2016--11--25--16--36--06(ZJYC):äº§ç”Ÿä¸€æ ·æœ¬ä¿¡æ¯å»è¯´ç½‘ç»œè¿æ¥å·²ç»æ–­å¼€äº†ï¼Œ
-è¿™ä¼šé€ æˆä»»åŠ¡åˆå§‹åŒ–ç½‘ç»œæ¥å£ï¼Œå®Œäº‹ä¹‹åï¼Œé‡æ–°è¿æ¥ä¹‹å‰çš„æ–­å¼€çš„è¿æ¥å°±æ˜¯ç½‘
-ç»œåº•å±‚é©±åŠ¨çš„äº‹äº†    */ 
+/*2016--11--25--16--36--06(ZJYC):²úÉúÒ»Ñù±¾ĞÅÏ¢È¥ËµÍøÂçÁ¬½ÓÒÑ¾­¶Ï¿ªÁË£¬
+Õâ»áÔì³ÉÈÎÎñ³õÊ¼»¯ÍøÂç½Ó¿Ú£¬ÍêÊÂÖ®ºó£¬ÖØĞÂÁ¬½ÓÖ®Ç°µÄ¶Ï¿ªµÄÁ¬½Ó¾ÍÊÇÍø
+Âçµ×²ãÇı¶¯µÄÊÂÁË    */ 
     FreeRTOS_NetworkDown();
 
     #if( ipconfigUSE_TCP == 1 )
     {
-        /*2016--11--25--16--38--49(ZJYC):åˆå§‹åŒ–TCPå®šæ—¶å™¨    */ 
+        /*2016--11--25--16--38--49(ZJYC):³õÊ¼»¯TCP¶¨Ê±Æ÷    */ 
         prvIPTimerReload( &xTCPTimer, pdMS_TO_TICKS( ipTCP_TIMER_PERIOD_MS ) );
     }
     #endif
-/*2016--11--25--16--39--06(ZJYC):åˆå§‹åŒ–å®Œæˆï¼Œç°åœ¨äº‹ä»¶å¯ä»¥è¢«æ‰§è¡Œäº†    */ 
+/*2016--11--25--16--39--06(ZJYC):³õÊ¼»¯Íê³É£¬ÏÖÔÚÊÂ¼ş¿ÉÒÔ±»Ö´ĞĞÁË    */ 
     xIPTaskInitialised = pdTRUE;
 
     FreeRTOS_debug_printf( ( "prvIPTask started\n" ) );
-/*2016--11--25--16--39--49(ZJYC):å¾ªç¯ï¼Œå¤„ç†IP äº‹ä»¶    */ 
+/*2016--11--25--16--39--49(ZJYC):Ñ­»·£¬´¦ÀíIP ÊÂ¼ş    */ 
     for( ;; )
     {
         ipconfigWATCHDOG_TIMER();
-        /*2016--11--25--16--43--11(ZJYC):æ£€æŸ¥ARPã€DHCPå’ŒTCPå®šæ—¶å™¨ï¼Œæ¥çœ‹çœ‹æ˜¯å¦æœ‰éœ€è¦æ‰§è¡Œçš„    */ 
+        /*2016--11--25--16--43--11(ZJYC):¼ì²éARP¡¢DHCPºÍTCP¶¨Ê±Æ÷£¬À´¿´¿´ÊÇ·ñÓĞĞèÒªÖ´ĞĞµÄ    */ 
         prvCheckNetworkTimers();
-        /*2016--11--25--16--43--55(ZJYC):è®¡ç®—å¯æ¥å—çš„æœ€å¤§ç¡çœ æ—¶é—´    */ 
+        /*2016--11--25--16--43--55(ZJYC):¼ÆËã¿É½ÓÊÜµÄ×î´óË¯ÃßÊ±¼ä    */ 
         xNextIPSleep = prvCalculateSleepTime();
-        /*2016--11--25--16--44--23(ZJYC):ç­‰å¾…ç›´åˆ°æœ‰äº‹å¯åšï¼Œäº‹ä»¶å˜é‡è¢«åˆå§‹åŒ–ä¸ºâ€œæ²¡æœ‰äº‹ä»¶â€
-        ä»¥é˜²æ­¢ä¸‹åˆ—çš„è°ƒç”¨å› è¶…æ—¶é€€å‡ºè€Œä¸æ˜¯æ¥æ”¶åˆ°ä¿¡æ¯*/ 
+        /*2016--11--25--16--44--23(ZJYC):µÈ´ıÖ±µ½ÓĞÊÂ¿É×ö£¬ÊÂ¼ş±äÁ¿±»³õÊ¼»¯Îª¡°Ã»ÓĞÊÂ¼ş¡±
+        ÒÔ·ÀÖ¹ÏÂÁĞµÄµ÷ÓÃÒò³¬Ê±ÍË³ö¶ø²»ÊÇ½ÓÊÕµ½ĞÅÏ¢*/ 
         xReceivedEvent.eEventType = eNoEvent;
         xQueueReceive( xNetworkEventQueue, ( void * ) &xReceivedEvent, xNextIPSleep );
 
@@ -268,52 +268,52 @@ struct freertos_sockaddr xAddress;
         switch( xReceivedEvent.eEventType )
         {
             case eNetworkDownEvent :
-                /*2016--11--25--16--47--16(ZJYC):å°è¯•å»ºç«‹ä¸€ä¸ªè¿æ¥    */ 
+                /*2016--11--25--16--47--16(ZJYC):³¢ÊÔ½¨Á¢Ò»¸öÁ¬½Ó    */ 
                 prvProcessNetworkDownEvent();
                 break;
 
             case eNetworkRxEvent:
-                /*2016--11--25--16--48--19(ZJYC):ç½‘ç»œåº•å±‚é©±åŠ¨å·²ç»æ¥æ”¶åˆ°æ–°çš„
-                æ•°æ®åŒ…ï¼ŒpvDataæŒ‡å‘æ‰€æ¥å—æ•°æ®çš„æŒ‡é’ˆ*/ 
+                /*2016--11--25--16--48--19(ZJYC):ÍøÂçµ×²ãÇı¶¯ÒÑ¾­½ÓÊÕµ½ĞÂµÄ
+                Êı¾İ°ü£¬pvDataÖ¸ÏòËù½ÓÊÜÊı¾İµÄÖ¸Õë*/ 
                 prvHandleEthernetPacket( ( NetworkBufferDescriptor_t * ) ( xReceivedEvent.pvData ) );
                 break;
 
             case eARPTimerEvent :
-                /*2016--11--25--16--50--02(ZJYC):ARPå®šæ—¶å™¨åˆ°æœŸï¼Œæ‰§è¡Œã€‚ã€‚ã€‚    */ 
+                /*2016--11--25--16--50--02(ZJYC):ARP¶¨Ê±Æ÷µ½ÆÚ£¬Ö´ĞĞ¡£¡£¡£    */ 
                 vARPAgeCache();
                 break;
 
             case eSocketBindEvent:
-                /*2016--11--25--16--50--31(ZJYC):FreeRTOS_bindï¼ˆç”¨æˆ·APIï¼‰è¦IP-Task
-                å»ç»‘å®šä¸€ä¸ªç«¯å£ï¼Œè¯¥ç«¯å£å·åœ¨å¥—æ¥å­—çš„usLocalPortåŒºåŸŸï¼ŒvSocketBind
-                å°†ä¼šå®é™…çš„ç»‘å®šå¥—æ¥å­—ï¼Œå¹¶ä¸”ï¼Œè¿™å¥—æ¥å­—ä¼šè¢«é”å®šï¼Œç›´åˆ°eSOCKET_BOUND
-                äº‹ä»¶è¢«è§¦å‘*/ 
+                /*2016--11--25--16--50--31(ZJYC):FreeRTOS_bind£¨ÓÃ»§API£©ÒªIP-Task
+                È¥°ó¶¨Ò»¸ö¶Ë¿Ú£¬¸Ã¶Ë¿ÚºÅÔÚÌ×½Ó×ÖµÄusLocalPortÇøÓò£¬vSocketBind
+                ½«»áÊµ¼ÊµÄ°ó¶¨Ì×½Ó×Ö£¬²¢ÇÒ£¬ÕâÌ×½Ó×Ö»á±»Ëø¶¨£¬Ö±µ½eSOCKET_BOUND
+                ÊÂ¼ş±»´¥·¢*/ 
                 pxSocket = ( FreeRTOS_Socket_t * ) ( xReceivedEvent.pvData );
                 xAddress.sin_addr = 0u; /* For the moment. */
                 xAddress.sin_port = FreeRTOS_ntohs( pxSocket->usLocalPort );
                 pxSocket->usLocalPort = 0u;
                 vSocketBind( pxSocket, &xAddress, sizeof( xAddress ), pdFALSE );
-                /*2016--11--25--17--35--57(ZJYC):eSocketBindEventè¢«å‘é€ä¹‹å‰ï¼Œ
-                ( xEventGroup != NULL )å·²è¢«æµ‹è¯•ï¼Œæ‰€ä»¥ä»–å¯ä»¥è¢«ç”¨äºå”¤é†’ç”¨æˆ·*/ 
+                /*2016--11--25--17--35--57(ZJYC):eSocketBindEvent±»·¢ËÍÖ®Ç°£¬
+                ( xEventGroup != NULL )ÒÑ±»²âÊÔ£¬ËùÒÔËû¿ÉÒÔ±»ÓÃÓÚ»½ĞÑÓÃ»§*/ 
                 pxSocket->xEventBits |= eSOCKET_BOUND;
                 vSocketWakeUpUser( pxSocket );
                 break;
             case eSocketCloseEvent :
-                /*2016--11--25--17--39--54(ZJYC):ç”¨æˆ·API-FreeRTOS_closesocket
-                    å·²ç»å‘é€äº†æ¶ˆæ¯åˆ°IP-Taskå»å…³é—­ä¸€ä¸ªå¥—æ¥å­—ï¼Œè¿™æœ‰vSocketClose()
-                    å®ç°ï¼Œå½“å¥—æ¥å­—å…³é—­ä»¥åï¼Œæ²¡æœ‰ä¸œè¥¿åé¦ˆç»™è¿™ä¸ªAPIï¼Œæ‰€æœ‰APIä¸ç”¨
-                    ç­‰å¾…ç»“æœ*/ 
+                /*2016--11--25--17--39--54(ZJYC):ÓÃ»§API-FreeRTOS_closesocket
+                    ÒÑ¾­·¢ËÍÁËÏûÏ¢µ½IP-TaskÈ¥¹Ø±ÕÒ»¸öÌ×½Ó×Ö£¬ÕâÓĞvSocketClose()
+                    ÊµÏÖ£¬µ±Ì×½Ó×Ö¹Ø±ÕÒÔºó£¬Ã»ÓĞ¶«Î÷·´À¡¸øÕâ¸öAPI£¬ËùÓĞAPI²»ÓÃ
+                    µÈ´ı½á¹û*/ 
                 vSocketClose( ( FreeRTOS_Socket_t * ) ( xReceivedEvent.pvData ) );
                 break;
 
             case eStackTxEvent :
-                /*2016--11--25--17--43--07(ZJYC):åè®®æ ˆå·²ç»äº§ç”Ÿäº†è¦è¢«å‘é€çš„åŒ…
-                æ—¶é—´ç»“æ„ä½“ä¸­çš„pvDataå­˜å‚¨è¯¥äº§ç”Ÿçš„æŒ‡é’ˆ*/ 
+                /*2016--11--25--17--43--07(ZJYC):Ğ­ÒéÕ»ÒÑ¾­²úÉúÁËÒª±»·¢ËÍµÄ°ü
+                Ê±¼ä½á¹¹ÌåÖĞµÄpvData´æ´¢¸Ã²úÉúµÄÖ¸Õë*/ 
                 vProcessGeneratedUDPPacket( ( NetworkBufferDescriptor_t * ) ( xReceivedEvent.pvData ) );
                 break;
 
             case eDHCPEvent:
-                /*2016--11--26--10--24--50(ZJYC):DHCPçŠ¶æ€æœºéœ€è¦æ‰§è¡Œ    */ 
+                /*2016--11--26--10--24--50(ZJYC):DHCP×´Ì¬»úĞèÒªÖ´ĞĞ    */ 
                 #if( ipconfigUSE_DHCP == 1 )
                 {
                     vDHCPProcess( pdFALSE );
@@ -322,9 +322,9 @@ struct freertos_sockaddr xAddress;
                 break;
 
             case eSocketSelectEvent :
-                /*2016--11--26--10--25--20(ZJYC):FreeRTOS_select()å·²ç»é€šè¿‡å¥—æ¥å­—äº‹ä»¶
-                è§£é”äº†ï¼ŒvSocketSelect()ä¼šæ£€æŸ¥å“ªä¸€ä¸ªå¥—æ¥å­—æœ‰äº‹ä»¶å¹¶æ›´æ–°è¯¥å¥—æ¥å­—çš„
-                xSocketBitsåŒºåŸŸ*/ 
+                /*2016--11--26--10--25--20(ZJYC):FreeRTOS_select()ÒÑ¾­Í¨¹ıÌ×½Ó×ÖÊÂ¼ş
+                ½âËøÁË£¬vSocketSelect()»á¼ì²éÄÄÒ»¸öÌ×½Ó×ÖÓĞÊÂ¼ş²¢¸üĞÂ¸ÃÌ×½Ó×ÖµÄ
+                xSocketBitsÇøÓò*/ 
                 #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
                 {
                     vSocketSelect( ( SocketSelect_t * ) ( xReceivedEvent.pvData ) );
@@ -335,8 +335,8 @@ struct freertos_sockaddr xAddress;
             case eSocketSignalEvent :
                 #if( ipconfigSUPPORT_SIGNALS != 0 )
                 {
-                    /*2016--11--26--10--27--24(ZJYC):æŸäº›ä»»åŠ¡æƒ³é€šçŸ¥è¿™ä¸ªå¥—æ¥å­—çš„ç”¨æˆ·
-                    ï¼Œæ¥ä¸­æ–­*/ 
+                    /*2016--11--26--10--27--24(ZJYC):Ä³Ğ©ÈÎÎñÏëÍ¨ÖªÕâ¸öÌ×½Ó×ÖµÄÓÃ»§
+                    £¬À´ÖĞ¶Ï*/ 
                     /* Some task wants to signal the user of this socket in
                     order to interrupt a call to recv() or a call to select(). */
                     FreeRTOS_SignalSocket( ( Socket_t ) xReceivedEvent.pvData );
@@ -347,16 +347,17 @@ struct freertos_sockaddr xAddress;
             case eTCPTimerEvent :
                 #if( ipconfigUSE_TCP == 1 )
                 {
-                    /*2016--11--26--10--29--23(ZJYC):ç®€å•çš„æŒ‰éœ€æ ‡è®°TCPå®šæ—¶å™¨
-                    ä½¿å¾—å®šæ—¶å™¨å¯ä»¥åœ¨ä¸‹ä¸€æ¬¡è°ƒç”¨prvCheckNetworkTimers()æ—¶å¾—ä»¥è¿è¡Œ*/ 
+                    /*2016--11--26--10--29--23(ZJYC):¼òµ¥µÄ°´Ğè±ê¼ÇTCP¶¨Ê±Æ÷
+                    Ê¹µÃ¶¨Ê±Æ÷¿ÉÒÔÔÚÏÂÒ»´Îµ÷ÓÃprvCheckNetworkTimers()Ê±µÃÒÔÔËĞĞ*/ 
                     xTCPTimer.bExpired = pdTRUE_UNSIGNED;
                 }
                 #endif /* ipconfigUSE_TCP */
                 break;
 
             case eTCPAcceptEvent:
-                /*2016--11--26--10--30--58(ZJYC):API FreeRTOS_accept()è¢«è°ƒç”¨ï¼ŒIP-Taskä¼š
-                æ£€æŸ¥ç›‘å¬å¥—æ¥å­—æ˜¯å¦çœŸçš„æ”¶åˆ°äº†æ–°çš„è¿æ¥*/ 
+                /*2016--11--26--10--30--58(ZJYC):API FreeRTOS_accept()±»µ÷ÓÃ£¬IP-Task»á
+                ¼ì²é¼àÌıÌ×½Ó×ÖÊÇ·ñÕæµÄÊÕµ½ÁËĞÂµÄÁ¬½Ó*/ 
+				#if( ipconfigUSE_TCP == 1 )
                 {
                     pxSocket = ( FreeRTOS_Socket_t * ) ( xReceivedEvent.pvData );
 
@@ -370,8 +371,8 @@ struct freertos_sockaddr xAddress;
                 break;
 
             case eTCPNetStat:
-                /*2016--11--26--12--25--10(ZJYC):FreeRTOS_netstat()è¢«è°ƒç”¨æ¥æ‰“å°å…¨éƒ¨å¥—æ¥å­—
-                ä»¥åŠå…¶è¿æ¥çš„ä¿¡æ¯*/ 
+                /*2016--11--26--12--25--10(ZJYC):FreeRTOS_netstat()±»µ÷ÓÃÀ´´òÓ¡È«²¿Ì×½Ó×Ö
+                ÒÔ¼°ÆäÁ¬½ÓµÄĞÅÏ¢*/ 
                 #if( ( ipconfigUSE_TCP == 1 ) && ( ipconfigHAS_PRINTF == 1 ) )
                 {
                     vTCPNetStat();
@@ -380,14 +381,14 @@ struct freertos_sockaddr xAddress;
                 break;
 
             default :
-                /*2016--11--26--12--26--06(ZJYC):ä¸åº”è¯¥æ‰§è¡Œåˆ°è¿™é‡Œ    */ 
+                /*2016--11--26--12--26--06(ZJYC):²»Ó¦¸ÃÖ´ĞĞµ½ÕâÀï    */ 
                 break;
         }
 
         if( xNetworkDownEventPending != pdFALSE )
         {
-            /*2016--11--26--12--26--28(ZJYC):æ‰ç½‘äº‹ä»¶å› é˜Ÿåˆ—æ»¡è€Œä¸èƒ½è¢«å‘é€åˆ°
-            äº‹ä»¶é˜Ÿåˆ—ï¼Œåœ¨è¿™é‡Œå†æ¬¡å°è¯•    */ 
+            /*2016--11--26--12--26--28(ZJYC):µôÍøÊÂ¼şÒò¶ÓÁĞÂú¶ø²»ÄÜ±»·¢ËÍµ½
+            ÊÂ¼ş¶ÓÁĞ£¬ÔÚÕâÀïÔÙ´Î³¢ÊÔ    */ 
             FreeRTOS_NetworkDown();
         }
     }
@@ -415,27 +416,27 @@ static void prvHandleEthernetPacket( NetworkBufferDescriptor_t *pxBuffer )
 {
     #if( ipconfigUSE_LINKED_RX_MESSAGES == 0 )
     {
-        /*2016--11--26--12--27--56(ZJYC):iå¦‚æœpconfigUSE_LINKED_RX_MESSAGESä¸ä¸º0ï¼Œ
-        åˆ™ä¸€æ¬¡åªèƒ½å‘é€ä¸€ä¸ªç¼“å†²ï¼Œè¿™æ˜¯TCPä»MACå‘åè®®æ ˆä¼ é€’æ•°æ®çš„é»˜è®¤æ–¹å¼*/ 
+        /*2016--11--26--12--27--56(ZJYC):iÈç¹ûpconfigUSE_LINKED_RX_MESSAGES²»Îª0£¬
+        ÔòÒ»´ÎÖ»ÄÜ·¢ËÍÒ»¸ö»º³å£¬ÕâÊÇTCP´ÓMACÏòĞ­ÒéÕ»´«µİÊı¾İµÄÄ¬ÈÏ·½Ê½*/ 
         prvProcessEthernetPacket( pxBuffer );
     }
     #else /* ipconfigUSE_LINKED_RX_MESSAGES */
     {
     NetworkBufferDescriptor_t *pxNextBuffer;
 
-        /*2016--11--26--12--29--37(ZJYC):å½“ç½‘ç»œæ‹¥æŒ¤æ—¶ï¼Œä¼˜åŒ–ç®—æ³•æ˜¯æœ‰ç”¨çš„ï¼Œä¸æ˜¯
-        æ¯æ¬¡éƒ½ä¼ é€’æ•°æ®åŒ…åˆ°IP-Taskï¼Œç½‘ç»œæ¥å£å¯ä»¥æ¥å—ä¸€ç³»åˆ—æ•°æ®åŒ…å¹¶ä»¥æ­¤å°†å…¶ä¼ é€’ç»™
-        IP-Taskã€‚æ•°æ®ä½¿ç”¨pxNextBufferçš„æˆå‘˜æ¥è¿æ¥ä½ï¼Œå¦‚ä¸‹çš„ä»£ç éå†æ¯ä¸€ä¸ªæ•°æ®åŒ…
-        å¹¶å¤„ç†ä¹‹*/ 
+        /*2016--11--26--12--29--37(ZJYC):µ±ÍøÂçÓµ¼·Ê±£¬ÓÅ»¯Ëã·¨ÊÇÓĞÓÃµÄ£¬²»ÊÇ
+        Ã¿´Î¶¼´«µİÊı¾İ°üµ½IP-Task£¬ÍøÂç½Ó¿Ú¿ÉÒÔ½ÓÊÜÒ»ÏµÁĞÊı¾İ°ü²¢ÒÔ´Ë½«Æä´«µİ¸ø
+        IP-Task¡£Êı¾İÊ¹ÓÃpxNextBufferµÄ³ÉÔ±À´Á¬½Ó×¡£¬ÈçÏÂµÄ´úÂë±éÀúÃ¿Ò»¸öÊı¾İ°ü
+        ²¢´¦ÀíÖ®*/ 
         do
         {
-            /*2016--11--26--12--33--26(ZJYC):å­˜å‚¨ä¸€æŒ‡å‘è¯¥ç¼“å†²çš„æŒ‡é’ˆä»¥ä¾¿åç»­ä½¿ç”¨    */ 
+            /*2016--11--26--12--33--26(ZJYC):´æ´¢Ò»Ö¸Ïò¸Ã»º³åµÄÖ¸ÕëÒÔ±ãºóĞøÊ¹ÓÃ    */ 
             pxNextBuffer = pxBuffer->pxNextBuffer;
-            /*2016--11--26--12--34--46(ZJYC):ç½®ä½0ä»¥é˜²åç»­ä½¿ç”¨    */ 
+            /*2016--11--26--12--34--46(ZJYC):ÖÃÎ»0ÒÔ·ÀºóĞøÊ¹ÓÃ    */ 
             pxBuffer->pxNextBuffer = NULL;
             prvProcessEthernetPacket( pxBuffer );
             pxBuffer = pxNextBuffer;
-            /*2016--11--26--12--35--25(ZJYC):å¾ªç¯è§£å†³*/ 
+            /*2016--11--26--12--35--25(ZJYC):Ñ­»·½â¾ö*/ 
         } while( pxBuffer != NULL );
     }
     #endif /* ipconfigUSE_LINKED_RX_MESSAGES */
@@ -445,7 +446,7 @@ static void prvHandleEthernetPacket( NetworkBufferDescriptor_t *pxBuffer )
 static TickType_t prvCalculateSleepTime( void )
 {
 TickType_t xMaximumSleepTime;
-    /*2016--11--26--12--36--04(ZJYC):ä»æœ€å¤§ç¡çœ æ—¶é—´å¼€å§‹ï¼Œç„¶åä¸€æ¬¡å¯¹æ¯”å…¶ä»–æ¿€æ´»çš„å®šæ—¶å™¨    */ 
+    /*2016--11--26--12--36--04(ZJYC):´Ó×î´óË¯ÃßÊ±¼ä¿ªÊ¼£¬È»ºóÒ»´Î¶Ô±ÈÆäËû¼¤»îµÄ¶¨Ê±Æ÷    */ 
     xMaximumSleepTime = ipconfigMAX_IP_TASK_SLEEP_TIME;
     if( xARPTimer.bActive != pdFALSE_UNSIGNED )
     {
@@ -490,14 +491,14 @@ TickType_t xMaximumSleepTime;
 
 static void prvCheckNetworkTimers( void )
 {
-    /*2016--11--26--12--37--16(ZJYC):æ˜¯ARPå¤„ç†çš„æ—¶é—´äº†å—    */ 
+    /*2016--11--26--12--37--16(ZJYC):ÊÇARP´¦ÀíµÄÊ±¼äÁËÂğ    */ 
     if( prvIPTimerCheck( &xARPTimer ) != pdFALSE )
     {
         xSendEventToIPTask( eARPTimerEvent );
     }
     #if( ipconfigUSE_DHCP == 1 )
     {
-        /*2016--11--26--12--37--36(ZJYC):æ˜¯DHCPå¤„ç†çš„æ—¶é—´äº†å—    */ 
+        /*2016--11--26--12--37--36(ZJYC):ÊÇDHCP´¦ÀíµÄÊ±¼äÁËÂğ    */ 
         if( prvIPTimerCheck( &xDHCPTimer ) != pdFALSE )
         {
             xSendEventToIPTask( eDHCPEvent );
@@ -507,7 +508,7 @@ static void prvCheckNetworkTimers( void )
     #if( ipconfigDNS_USE_CALLBACKS != 0 )
     {
     extern void vDNSCheckCallBack( void *pvSearchID );
-        /*2016--11--26--12--37--58(ZJYC):æ˜¯DNSå¤„ç†çš„æ—¶å€™äº†å—    */ 
+        /*2016--11--26--12--37--58(ZJYC):ÊÇDNS´¦ÀíµÄÊ±ºòÁËÂğ    */ 
         if( prvIPTimerCheck( &xDNSTimer ) != pdFALSE )
         {
             vDNSCheckCallBack( NULL );
@@ -517,10 +518,10 @@ static void prvCheckNetworkTimers( void )
     #if( ipconfigUSE_TCP == 1 )
     {
     BaseType_t xWillSleep;
-    /*2016--11--26--12--38--17(ZJYC):å¤åˆ¶ä¸Šä¸€æ¬¡æœ¬å®šæ—¶å™¨æ¿€æ´»çš„äº‹ä»¶ï¼Œ
-    æ¯æ¬¡è°ƒç”¨ï¼Œä»–éƒ½ä¼šè¢«æ›´æ–°xTaskGetTickCount()ã€‚0è¡¨ç¤ºåˆ°ç›®å‰ä¸ºæ­¢è¿˜
-    æ²¡åˆå§‹åŒ–ï¼ˆè™½ç„¶ï¼Œåè¾¹xTaskGetTickCount()ä¹Ÿä¼šè¿”å›0ï¼Œä½†è¿™æ˜¯æ²¡é—®
-    é¢˜çš„ï¼‰*/ 
+    /*2016--11--26--12--38--17(ZJYC):¸´ÖÆÉÏÒ»´Î±¾¶¨Ê±Æ÷¼¤»îµÄÊÂ¼ş£¬
+    Ã¿´Îµ÷ÓÃ£¬Ëû¶¼»á±»¸üĞÂxTaskGetTickCount()¡£0±íÊ¾µ½Ä¿Ç°ÎªÖ¹»¹
+    Ã»³õÊ¼»¯£¨ËäÈ»£¬ºó±ßxTaskGetTickCount()Ò²»á·µ»Ø0£¬µ«ÕâÊÇÃ»ÎÊ
+    ÌâµÄ£©*/ 
     static TickType_t xStart = ( TickType_t ) 0;
     TickType_t xTimeNow, xNextTime;
     BaseType_t xCheckTCPSockets;
@@ -536,22 +537,22 @@ static void prvCheckNetworkTimers( void )
         xTimeNow = xTaskGetTickCount();
         if( xStart != ( TickType_t ) 0 )
         {
-            /*2016--11--26--12--40--58(ZJYC):å»ºè®®æ¯å››ä¸ªå¾®å¦™å¢åŠ ä¸€æ¬¡åºåˆ—å·ï¼Œå³
-            æ¯mså¢åŠ 250ï¼Œè¿™å°†ä½¿å¾—ç¬¬ä¸‰æ–¹å¾ˆéš¾çŒœæµ‹æˆ‘ä»¬çš„åºåˆ—å·*/ 
+            /*2016--11--26--12--40--58(ZJYC):½¨ÒéÃ¿ËÄ¸öÎ¢ÃîÔö¼ÓÒ»´ÎĞòÁĞºÅ£¬¼´
+            Ã¿msÔö¼Ó250£¬Õâ½«Ê¹µÃµÚÈı·½ºÜÄÑ²Â²âÎÒÃÇµÄĞòÁĞºÅ*/ 
             ulNextInitialSequenceNumber += ipINITIAL_SEQUENCE_NUMBER_FACTOR * ( ( xTimeNow - xStart ) * portTICK_PERIOD_MS );
         }
         xStart = xTimeNow;
-        /*2016--11--26--12--44--04(ZJYC):å¦‚æœTCPå®šæ—¶æ—¶é—´åˆ°äº†ï¼Œå¥—æ¥å­—éœ€è¦è¢«æ£€æŸ¥    */ 
+        /*2016--11--26--12--44--04(ZJYC):Èç¹ûTCP¶¨Ê±Ê±¼äµ½ÁË£¬Ì×½Ó×ÖĞèÒª±»¼ì²é    */ 
         xCheckTCPSockets = prvIPTimerCheck( &xTCPTimer );
-        /*2016--11--26--12--44--35(ZJYC):å¦‚æœæœ‰TCPæ¶ˆæ¯ä½†æ¶ˆæ¯é˜Ÿåˆ—æ˜¯ç©ºçš„ï¼Œ
-        ï¼ˆæš—ç¤ºxWillSleepä¸ºçœŸï¼‰    */ 
+        /*2016--11--26--12--44--35(ZJYC):Èç¹ûÓĞTCPÏûÏ¢µ«ÏûÏ¢¶ÓÁĞÊÇ¿ÕµÄ£¬
+        £¨°µÊ¾xWillSleepÎªÕæ£©    */ 
         if( ( xProcessedTCPMessage != pdFALSE ) && ( xWillSleep != pdFALSE ) )
         {
             xCheckTCPSockets = pdTRUE;
         }
         if( xCheckTCPSockets != pdFALSE )
         {
-            /*2016--11--26--12--46--03(ZJYC):è¿”å›ä¸‹æ¬¡é‡å¤æ£€æŸ¥çš„æ—¶é—´    */ 
+            /*2016--11--26--12--46--03(ZJYC):·µ»ØÏÂ´ÎÖØ¸´¼ì²éµÄÊ±¼ä    */ 
             xNextTime = xTCPTimerCheck( xWillSleep );
             prvIPTimerStart( &xTCPTimer, xNextTime );
             xProcessedTCPMessage = 0;
@@ -590,13 +591,13 @@ BaseType_t xReturn;
 
     if( pxTimer->bActive == pdFALSE_UNSIGNED )
     {
-        /*2016--11--26--12--50--22(ZJYC):å®šæ—¶å™¨è¢«å¯åŠ¨    */ 
+        /*2016--11--26--12--50--22(ZJYC):¶¨Ê±Æ÷±»Æô¶¯    */ 
         xReturn = pdFALSE;
     }
     else
     {
-        /*2016--11--26--12--50--36(ZJYC):å®šæ—¶å™¨æ—©å°±ç½®ä½bExpiredäº†ï¼Œå¦‚æœæ²¡æœ‰ï¼Œ
-        å¯¹æ¯”xTimeOutå’ŒulRemainingTime*/ 
+        /*2016--11--26--12--50--36(ZJYC):¶¨Ê±Æ÷Ôç¾ÍÖÃÎ»bExpiredÁË£¬Èç¹ûÃ»ÓĞ£¬
+        ¶Ô±ÈxTimeOutºÍulRemainingTime*/ 
         if( ( pxTimer->bExpired != pdFALSE_UNSIGNED ) ||
             ( xTaskCheckForTimeOut( &( pxTimer->xTimeOut ), &( pxTimer->ulRemainingTime ) ) != pdFALSE ) )
         {
@@ -617,15 +618,15 @@ void FreeRTOS_NetworkDown( void )
 {
 static const IPStackEvent_t xNetworkDownEvent = { eNetworkDownEvent, NULL };
 const TickType_t xDontBlock = ( TickType_t ) 0;
-    /*2016--11--26--12--51--58(ZJYC):ç®€å•çš„å‘é€æ­£ç¡®çš„äº‹ä»¶    */ 
+    /*2016--11--26--12--51--58(ZJYC):¼òµ¥µÄ·¢ËÍÕıÈ·µÄÊÂ¼ş    */ 
     if( xSendEventStructToIPTask( &xNetworkDownEvent, xDontBlock ) != pdPASS )
     {
-        /*2016--11--26--12--52--32(ZJYC):ä¸èƒ½å‘é€æ¶ˆæ¯ï¼Œä¾æ—§ç­‰å¾…    */ 
+        /*2016--11--26--12--52--32(ZJYC):²»ÄÜ·¢ËÍÏûÏ¢£¬ÒÀ¾ÉµÈ´ı    */ 
         xNetworkDownEventPending = pdTRUE;
     }
     else
     {
-        /*2016--11--26--12--53--04(ZJYC):æ¶ˆæ¯å·²è¢«å‘å‡ºï¼Œæ‰€ä»¥ä¸ç”¨åœ¨ç­‰å¾…äº†    */ 
+        /*2016--11--26--12--53--04(ZJYC):ÏûÏ¢ÒÑ±»·¢³ö£¬ËùÒÔ²»ÓÃÔÚµÈ´ıÁË    */ 
         xNetworkDownEventPending = pdFALSE;
     }
 
@@ -637,7 +638,7 @@ BaseType_t FreeRTOS_NetworkDownFromISR( void )
 {
 static const IPStackEvent_t xNetworkDownEvent = { eNetworkDownEvent, NULL };
 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    /*2016--11--26--13--13--14(ZJYC):ç®€å•çš„å‘é€æ­£ç¡®çš„äº‹ä»¶    */ 
+    /*2016--11--26--13--13--14(ZJYC):¼òµ¥µÄ·¢ËÍÕıÈ·µÄÊÂ¼ş    */ 
     if( xQueueSendToBackFromISR( xNetworkEventQueue, &xNetworkDownEvent, &xHigherPriorityTaskWoken ) != pdPASS )
     {
         xNetworkDownEventPending = pdTRUE;
@@ -657,7 +658,7 @@ void *FreeRTOS_GetUDPPayloadBuffer( size_t xRequestedSizeBytes, TickType_t xBloc
 {
 NetworkBufferDescriptor_t *pxNetworkBuffer;
 void *pvReturn;
-    /*2016--11--26--13--15--50(ZJYC):ï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿ    */ 
+    /*2016--11--26--13--15--50(ZJYC):£¿£¿£¿£¿£¿    */ 
     /* Cap the block time.  The reason for this is explained where
     ipconfigUDP_MAX_SEND_BLOCK_TIME_TICKS is defined (assuming an official
     FreeRTOSIPConfig.h header file is being used). */
@@ -665,12 +666,12 @@ void *pvReturn;
     {
         xBlockTimeTicks = ipconfigUDP_MAX_SEND_BLOCK_TIME_TICKS;
     }
-    /*2016--11--26--13--17--17(ZJYC):æ ¹æ®éœ€è¦çš„å­˜å‚¨é‡è·å–ç½‘ç»œç¼“å­˜    */ 
+    /*2016--11--26--13--17--17(ZJYC):¸ù¾İĞèÒªµÄ´æ´¢Á¿»ñÈ¡ÍøÂç»º´æ    */ 
     pxNetworkBuffer = pxGetNetworkBufferWithDescriptor( sizeof( UDPPacket_t ) + xRequestedSizeBytes, xBlockTimeTicks );
 
     if( pxNetworkBuffer != NULL )
     {
-        /*2016--11--26--13--17--57(ZJYC):è¿”å›UDPå¤´çš„ç©ºé—´    */ 
+        /*2016--11--26--13--17--57(ZJYC):·µ»ØUDPÍ·µÄ¿Õ¼ä    */ 
         pvReturn = ( void * ) &( pxNetworkBuffer->pucEthernetBuffer[ ipUDP_PAYLOAD_OFFSET_IPv4 ] );
     }
     else
@@ -686,8 +687,8 @@ NetworkBufferDescriptor_t *pxDuplicateNetworkBufferWithDescriptor( NetworkBuffer
     BaseType_t xNewLength )
 {
 NetworkBufferDescriptor_t * pxNewBuffer;
-    /*2016--11--26--13--38--35(ZJYC):æœ¬å‡½æ•°åªæœ‰ipconfigZERO_COPY_TX_DRIVERç½®1æ—¶æ‰å¯ä½¿ç”¨
-    å‘é€æµç¨‹éœ€è¦æ‹¥æœ‰ç½‘ç»œç¼“å†²çš„æè¿°ç¬¦çš„é¢†å¯¼æƒï¼Œå› ä¸ºä»–å°†ä¼šæŠŠç¼“å†²ç›´æ¥ä¼ é€åˆ°DMA*/ 
+    /*2016--11--26--13--38--35(ZJYC):±¾º¯ÊıÖ»ÓĞipconfigZERO_COPY_TX_DRIVERÖÃ1Ê±²Å¿ÉÊ¹ÓÃ
+    ·¢ËÍÁ÷³ÌĞèÒªÓµÓĞÍøÂç»º³åµÄÃèÊö·ûµÄÁìµ¼È¨£¬ÒòÎªËû½«»á°Ñ»º³åÖ±½Ó´«ËÍµ½DMA*/ 
     pxNewBuffer = pxGetNetworkBufferWithDescriptor( ( size_t ) xNewLength, ( TickType_t ) 0 );
 
     if( pxNewBuffer != NULL )
@@ -715,13 +716,13 @@ NetworkBufferDescriptor_t * pxNewBuffer;
         }
         else
         {
-            /*2016--11--26--13--40--39(ZJYC):ä»0å¤åˆ¶æŒ‡é’ˆä¸­è·å–ç½‘ç»œç¼“å†²    */ 
+            /*2016--11--26--13--40--39(ZJYC):´Ó0¸´ÖÆÖ¸ÕëÖĞ»ñÈ¡ÍøÂç»º³å    */ 
             pucBuffer = ( uint8_t * ) pvBuffer;
-            /*2016--11--26--13--41--12(ZJYC):è¿™é‡Œè¾“å…¥çš„æ˜¯æŒ‡å‘è½½è·ç¼“å†²çš„æŒ‡é’ˆ
-            å‡æ‰å¤´éƒ¨çš„å¤§å°ï¼Œé€šå¸¸æ˜¯8 + 2*/ 
+            /*2016--11--26--13--41--12(ZJYC):ÕâÀïÊäÈëµÄÊÇÖ¸ÏòÔØºÉ»º³åµÄÖ¸Õë
+            ¼õµôÍ·²¿µÄ´óĞ¡£¬Í¨³£ÊÇ8 + 2*/ 
             pucBuffer -= ipBUFFER_PADDING;
-            /*2016--11--26--13--42--32(ZJYC):è¿™é‡Œä¸€ä¸ªæŒ‡é’ˆè¢«æ”¾å…¥ç½‘ç»œæè¿°ç¬¦
-            å› ä¸ºæŒ‡é’ˆè¢«é—´æ¥å¼•ç”¨ï¼Œè¦ç¡®ä¿å¯¹é½*/ 
+            /*2016--11--26--13--42--32(ZJYC):ÕâÀïÒ»¸öÖ¸Õë±»·ÅÈëÍøÂçÃèÊö·û
+            ÒòÎªÖ¸Õë±»¼ä½ÓÒıÓÃ£¬ÒªÈ·±£¶ÔÆë*/ 
             if( ( ( ( uint32_t ) pucBuffer ) & ( sizeof( pucBuffer ) - ( size_t ) 1 ) ) == ( uint32_t ) 0 )
             {
                 pxResult = * ( ( NetworkBufferDescriptor_t ** ) pucBuffer );
@@ -748,16 +749,16 @@ NetworkBufferDescriptor_t *pxResult;
     }
     else
     {
-        /*2016--11--26--13--44--44(ZJYC):ä»0å¤åˆ¶æŒ‡é’ˆè·å–ç½‘ç»œç¼“å†²    */ 
+        /*2016--11--26--13--44--44(ZJYC):´Ó0¸´ÖÆÖ¸Õë»ñÈ¡ÍøÂç»º³å    */ 
         pucBuffer = ( uint8_t * ) pvBuffer;
-        /*2016--11--26--13--45--15(ZJYC):è¿™é‡Œè¾“å…¥çš„æ˜¯æŒ‡å‘è½½è·ç¼“å†²çš„æŒ‡é’ˆ
-            å‡æ‰å¤´éƒ¨çš„å¤§å°ï¼Œé€šå¸¸æ˜¯8 + 2    */ 
+        /*2016--11--26--13--45--15(ZJYC):ÕâÀïÊäÈëµÄÊÇÖ¸ÏòÔØºÉ»º³åµÄÖ¸Õë
+            ¼õµôÍ·²¿µÄ´óĞ¡£¬Í¨³£ÊÇ8 + 2    */ 
         pucBuffer -= ( sizeof( UDPPacket_t ) + ipBUFFER_PADDING );
-        /*2016--11--26--13--45--58(ZJYC): è¿™é‡Œä¸€ä¸ªæŒ‡é’ˆè¢«æ”¾å…¥ç½‘ç»œæè¿°ç¬¦
-            å› ä¸ºæŒ‡é’ˆè¢«é—´æ¥å¼•ç”¨ï¼Œè¦ç¡®ä¿å¯¹é½   */ 
+        /*2016--11--26--13--45--58(ZJYC): ÕâÀïÒ»¸öÖ¸Õë±»·ÅÈëÍøÂçÃèÊö·û
+            ÒòÎªÖ¸Õë±»¼ä½ÓÒıÓÃ£¬ÒªÈ·±£¶ÔÆë   */ 
         if( ( ( ( uint32_t ) pucBuffer ) & ( sizeof( pucBuffer ) - 1 ) ) == 0 )
         {
-            /*2016--11--26--13--46--25(ZJYC):å¦‚ä¸‹çš„é™ˆè¿°å¯èƒ½ä¼šè§¦å‘è­¦å‘Š    */ 
+            /*2016--11--26--13--46--25(ZJYC):ÈçÏÂµÄ³ÂÊö¿ÉÄÜ»á´¥·¢¾¯¸æ    */ 
             /* The following statement may trigger a:
             warning: cast increases required alignment of target type [-Wcast-align].
             It has been confirmed though that the alignment is suitable. */
@@ -786,31 +787,31 @@ void FreeRTOS_ReleaseUDPPayloadBuffer( void *pvBuffer )
 BaseType_t FreeRTOS_IPInit( const uint8_t ucIPAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucNetMask[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucGatewayAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucDNSServerAddress[ ipIP_ADDRESS_LENGTH_BYTES ], const uint8_t ucMACAddress[ ipMAC_ADDRESS_LENGTH_BYTES ] )
 {
 BaseType_t xReturn = pdFALSE;
-    /*2016--11--26--13--48--01(ZJYC):è¿™ä¸ªå‡½æ•°åªèƒ½è¢«è°ƒç”¨ä¸€æ¬¡    */ 
+    /*2016--11--26--13--48--01(ZJYC):Õâ¸öº¯ÊıÖ»ÄÜ±»µ÷ÓÃÒ»´Î    */ 
     configASSERT( xIPIsNetworkTaskReady() == pdFALSE );
     configASSERT( xNetworkEventQueue == NULL );
     configASSERT( xIPTaskHandle == NULL );
-    /*2016--11--26--13--48--21(ZJYC):æ£€æŸ¥ç»“æ„ä½“æ˜¯å¦æ­£ç¡®    */ 
+    /*2016--11--26--13--48--21(ZJYC):¼ì²é½á¹¹ÌåÊÇ·ñÕıÈ·    */ 
     configASSERT( sizeof( EthernetHeader_t ) == ipEXPECTED_EthernetHeader_t_SIZE );
     configASSERT( sizeof( ARPHeader_t ) == ipEXPECTED_ARPHeader_t_SIZE );
     configASSERT( sizeof( IPHeader_t ) == ipEXPECTED_IPHeader_t_SIZE );
     configASSERT( sizeof( ICMPHeader_t ) == ipEXPECTED_ICMPHeader_t_SIZE );
     configASSERT( sizeof( UDPHeader_t ) == ipEXPECTED_UDPHeader_t_SIZE );
-    /*2016--11--26--13--48--54(ZJYC):å°è¯•å»ºç«‹åæœŸä¸IP-Taskäº¤æµçš„é˜Ÿåˆ—    */ 
+    /*2016--11--26--13--48--54(ZJYC):³¢ÊÔ½¨Á¢ºóÆÚÓëIP-Task½»Á÷µÄ¶ÓÁĞ    */ 
     xNetworkEventQueue = xQueueCreate( ( UBaseType_t ) ipconfigEVENT_QUEUE_LENGTH, ( UBaseType_t ) sizeof( IPStackEvent_t ) );
     configASSERT( xNetworkEventQueue );
     if( xNetworkEventQueue != NULL )
     {
         #if ( configQUEUE_REGISTRY_SIZE > 0 )
         {
-            /*2016--11--26--13--49--28(ZJYC):é˜Ÿåˆ—çš„æ³¨å†Œé€šå¸¸ç”¨äºæ”¯æŒå†…æ ¸è°ƒè¯•*/ 
+            /*2016--11--26--13--49--28(ZJYC):¶ÓÁĞµÄ×¢²áÍ¨³£ÓÃÓÚÖ§³ÖÄÚºËµ÷ÊÔ*/ 
             vQueueAddToRegistry( xNetworkEventQueue, "NetEvnt" );
         }
         #endif /* configQUEUE_REGISTRY_SIZE */
 
         if( xNetworkBuffersInitialise() == pdPASS )
         {
-            /*2016--11--26--13--50--37(ZJYC):ä¿å­˜æœ¬åœ°IPå’ŒMACåœ°å€    */ 
+            /*2016--11--26--13--50--37(ZJYC):±£´æ±¾µØIPºÍMACµØÖ·    */ 
             xNetworkAddressing.ulDefaultIPAddress = FreeRTOS_inet_addr_quick( ucIPAddress[ 0 ], ucIPAddress[ 1 ], ucIPAddress[ 2 ], ucIPAddress[ 3 ] );
             xNetworkAddressing.ulNetMask = FreeRTOS_inet_addr_quick( ucNetMask[ 0 ], ucNetMask[ 1 ], ucNetMask[ 2 ], ucNetMask[ 3 ] );
             xNetworkAddressing.ulGatewayAddress = FreeRTOS_inet_addr_quick( ucGatewayAddress[ 0 ], ucGatewayAddress[ 1 ], ucGatewayAddress[ 2 ], ucGatewayAddress[ 3 ] );
@@ -819,29 +820,29 @@ BaseType_t xReturn = pdFALSE;
             memcpy( &xDefaultAddressing, &xNetworkAddressing, sizeof( xDefaultAddressing ) );
             #if ipconfigUSE_DHCP == 1
             {
-                /*2016--11--26--13--51--04(ZJYC):IPåœ°å€ç›´åˆ°DHCPå®Œæˆæ‰ä¼šå»ºç«‹    */ 
+                /*2016--11--26--13--51--04(ZJYC):IPµØÖ·Ö±µ½DHCPÍê³É²Å»á½¨Á¢    */ 
                 *ipLOCAL_IP_ADDRESS_POINTER = 0x00UL;
             }
             #else
             {
-                /*2016--11--26--13--51--36(ZJYC):IPåœ°å€é€šè¿‡ä¼ å…¥çš„å‚æ•°æ¥ç¡®å®š    */ 
+                /*2016--11--26--13--51--36(ZJYC):IPµØÖ·Í¨¹ı´«ÈëµÄ²ÎÊıÀ´È·¶¨    */ 
                 *ipLOCAL_IP_ADDRESS_POINTER = xNetworkAddressing.ulDefaultIPAddress;
-                /*2016--11--26--13--52--09(ZJYC):æ·»åŠ ç”¨äºé˜²æ­¢é’ˆå¯¹ç½‘å…³çš„ARPæ´ªæ°´ï¼Œ
-                ç¡®ä¿ç½‘å…³åœ¨åŒä¸€å­ç½‘ä¸‹*/ 
+                /*2016--11--26--13--52--09(ZJYC):Ìí¼ÓÓÃÓÚ·ÀÖ¹Õë¶ÔÍø¹ØµÄARPºéË®£¬
+                È·±£Íø¹ØÔÚÍ¬Ò»×ÓÍøÏÂ*/ 
                 configASSERT( ( ( *ipLOCAL_IP_ADDRESS_POINTER ) & xNetworkAddressing.ulNetMask ) == ( xNetworkAddressing.ulGatewayAddress & xNetworkAddressing.ulNetMask ) );
             }
             #endif /* ipconfigUSE_DHCP == 1 */
-            /*2016--11--26--14--15--58(ZJYC):MACåœ°å€è¢«å­˜å‚¨åœ¨é»˜è®¤çš„åŒ…å¤´ç‰‡æ®µï¼Œè¿™åœ¨å‘é€UDPåŒ…æ—¶ç”¨åˆ°    */ 
+            /*2016--11--26--14--15--58(ZJYC):MACµØÖ·±»´æ´¢ÔÚÄ¬ÈÏµÄ°üÍ·Æ¬¶Î£¬ÕâÔÚ·¢ËÍUDP°üÊ±ÓÃµ½    */ 
             memcpy( ( void * ) ipLOCAL_MAC_ADDRESS, ( void * ) ucMACAddress, ( size_t ) ipMAC_ADDRESS_LENGTH_BYTES );
-            /*2016--11--26--14--17--08(ZJYC):å‡†å¤‡å¥—æ¥å­—æ¥å£    */ 
+            /*2016--11--26--14--17--08(ZJYC):×¼±¸Ì×½Ó×Ö½Ó¿Ú    */ 
             vNetworkSocketsInit();
-            /*2016--11--26--14--17--57(ZJYC):åˆ›å»ºå¤„ç†ä»¥å¤ªç½‘å’Œåè®®æ ˆäº‹ä»¶çš„ä»»åŠ¡    */ 
+            /*2016--11--26--14--17--57(ZJYC):´´½¨´¦ÀíÒÔÌ«ÍøºÍĞ­ÒéÕ»ÊÂ¼şµÄÈÎÎñ    */ 
             xReturn = xTaskCreate( prvIPTask, "IP-task", ( uint16_t ) ipconfigIP_TASK_STACK_SIZE_WORDS, NULL, ( UBaseType_t ) ipconfigIP_TASK_PRIORITY, &xIPTaskHandle );
         }
         else
         {
             FreeRTOS_debug_printf( ( "FreeRTOS_IPInit: xNetworkBuffersInitialise() failed\n") );
-            /*2016--11--26--14--18--30(ZJYC):æ¸…ç†å¹²å‡€    */ 
+            /*2016--11--26--14--18--30(ZJYC):ÇåÀí¸É¾»    */ 
             vQueueDelete( xNetworkEventQueue );
             xNetworkEventQueue = NULL;
         }
@@ -857,7 +858,7 @@ BaseType_t xReturn = pdFALSE;
 
 void FreeRTOS_GetAddressConfiguration( uint32_t *pulIPAddress, uint32_t *pulNetMask, uint32_t *pulGatewayAddress, uint32_t *pulDNSServerAddress )
 {
-    /*2016--11--26--14--18--46(ZJYC):è¿”å›åœ°å€é…ç½®ä¿¡æ¯ç»™è°ƒç”¨è€…    */ 
+    /*2016--11--26--14--18--46(ZJYC):·µ»ØµØÖ·ÅäÖÃĞÅÏ¢¸øµ÷ÓÃÕß    */ 
     if( pulIPAddress != NULL )
     {
         *pulIPAddress = *ipLOCAL_IP_ADDRESS_POINTER;
@@ -879,7 +880,7 @@ void FreeRTOS_GetAddressConfiguration( uint32_t *pulIPAddress, uint32_t *pulNetM
 
 void FreeRTOS_SetAddressConfiguration( const uint32_t *pulIPAddress, const uint32_t *pulNetMask, const uint32_t *pulGatewayAddress, const uint32_t *pulDNSServerAddress )
 {
-    /*2016--11--26--14--19--13(ZJYC):æ›´æ–°åœ°å€é…ç½®ä¿¡æ¯    */ 
+    /*2016--11--26--14--19--13(ZJYC):¸üĞÂµØÖ·ÅäÖÃĞÅÏ¢    */ 
     if( pulIPAddress != NULL )
     {
         *ipLOCAL_IP_ADDRESS_POINTER = *pulIPAddress;
@@ -918,24 +919,24 @@ void FreeRTOS_SetAddressConfiguration( const uint32_t *pulIPAddress, const uint3
             {
                 pxICMPHeader = ( ICMPHeader_t * ) &( pxNetworkBuffer->pucEthernetBuffer[ ipIP_PAYLOAD_OFFSET ] );
                 usSequenceNumber++;
-                /*2016--11--26--14--21--18(ZJYC):å¡«å……åŸºæœ¬å¤´éƒ¨ä¿¡æ¯    */ 
+                /*2016--11--26--14--21--18(ZJYC):Ìî³ä»ù±¾Í·²¿ĞÅÏ¢    */ 
                 pxICMPHeader->ucTypeOfMessage = ipICMP_ECHO_REQUEST;
                 pxICMPHeader->ucTypeOfService = 0;
                 pxICMPHeader->usIdentifier = usSequenceNumber;
                 pxICMPHeader->usSequenceNumber = usSequenceNumber;
-                /*2016--11--26--14--21--36(ZJYC):æ‰¾åˆ°æ•°æ®çš„å¼€å§‹    */ 
+                /*2016--11--26--14--21--36(ZJYC):ÕÒµ½Êı¾İµÄ¿ªÊ¼    */ 
                 pucChar = ( uint8_t * ) pxICMPHeader;
                 pucChar += sizeof( ICMPHeader_t );
                 /*2016--11--26--14--28--40(ZJYC):    */ 
                 /* Just memset the data to a fixed value. */
                 memset( ( void * ) pucChar, ( int ) ipECHO_DATA_FILL_BYTE, xNumberOfBytesToSend );
-                /*2016--11--26--14--28--46(ZJYC):ä¿¡æ¯å‘é€å®Œæˆï¼ŒIPå’Œæ ¡éªŒç”±
-                vProcessGeneratedUDPPacketæŒæ¡*/ 
+                /*2016--11--26--14--28--46(ZJYC):ĞÅÏ¢·¢ËÍÍê³É£¬IPºÍĞ£ÑéÓÉ
+                vProcessGeneratedUDPPacketÕÆÎÕ*/ 
                 pxNetworkBuffer->pucEthernetBuffer[ ipSOCKET_OPTIONS_OFFSET ] = FREERTOS_SO_UDPCKSUM_OUT;
                 pxNetworkBuffer->ulIPAddress = ulIPAddress;
                 pxNetworkBuffer->usPort = ipPACKET_CONTAINS_ICMP_DATA;
                 pxNetworkBuffer->xDataLength = xNumberOfBytesToSend + sizeof( ICMPHeader_t );
-                /*2016--11--26--14--30--37(ZJYC):å‘é€ç»™åè®®æ ˆ    */ 
+                /*2016--11--26--14--30--37(ZJYC):·¢ËÍ¸øĞ­ÒéÕ»    */ 
                 xStackTxEvent.pvData = pxNetworkBuffer;
 
                 if( xSendEventStructToIPTask( &xStackTxEvent, xBlockTimeTicks) != pdPASS )
@@ -979,8 +980,8 @@ BaseType_t xReturn, xSendMessage;
 
     if( ( xIPIsNetworkTaskReady() == pdFALSE ) && ( pxEvent->eEventType != eNetworkDownEvent ) )
     {
-        /*2016--11--26--14--31--54(ZJYC):å¦‚æœIP-Taskæ²¡å‡†å¤‡å¥½ï¼Œåˆ™åªå…è®¸eNetworkDownEvent
-        é€šè¿‡ã€‚ä¸å»å°è¯•å‘é€æ¶ˆæ¯ï¼Œæ‰€ä»¥è¿”å›å¤±è´¥*/ 
+        /*2016--11--26--14--31--54(ZJYC):Èç¹ûIP-TaskÃ»×¼±¸ºÃ£¬ÔòÖ»ÔÊĞíeNetworkDownEvent
+        Í¨¹ı¡£²»È¥³¢ÊÔ·¢ËÍÏûÏ¢£¬ËùÒÔ·µ»ØÊ§°Ü*/ 
         xReturn = pdFAIL;
     }
     else
@@ -990,13 +991,13 @@ BaseType_t xReturn, xSendMessage;
         {
             if( pxEvent->eEventType == eTCPTimerEvent )
             {
-                /*2016--11--26--14--34--20(ZJYC):å½“å®šæ—¶å™¨åˆ°æœŸæ—¶ï¼ŒTCPå®šæ—¶å™¨äº‹ä»¶å”¤é†’
-                å®šæ—¶å™¨ä»»åŠ¡ï¼Œä½†æ˜¯å¦‚æœIP-Taskå·²ç»è¢«å”¤é†’äº†ï¼Œå†å‘é€å°±æ²¡æœ‰æ„ä¹‰äº†    */ 
+                /*2016--11--26--14--34--20(ZJYC):µ±¶¨Ê±Æ÷µ½ÆÚÊ±£¬TCP¶¨Ê±Æ÷ÊÂ¼ş»½ĞÑ
+                ¶¨Ê±Æ÷ÈÎÎñ£¬µ«ÊÇÈç¹ûIP-TaskÒÑ¾­±»»½ĞÑÁË£¬ÔÙ·¢ËÍ¾ÍÃ»ÓĞÒâÒåÁË    */ 
                 xTCPTimer.bExpired = pdTRUE_UNSIGNED;
                 if( uxQueueMessagesWaiting( xNetworkEventQueue ) != 0u )
                 {
-                    /*2016--11--26--14--38--45(ZJYC):å¹¶ä¸æ˜¯çœŸæ­£çš„è¦å»å‘é€ä¿¡æ¯ï¼Œä½†è¿™ä¹Ÿä¸ç®—æ˜¯å¤±è´¥ï¼Œ
-                    å› ä¸ºä¿¡æ¯ä¸éœ€è¦å‘é€*/ 
+                    /*2016--11--26--14--38--45(ZJYC):²¢²»ÊÇÕæÕıµÄÒªÈ¥·¢ËÍĞÅÏ¢£¬µ«ÕâÒ²²»ËãÊÇÊ§°Ü£¬
+                    ÒòÎªĞÅÏ¢²»ĞèÒª·¢ËÍ*/ 
                     xSendMessage = pdFALSE;
                 }
             }
@@ -1004,7 +1005,7 @@ BaseType_t xReturn, xSendMessage;
         #endif /* ipconfigUSE_TCP */
         if( xSendMessage != pdFALSE )
         {
-            /*2016--11--26--14--42--29(ZJYC):IP-Taskåœ¨ç­‰å¾…è‡ªèº«çš„å›å¤æ—¶ä¸èƒ½é˜»å¡è‡ªå·±    */ 
+            /*2016--11--26--14--42--29(ZJYC):IP-TaskÔÚµÈ´ı×ÔÉíµÄ»Ø¸´Ê±²»ÄÜ×èÈû×Ô¼º    */ 
             if( ( xIsCallingFromIPTask() == pdTRUE ) && ( xTimeout > ( TickType_t ) 0 ) )
             {
                 xTimeout = ( TickType_t ) 0;
@@ -1012,15 +1013,15 @@ BaseType_t xReturn, xSendMessage;
             xReturn = xQueueSendToBack( xNetworkEventQueue, pxEvent, xTimeout );
             if( xReturn == pdFAIL )
             {
-                /*2016--11--26--14--43--51(ZJYC):ä¸€ä¸ªæ¶ˆæ¯åº”å½“è¢«å‘é€ä½†æ˜¯ä»–æ²¡æœ‰    */ 
+                /*2016--11--26--14--43--51(ZJYC):Ò»¸öÏûÏ¢Ó¦µ±±»·¢ËÍµ«ÊÇËûÃ»ÓĞ    */ 
                 FreeRTOS_debug_printf( ( "xSendEventStructToIPTask: CAN NOT ADD %d\n", pxEvent->eEventType ) );
                 iptraceSTACK_TX_EVENT_LOST( pxEvent->eEventType );
             }
         }
         else
         {
-            /*2016--11--26--14--44--59(ZJYC):æ²¡æœ‰å¿…è¦å»å‘é€æ¶ˆæ¯æ¥å¤„ç†äº‹ä»¶ï¼Œ
-            å³ä½¿å³ä½¿æ¶ˆæ¯æ²¡æœ‰è¢«å‘é€ï¼Œè°ƒç”¨ä¾ç„¶æ˜¯æˆåŠŸçš„*/ 
+            /*2016--11--26--14--44--59(ZJYC):Ã»ÓĞ±ØÒªÈ¥·¢ËÍÏûÏ¢À´´¦ÀíÊÂ¼ş£¬
+            ¼´Ê¹¼´Ê¹ÏûÏ¢Ã»ÓĞ±»·¢ËÍ£¬µ÷ÓÃÒÀÈ»ÊÇ³É¹¦µÄ*/ 
             xReturn = pdPASS;
         }
     }
@@ -1036,25 +1037,25 @@ const EthernetHeader_t *pxEthernetHeader;
     pxEthernetHeader = ( const EthernetHeader_t * ) pucEthernetBuffer;
     if( memcmp( ( void * ) ipLOCAL_MAC_ADDRESS, ( void * ) &( pxEthernetHeader->xDestinationAddress ), sizeof( MACAddress_t ) ) == 0 )
     {
-        /*2016--11--26--14--49--10(ZJYC):åŒ…ç›´æ¥æŒ‡å‘æ­¤èŠ‚ç‚¹--å¤„ç†å®ƒ    */ 
+        /*2016--11--26--14--49--10(ZJYC):°üÖ±½ÓÖ¸Ïò´Ë½Úµã--´¦ÀíËü    */ 
         eReturn = eProcessBuffer;
     }
     else if( memcmp( ( void * ) xBroadcastMACAddress.ucBytes, ( void * ) pxEthernetHeader->xDestinationAddress.ucBytes, sizeof( MACAddress_t ) ) == 0 )
     {
-        /*2016--11--26--14--50--48(ZJYC):åŒ…æ˜¯ä¸€ä¸ªå¹¿æ’­åŒ…--å¤„ç†å®ƒ    */ 
+        /*2016--11--26--14--50--48(ZJYC):°üÊÇÒ»¸ö¹ã²¥°ü--´¦ÀíËü    */ 
         eReturn = eProcessBuffer;
     }
     else
 #if( ipconfigUSE_LLMNR == 1 )
     if( memcmp( ( void * ) xLLMNR_MacAdress.ucBytes, ( void * ) pxEthernetHeader->xDestinationAddress.ucBytes, sizeof( MACAddress_t ) ) == 0 )
     {
-        /*2016--11--26--14--51--20(ZJYC):æŠ¥æ˜¯LLMNRè¯·æ±‚ï¼Œå¤„ç†å®ƒ    */ 
+        /*2016--11--26--14--51--20(ZJYC):±¨ÊÇLLMNRÇëÇó£¬´¦ÀíËü    */ 
         eReturn = eProcessBuffer;
     }
     else
 #endif /* ipconfigUSE_LLMNR */
     {
-        /*2016--11--26--14--54--50(ZJYC):åŒ…ä¸æ˜¯ä¸€ä¸ªå¹¿æ’­åŒ…ï¼Œæˆ–è€…å¯¹äºè¿™ä¸ªèŠ‚ç‚¹æ¥è¯´ä¸é‡‡å–ä»»ä½•è¡ŒåŠ¨    */ 
+        /*2016--11--26--14--54--50(ZJYC):°ü²»ÊÇÒ»¸ö¹ã²¥°ü£¬»òÕß¶ÔÓÚÕâ¸ö½ÚµãÀ´Ëµ²»²ÉÈ¡ÈÎºÎĞĞ¶¯    */ 
         eReturn = eReleaseBuffer;
     }
 
@@ -1069,7 +1070,7 @@ const EthernetHeader_t *pxEthernetHeader;
 
             if( usFrameType <= 0x600U )
             {
-                /*2016--11--26--14--55--47(ZJYC):ä¸æ˜¯ä»¥å¤ªç½‘ II æ¶æ„    */ 
+                /*2016--11--26--14--55--47(ZJYC):²»ÊÇÒÔÌ«Íø II ¼Ü¹¹    */ 
                 eReturn = eReleaseBuffer;
             }
         }
@@ -1082,14 +1083,14 @@ const EthernetHeader_t *pxEthernetHeader;
 
 static void prvProcessNetworkDownEvent( void )
 {
-    /*2016--11--26--15--03--13(ZJYC):æ²¡æœ‰ç½‘ç»œæ˜¯åœæ­¢ARPå®šæ—¶å™¨    */ 
+    /*2016--11--26--15--03--13(ZJYC):Ã»ÓĞÍøÂçÊÇÍ£Ö¹ARP¶¨Ê±Æ÷    */ 
     xARPTimer.bActive = pdFALSE_UNSIGNED;
 
     #if ipconfigUSE_NETWORK_EVENT_HOOK == 1
     {
         static BaseType_t xCallEventHook = pdFALSE;
-        /*2016--11--26--15--03--42(ZJYC):ç¬¬ä¸€ä¸ªæ‰ç½‘äº‹ä»¶æœ‰IPä»»åŠ¡äº§ç”Ÿå»åˆå§‹åŒ–åº•å±‚ç¡¬ä»¶
-        æ‰€ä»¥ï¼Œä¸è¦ç¬¬ä¸€æ¬¡æ‰ç½‘äº‹ä»¶ä¸ä¼šé‡‡ç”¨*/ 
+        /*2016--11--26--15--03--42(ZJYC):µÚÒ»¸öµôÍøÊÂ¼şÓĞIPÈÎÎñ²úÉúÈ¥³õÊ¼»¯µ×²ãÓ²¼ş
+        ËùÒÔ£¬²»ÒªµÚÒ»´ÎµôÍøÊÂ¼ş²»»á²ÉÓÃ*/ 
         if( xCallEventHook == pdTRUE )
         {
             vApplicationIPNetworkEventHook( eNetworkDown );
@@ -1097,18 +1098,18 @@ static void prvProcessNetworkDownEvent( void )
         xCallEventHook = pdTRUE;
     }
     #endif
-    /*2016--11--26--15--05--02(ZJYC):ç½‘ç»œæ–­å¼€ï¼ˆæˆ–è€…è¢«ç¬¬ä¸€æ¬¡åˆå§‹åŒ–ï¼‰ã€‚æ‰§è¡Œä»»ä½•ç¡¬ä»¶å¤„ç†æ˜¯å¿…è¦çš„
-    æˆ–è€…ï¼Œç­‰å¾…å…¶å†æ¬¡å¯ç”¨ï¼Œè¿™ä¾èµ–äºç¡¬ä»¶*/ 
+    /*2016--11--26--15--05--02(ZJYC):ÍøÂç¶Ï¿ª£¨»òÕß±»µÚÒ»´Î³õÊ¼»¯£©¡£Ö´ĞĞÈÎºÎÓ²¼ş´¦ÀíÊÇ±ØÒªµÄ
+    »òÕß£¬µÈ´ıÆäÔÙ´Î¿ÉÓÃ£¬ÕâÒÀÀµÓÚÓ²¼ş*/ 
     if( xNetworkInterfaceInitialise() != pdPASS )
     {
-        /*2016--11--26--15--07--38(ZJYC):ç†æƒ³æƒ…å†µä¸‹ï¼Œåªæœ‰ç½‘ç»œå¯ç”¨æ—¶ç½‘ç»œæ¥å£åˆå§‹åŒ–å‡½æ•°æ‰ä¼šè¿”å›
-        å¦‚æœæƒ…å†µä¸æ˜¯è¿™æ ·ï¼Œåœ¨é‡æ–°åˆå§‹åŒ–ä¹‹å‰ç­‰å¾…ä¸€ä¼š*/ 
+        /*2016--11--26--15--07--38(ZJYC):ÀíÏëÇé¿öÏÂ£¬Ö»ÓĞÍøÂç¿ÉÓÃÊ±ÍøÂç½Ó¿Ú³õÊ¼»¯º¯Êı²Å»á·µ»Ø
+        Èç¹ûÇé¿ö²»ÊÇÕâÑù£¬ÔÚÖØĞÂ³õÊ¼»¯Ö®Ç°µÈ´ıÒ»»á*/ 
         vTaskDelay( ipINITIALISATION_RETRY_DELAY );
         FreeRTOS_NetworkDown();
     }
     else
     {
-        /*2016--11--26--15--13--08(ZJYC):å°†å‰©ä½™æ—¶é—´ç½®ä¸º0ï¼Œä»–å°†ä¼šç«‹åˆ»æ¿€æ´»    */ 
+        /*2016--11--26--15--13--08(ZJYC):½«Ê£ÓàÊ±¼äÖÃÎª0£¬Ëû½«»áÁ¢¿Ì¼¤»î    */ 
         #if ipconfigUSE_DHCP == 1
         {
             /*2016--11--26--15--14--01(ZJYC):    */ 
@@ -1138,13 +1139,13 @@ void vIPNetworkUpCalls( void )
 
     #if( ipconfigDNS_USE_CALLBACKS != 0 )
     {
-        /*2016--11--26--19--30--46(ZJYC):å¦‚ä¸‹çš„å‡½æ•°åœ¨FreeRTOS_DNS.cä¸­å£°æ˜ï¼Œå¹¶ä¸”
-        å¯¹äºåº“ç§æœ‰ï¼ˆä¸å…¬å¼€ï¼‰*/ 
+        /*2016--11--26--19--30--46(ZJYC):ÈçÏÂµÄº¯ÊıÔÚFreeRTOS_DNS.cÖĞÉùÃ÷£¬²¢ÇÒ
+        ¶ÔÓÚ¿âË½ÓĞ£¨²»¹«¿ª£©*/ 
         extern void vDNSInitialise( void );
         vDNSInitialise();
     }
     #endif /* ipconfigDNS_USE_CALLBACKS != 0 */
-    /*2016--11--26--19--31--45(ZJYC):å°†å‰©ä½™æ—¶é—´è®¾ç½®ä¸º0ï¼Œæ‰€ä»¥ä»–ä¼šè¢«ç«‹å³æ¿€æ´»    */ 
+    /*2016--11--26--19--31--45(ZJYC):½«Ê£ÓàÊ±¼äÉèÖÃÎª0£¬ËùÒÔËû»á±»Á¢¼´¼¤»î    */ 
     prvIPTimerReload( &xARPTimer, pdMS_TO_TICKS( ipARP_TIMER_PERIOD_MS ) );
 }
 /*-----------------------------------------------------------*/
@@ -1161,16 +1162,16 @@ volatile eFrameProcessingResult_t eReturned;
 
     if( eReturned == eProcessBuffer )
     {
-        /*2016--11--26--19--32--53(ZJYC):ç¿»è¯‘æ”¶åˆ°çš„ä»¥å¤ªç½‘æ•°æ®åŒ…    */ 
+        /*2016--11--26--19--32--53(ZJYC):·­ÒëÊÕµ½µÄÒÔÌ«ÍøÊı¾İ°ü    */ 
         switch( pxEthernetHeader->usFrameType )
         {
             case ipARP_FRAME_TYPE :
-                /*2016--11--26--19--33--24(ZJYC):ä»¥å¤ªç½‘æ•°æ®åŒ…å«æœ‰ARP    */ 
+                /*2016--11--26--19--33--24(ZJYC):ÒÔÌ«ÍøÊı¾İ°üº¬ÓĞARP    */ 
                 eReturned = eARPProcessPacket( ( ARPPacket_t * ) pxNetworkBuffer->pucEthernetBuffer );
                 break;
 
             case ipIPv4_FRAME_TYPE :
-                /*2016--11--26--19--33--48(ZJYC):ä»¥å¤ªç½‘æ•°æ®åŒ…å«æœ‰IP    */ 
+                /*2016--11--26--19--33--48(ZJYC):ÒÔÌ«ÍøÊı¾İ°üº¬ÓĞIP    */ 
                 eReturned = prvProcessIPPacket( ( IPPacket_t * ) pxNetworkBuffer->pucEthernetBuffer, pxNetworkBuffer );
                 break;
 
@@ -1185,18 +1186,18 @@ volatile eFrameProcessingResult_t eReturned;
     switch( eReturned )
     {
         case eReturnEthernetFrame :
-            /*2016--11--26--19--35--28(ZJYC):ä»¥å¤ªç½‘å¸§å¯èƒ½å·²ç»è¢«æ›´æ–°äº†ï¼Œ
-            ï¼ˆæˆ–è®¸ä»–æ˜¯ä¸€ä¸ªARPè¯·æ±‚æˆ–è€…æ˜¯PINGè¯·æ±‚ï¼Ÿï¼‰å¹¶ä¸”åº”å½“åŸè·¯è¿”å›*/ 
+            /*2016--11--26--19--35--28(ZJYC):ÒÔÌ«ÍøÖ¡¿ÉÄÜÒÑ¾­±»¸üĞÂÁË£¬
+            £¨»òĞíËûÊÇÒ»¸öARPÇëÇó»òÕßÊÇPINGÇëÇó£¿£©²¢ÇÒÓ¦µ±Ô­Â··µ»Ø*/ 
             vReturnEthernetFrame( pxNetworkBuffer, pdTRUE );
-            /*2016--11--26--19--35--03(ZJYC):pdTRUEç¼“å†²ä¸€æ—¦è¢«å‘é€å³é‡Šæ”¾    */ 
+            /*2016--11--26--19--35--03(ZJYC):pdTRUE»º³åÒ»µ©±»·¢ËÍ¼´ÊÍ·Å    */ 
             break;
 
         case eFrameConsumed :
-            /*2016--11--26--19--36--56(ZJYC):è¯¥ç¼“å­˜æ­£åœ¨ä»€ä¹ˆåœ°æ–¹ä½¿ç”¨ï¼Œç°åœ¨ä¸èƒ½é‡Šæ”¾    */ 
+            /*2016--11--26--19--36--56(ZJYC):¸Ã»º´æÕıÔÚÊ²Ã´µØ·½Ê¹ÓÃ£¬ÏÖÔÚ²»ÄÜÊÍ·Å    */ 
             break;
 
         default :
-            /*2016--11--26--19--37--30(ZJYC):è¯¥å¸§ä»€ä¹ˆåœ°æ–¹éƒ½ç”¨ä¸åˆ°ï¼Œå¹¶ä¸”ï¼Œ***è¦é‡Šæ”¾    */ 
+            /*2016--11--26--19--37--30(ZJYC):¸ÃÖ¡Ê²Ã´µØ·½¶¼ÓÃ²»µ½£¬²¢ÇÒ£¬***ÒªÊÍ·Å    */ 
             vReleaseNetworkBufferAndDescriptor( pxNetworkBuffer );
             break;
     }
@@ -1218,10 +1219,10 @@ eFrameProcessingResult_t eReturn = eProcessBuffer;
 
     #if( ipconfigETHERNET_DRIVER_FILTERS_PACKETS == 0 )
     {
-        /*2016--11--26--19--39--50(ZJYC):åœ¨RAMè¾ƒå°çš„ç³»ç»Ÿä¸­ï¼Œæå‰æ£€æŸ¥åˆ°æ¥çš„æ•°æ®
-        æ˜¯æœ‰ä¸€å®šä¼˜åŠ¿çš„ï¼Œé€šè¿‡ç½‘å¡é©±åŠ¨ï¼Œè¯¥æ–¹æ³•ä¼šå‡å°‘ç½‘ç»œç¼“å­˜çš„ä½¿ç”¨é‡*/ 
+        /*2016--11--26--19--39--50(ZJYC):ÔÚRAM½ÏĞ¡µÄÏµÍ³ÖĞ£¬ÌáÇ°¼ì²éµ½À´µÄÊı¾İ
+        ÊÇÓĞÒ»¶¨ÓÅÊÆµÄ£¬Í¨¹ıÍø¿¨Çı¶¯£¬¸Ã·½·¨»á¼õÉÙÍøÂç»º´æµÄÊ¹ÓÃÁ¿*/ 
         uint32_t ulDestinationIPAddress = pxIPHeader->ulDestinationIPAddress;
-            /*2016--11--26--19--41--27(ZJYC):ç¡®ä¿åˆ°æ¥çš„æ•°æ®åŒ…æ²¡æœ‰ï¼Ÿï¼Ÿï¼Ÿ    */ 
+            /*2016--11--26--19--41--27(ZJYC):È·±£µ½À´µÄÊı¾İ°üÃ»ÓĞ£¿£¿£¿    */ 
             /* Ensure that the incoming packet is not fragmented (only outgoing
             packets can be fragmented) as these are the only handled IP frames
             currently. */
@@ -1304,7 +1305,7 @@ uint8_t ucProtocol;
     {
         if( uxHeaderLength > ipSIZE_OF_IPv4_HEADER )
         {
-            /*2016--11--30--18--46--33(ZJYC): æœ‰é€‰é¡¹   */ 
+            /*2016--11--30--18--46--33(ZJYC): ÓĞÑ¡Ïî   */ 
             const size_t optlen = ( ( size_t ) uxHeaderLength ) - ipSIZE_OF_IPv4_HEADER;
             /* From: the previous start of UDP/ICMP/TCP data */
             uint8_t *pucSource = ( ( uint8_t * ) pxIPHeader ) + uxHeaderLength;
@@ -1312,13 +1313,13 @@ uint8_t ucProtocol;
             uint8_t *pucTarget = ( ( uint8_t * ) pxIPHeader ) + ipSIZE_OF_IPv4_HEADER;
             /* How many: total length minus the options and the lower headers */
             const size_t  xMoveLen = pxNetworkBuffer->xDataLength - optlen - ipSIZE_OF_IPv4_HEADER - ipSIZE_OF_ETH_HEADER;
-            /*2016--11--30--18--47--09(ZJYC): å¯æƒœæˆ‘ä»¬ä¸éœ€è¦è¿™äº›ä¸œè¥¿   */ 
+            /*2016--11--30--18--47--09(ZJYC): ¿ÉÏ§ÎÒÃÇ²»ĞèÒªÕâĞ©¶«Î÷   */ 
             memmove( pucTarget, pucSource, xMoveLen );
             pxNetworkBuffer->xDataLength -= optlen;
         }
         if( ucProtocol != ( uint8_t ) ipPROTOCOL_UDP )
         {
-            /*2016--11--30--18--47--48(ZJYC): åŠ å…¥åˆ°ARPç¼“å­˜ä¸­   */ 
+            /*2016--11--30--18--47--48(ZJYC): ¼ÓÈëµ½ARP»º´æÖĞ   */ 
             vARPRefreshCacheEntry( &( pxIPPacket->xEthernetHeader.xSourceAddress ), pxIPHeader->ulSourceIPAddress );
         }
         switch( ucProtocol )

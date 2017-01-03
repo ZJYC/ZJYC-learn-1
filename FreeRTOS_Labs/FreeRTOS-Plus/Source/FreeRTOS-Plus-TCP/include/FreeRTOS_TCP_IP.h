@@ -12,18 +12,18 @@ typedef enum eTCP_STATE {
     /* Comments about the TCP states are borrowed from the very useful
      * Wiki page:
      * http://en.wikipedia.org/wiki/Transmission_Control_Protocol */
-    eCLOSED = 0u,   /* 0 (server + client) æ²¡æœ‰è¿æ¥çŠ¶æ€ */
-    eTCP_LISTEN,    /* 1 (server) ç­‰å¾…è¿æ¥è¯·æ±‚ */
-    eCONNECT_SYN,   /* 2 (client) å†…éƒ¨çŠ¶æ€: å¥—æ¥å­—æƒ³å‘é€è¿æ¥ */
-    eSYN_FIRST,     /* 3 (server) åˆšåˆšåˆ›å»º, å¿…é¡»åº”ç­”SYNè¯·æ±‚ */
-    eSYN_RECEIVED,  /* 4 (server) éœ€è¦è¿æ¥è¯·æ±‚çš„åº”ç­”åœ¨å·²ç»æ¥æ”¶åˆ°å¹¶å‘é€è¿æ¥è¯·æ±‚ä¹‹å */
-    eESTABLISHED,   /* 5 (server + client) å·²è¿æ¥ï¼Œæ•°æ®å¯ä»¥ä¼ è¾“ï¼Œæ•°æ®ä¼ è¾“é˜¶æ®µçš„æ­£å¸¸çŠ¶æ€ */
-    eFIN_WAIT_1,    /* 6 (server+client)ç­‰å¾…è¿œç¨‹TCPå‘é€ç»“æŸè¯·æ±‚æˆ–è€…å·²ç»ç¡®è®¤äº†è¿œç¨‹TCPçš„ç»“æŸè¯·æ±‚*/
-    eFIN_WAIT_2,    /* 7 (server + client) ç­‰å¾…è¿œç¨‹TCPå‘é€ç»“æŸè¯·æ±‚ */
-    eCLOSE_WAIT,    /* 8 (server + client) ç­‰å¾…æœ¬åœ°ç”¨æˆ·çš„ç»“æŸè¯·æ±‚ */
-    eCLOSING,       /*   (server + client) ç­‰å¾…è¿œç¨‹å¯¹ç»“æŸè¯·æ±‚çš„ç¡®è®¤ */
-    eLAST_ACK,      /* 9 (server + client) ç­‰å¾…è¿œç¨‹çš„ç»“æŸè¯·æ±‚ç¡®è®¤(ä¹ŸåŒ…æ‹¬äº†å¯¹ä»–ä»¬è¿æ¥è¯·æ±‚çš„ç¡®è®¤). */
-    eTIME_WAIT,     /* 10 (either server or client) ç­‰å¾…è¶³å¤Ÿé•¿æ—¶é—´ä»¥ç¡®ä¿è¿œç¨‹çš„åˆ°äº†ç»“æŸè¯·æ±‚  */
+    eCLOSED = 0u,   /* 0 (server + client) Ã»ÓĞÁ¬½Ó×´Ì¬ */
+    eTCP_LISTEN,    /* 1 (server) µÈ´ıÁ¬½ÓÇëÇó */
+    eCONNECT_SYN,   /* 2 (client) ÄÚ²¿×´Ì¬: Ì×½Ó×ÖÏë·¢ËÍÁ¬½Ó */
+    eSYN_FIRST,     /* 3 (server) ¸Õ¸Õ´´½¨, ±ØĞëÓ¦´ğSYNÇëÇó */
+    eSYN_RECEIVED,  /* 4 (server) ĞèÒªÁ¬½ÓÇëÇóµÄÓ¦´ğÔÚÒÑ¾­½ÓÊÕµ½²¢·¢ËÍÁ¬½ÓÇëÇóÖ®ºó */
+    eESTABLISHED,   /* 5 (server + client) ÒÑÁ¬½Ó£¬Êı¾İ¿ÉÒÔ´«Êä£¬Êı¾İ´«Êä½×¶ÎµÄÕı³£×´Ì¬ */
+    eFIN_WAIT_1,    /* 6 (server+client)µÈ´ıÔ¶³ÌTCP·¢ËÍ½áÊøÇëÇó»òÕßÒÑ¾­È·ÈÏÁËÔ¶³ÌTCPµÄ½áÊøÇëÇó*/
+    eFIN_WAIT_2,    /* 7 (server + client) µÈ´ıÔ¶³ÌTCP·¢ËÍ½áÊøÇëÇó */
+    eCLOSE_WAIT,    /* 8 (server + client) µÈ´ı±¾µØÓÃ»§µÄ½áÊøÇëÇó */
+    eCLOSING,       /*   (server + client) µÈ´ıÔ¶³Ì¶Ô½áÊøÇëÇóµÄÈ·ÈÏ */
+    eLAST_ACK,      /* 9 (server + client) µÈ´ıÔ¶³ÌµÄ½áÊøÇëÇóÈ·ÈÏ(Ò²°üÀ¨ÁË¶ÔËûÃÇÁ¬½ÓÇëÇóµÄÈ·ÈÏ). */
+    eTIME_WAIT,     /* 10 (either server or client) µÈ´ı×ã¹»³¤Ê±¼äÒÔÈ·±£Ô¶³ÌµÄµ½ÁË½áÊøÇëÇó  */
 } eIPTCPState_t;
 
 

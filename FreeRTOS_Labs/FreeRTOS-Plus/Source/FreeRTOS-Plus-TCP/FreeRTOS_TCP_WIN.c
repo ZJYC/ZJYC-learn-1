@@ -120,18 +120,18 @@ extern void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewL
 
 /*
 ****************************************************
-*  å‡½æ•°å         : xTCPWindowRxConfirm
-*  å‡½æ•°æè¿°       :     ä¸€ä¸ªåºåˆ—å·ä¸ºulSequenceNumberçš„æ®µå·²è¢«æ¥æ”¶ï¼Œå¦‚æœulCurrentSequenceNumber == 
-                        ulSequenceNumberè¡¨ç¤ºè¿™æ­£æ˜¯æˆ‘ä»¬æ‰€æœŸæœ›çš„ï¼Œæˆ‘ä»¬æŸ¥çœ‹åœ¨ulSequenceNumberå’Œ
-                        (ulSequenceNumber+xLength)ä¹‹é—´æ˜¯å¦å­˜åœ¨å¦ä¸€ä¸ªæ®µçš„åºåˆ—å·ï¼Œé€šå¸¸æ²¡æœ‰ã€‚
+*  º¯ÊıÃû         : xTCPWindowRxConfirm
+*  º¯ÊıÃèÊö       :     Ò»¸öĞòÁĞºÅÎªulSequenceNumberµÄ¶ÎÒÑ±»½ÓÊÕ£¬Èç¹ûulCurrentSequenceNumber == 
+                        ulSequenceNumber±íÊ¾ÕâÕıÊÇÎÒÃÇËùÆÚÍûµÄ£¬ÎÒÃÇ²é¿´ÔÚulSequenceNumberºÍ
+                        (ulSequenceNumber+xLength)Ö®¼äÊÇ·ñ´æÔÚÁíÒ»¸ö¶ÎµÄĞòÁĞºÅ£¬Í¨³£Ã»ÓĞ¡£
 
-*  å‚æ•°           : 
-                    pxWindowï¼š
-                    ulSequenceNumberï¼š
-                    ulLengthï¼šæ¥æ”¶æ•°æ®é•¿åº¦
-*  è¿”å›å€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  ²ÎÊı           : 
+                    pxWindow£º
+                    ulSequenceNumber£º
+                    ulLength£º½ÓÊÕÊı¾İ³¤¶È
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 #if( ipconfigUSE_TCP_WIN == 1 )
@@ -140,15 +140,15 @@ extern void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewL
 
 /*
 ****************************************************
-*  å‡½æ•°å         : lTCPIncrementTxPosition
-*  å‡½æ•°æè¿°       : 
-*  å‚æ•°           : 
-                    lPositionï¼šå½“å‰ä½ç½®
-                    lMaxï¼šç¼“å†²åŒºæœ€å¤§é•¿åº¦
-                    lCountï¼šå­˜å‚¨å­—èŠ‚æ•°
-*  è¿”å›å€¼         : å­˜å‚¨å®Œä¹‹åçš„ä½ç½®
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : lTCPIncrementTxPosition
+*  º¯ÊıÃèÊö       : 
+*  ²ÎÊı           : 
+                    lPosition£ºµ±Ç°Î»ÖÃ
+                    lMax£º»º³åÇø×î´ó³¤¶È
+                    lCount£º´æ´¢×Ö½ÚÊı
+*  ·µ»ØÖµ         : ´æ´¢ÍêÖ®ºóµÄÎ»ÖÃ
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 #if( ipconfigUSE_TCP_WIN == 1 )
@@ -265,13 +265,13 @@ extern void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewL
 
 void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem, MiniListItem_t * const pxWhere )
 {
-    /*2016--12--03--18--16--54(ZJYC): å‘pxListæ’å…¥ä¸€æ–°çš„æˆå‘˜ï¼Œè¿™ä¸ä¼šå¯¹åˆ—è¡¨æ’åºï¼Œ
-    ä»–å§æˆå‘˜æ”¾åœ¨xListEndä¹‹å‰ï¼Œæ‰€ä»¥ä»–ä¼šæ˜¯æœ€åä¸€ä¸ªè¢«listGET_HEAD_ENTRY()è¿”å›çš„å…ƒç´ */ 
+    /*2016--12--03--18--16--54(ZJYC): ÏòpxList²åÈëÒ»ĞÂµÄ³ÉÔ±£¬Õâ²»»á¶ÔÁĞ±íÅÅĞò£¬
+    Ëû°É³ÉÔ±·ÅÔÚxListEndÖ®Ç°£¬ËùÒÔËû»áÊÇ×îºóÒ»¸ö±»listGET_HEAD_ENTRY()·µ»ØµÄÔªËØ*/ 
     pxNewListItem->pxNext = (struct xLIST_ITEM * configLIST_VOLATILE)pxWhere;
     pxNewListItem->pxPrevious = pxWhere->pxPrevious;
     pxWhere->pxPrevious->pxNext = pxNewListItem;
     pxWhere->pxPrevious = pxNewListItem;
-    /*2016--12--03--18--18--53(ZJYC): è®°ä½è¿™ä¸€ä¸ªæˆå‘˜åœ¨å“ªä¸€ä¸ªåˆ—è¡¨ä¸­   */ 
+    /*2016--12--03--18--18--53(ZJYC): ¼Ç×¡ÕâÒ»¸ö³ÉÔ±ÔÚÄÄÒ»¸öÁĞ±íÖĞ   */ 
     pxNewListItem->pvContainer = ( void * ) pxList;
     ( pxList->uxNumberOfItems )++;
 }
@@ -282,7 +282,7 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
     static BaseType_t prvCreateSectors( void )
     {
     BaseType_t xIndex, xReturn;
-        /*2016--12--03--18--19--31(ZJYC): ä¸ºxTCPSegmentsåˆ›å»ºç©ºé—´ï¼Œå¹¶ä¿å­˜åœ¨xSegmentList   */ 
+        /*2016--12--03--18--19--31(ZJYC): ÎªxTCPSegments´´½¨¿Õ¼ä£¬²¢±£´æÔÚxSegmentList   */ 
         vListInitialise( &xSegmentList );
         xTCPSegments = ( TCPSegment_t * ) pvPortMallocLarge( ipconfigTCP_WIN_SEG_COUNT * sizeof(    xTCPSegments[ 0 ] ) );
         if( xTCPSegments == NULL )
@@ -294,7 +294,7 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
         }
         else
         {
-            /*2016--12--03--18--20--15(ZJYC): æ¸…ç©ºå·²ç”³è¯·çš„ç©ºé—´   */ 
+            /*2016--12--03--18--20--15(ZJYC): Çå¿ÕÒÑÉêÇëµÄ¿Õ¼ä   */ 
             memset( xTCPSegments, '\0', ipconfigTCP_WIN_SEG_COUNT * sizeof( xTCPSegments[ 0 ] ) );
             for( xIndex = 0; xIndex < ipconfigTCP_WIN_SEG_COUNT; xIndex++ )
             {
@@ -316,14 +316,14 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : xTCPWindowRxFind
-*  å‡½æ•°æè¿°       : æ‰¾åˆ°æ¥æ”¶æ–­æœºå’Œä¸­å¯¹åº”äºåºåˆ—å·ulSequenceNumberçš„æ®µ
-*  å‚æ•°           : ulSequenceNumberåºåˆ—å·
-*  è¿”å›å€¼         : 
-                    æ‰¾åˆ°ï¼šè¿”å›å¯¹åº”çš„çŸ­
-                    å¦åˆ™ï¼šè¿”å›NULL
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : xTCPWindowRxFind
+*  º¯ÊıÃèÊö       : ÕÒµ½½ÓÊÕ¶Ï»úºÍÖĞ¶ÔÓ¦ÓÚĞòÁĞºÅulSequenceNumberµÄ¶Î
+*  ²ÎÊı           : ulSequenceNumberĞòÁĞºÅ
+*  ·µ»ØÖµ         : 
+                    ÕÒµ½£º·µ»Ø¶ÔÓ¦µÄ¶Ì
+                    ·ñÔò£º·µ»ØNULL
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     static TCPSegment_t *xTCPWindowRxFind( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber )
@@ -331,7 +331,7 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
     const ListItem_t *pxIterator;
     const MiniListItem_t* pxEnd;
     TCPSegment_t *pxSegment, *pxReturn = NULL;
-        /*2016--12--03--18--21--18(ZJYC): åœ¨æ¥æ”¶æ®µé›†åˆä¸­æ‰¾åˆ°ç»™å®šåºåˆ—å·çš„æ®µ   */ 
+        /*2016--12--03--18--21--18(ZJYC): ÔÚ½ÓÊÕ¶Î¼¯ºÏÖĞÕÒµ½¸ø¶¨ĞòÁĞºÅµÄ¶Î   */ 
         pxEnd = ( const MiniListItem_t* )listGET_END_MARKER( &pxWindow->xRxSegments );
         for( pxIterator  = ( const ListItem_t * ) listGET_NEXT( pxEnd );
              pxIterator != ( const ListItem_t * ) pxEnd;
@@ -352,25 +352,25 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : xTCPWindowNew
-*  å‡½æ•°æè¿°       : (Rx/Tx)åˆ›å»ºæ–°çš„æ®µï¼Œ
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulSequenceNumberï¼šæœ¬åŒ…ä¸­ç¬¬ä¸€å­—èŠ‚çš„åºåˆ—å·
-                    lCountï¼šå­˜å‚¨åœ¨æœ¬æ®µçš„å­—èŠ‚æ•°
-                    xIsForRxï¼šæ˜¯ä¸æ˜¯æ¥å—ç¼“å†²è¿˜æ˜¯å‘é€ç¼“å†²
-*  è¿”å›å€¼         : 
-                    æˆåŠŸï¼šè¿”å›æ–°åˆ›å»ºçš„æ®µ
-                    å¤±è´¥ï¼šè¿”å›NULL
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : xTCPWindowNew
+*  º¯ÊıÃèÊö       : (Rx/Tx)´´½¨ĞÂµÄ¶Î£¬
+*  ²ÎÊı           : 
+                    pxWindow£º´°¿Ú
+                    ulSequenceNumber£º±¾°üÖĞµÚÒ»×Ö½ÚµÄĞòÁĞºÅ
+                    lCount£º´æ´¢ÔÚ±¾¶ÎµÄ×Ö½ÚÊı
+                    xIsForRx£ºÊÇ²»ÊÇ½ÓÊÜ»º³å»¹ÊÇ·¢ËÍ»º³å
+*  ·µ»ØÖµ         : 
+                    ³É¹¦£º·µ»ØĞÂ´´½¨µÄ¶Î
+                    Ê§°Ü£º·µ»ØNULL
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     static TCPSegment_t *xTCPWindowNew( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, int32_t lCount, BaseType_t xIsForRx )
     {
     TCPSegment_t *pxSegment;
     ListItem_t * pxItem;
-        /*2016--12--03--18--22--27(ZJYC): ç”³è¯·ä¸€æ–°çš„æ®µï¼Œå¥—æ¥å­—å°†ä¼šä»ä¸€å…±åŒçš„å†…å­˜æ± ä¸­å€Ÿæ®µï¼Œ
+        /*2016--12--03--18--22--27(ZJYC): ÉêÇëÒ»ĞÂµÄ¶Î£¬Ì×½Ó×Ö½«»á´ÓÒ»¹²Í¬µÄÄÚ´æ³ØÖĞ½è¶Î£¬
         xSegmentList*/ 
         if( listLIST_IS_EMPTY( &xSegmentList ) != pdFALSE )
         {
@@ -381,17 +381,17 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
         }
         else
         {
-            /*2016--12--03--18--24--32(ZJYC): ä»åˆ—è¡¨ä¸­å¼¹å‡ºæˆå‘˜ï¼ŒåŒæ­¥ä¿æŠ¤ä¸éœ€è¦ï¼Œ
-            å› ä¸ºåªå­˜åœ¨ä¸€ä¸ªä»»åŠ¡è°ƒç”¨ä»–ä»¬*/ 
+            /*2016--12--03--18--24--32(ZJYC): ´ÓÁĞ±íÖĞµ¯³ö³ÉÔ±£¬Í¬²½±£»¤²»ĞèÒª£¬
+            ÒòÎªÖ»´æÔÚÒ»¸öÈÎÎñµ÷ÓÃËûÃÇ*/ 
             pxItem = ( ListItem_t * ) listGET_HEAD_ENTRY( &xSegmentList );
             pxSegment = ( TCPSegment_t * ) listGET_LIST_ITEM_OWNER( pxItem );
             configASSERT( pxItem != NULL );
             configASSERT( pxSegment != NULL );
-            /*2016--12--03--18--25--57(ZJYC): ä»xSegmentListåˆ é™¤æˆå‘˜   */ 
+            /*2016--12--03--18--25--57(ZJYC): ´ÓxSegmentListÉ¾³ı³ÉÔ±   */ 
             uxListRemove( pxItem );
-            /*2016--12--03--18--26--42(ZJYC): æŠŠå®ƒæ”¾åˆ°å¦ä¸€ä¸ªè¿æ¥Rxæˆ–è€…Txä¸­   */ 
+            /*2016--12--03--18--26--42(ZJYC): °ÑËü·Åµ½ÁíÒ»¸öÁ¬½ÓRx»òÕßTxÖĞ   */ 
             vListInsertFifo( xIsForRx ? &pxWindow->xRxSegments : &pxWindow->xTxSegments, pxItem );
-            /*2016--12--03--18--27--18(ZJYC): å¹¶ä¸”è®¾ç½®æœ¬æ®µçš„å®šæ—¶å™¨ä¸º0   */ 
+            /*2016--12--03--18--27--18(ZJYC): ²¢ÇÒÉèÖÃ±¾¶ÎµÄ¶¨Ê±Æ÷Îª0   */ 
             vTCPTimerSet( &pxSegment->xTransmitTimer );
             pxSegment->u.ulFlags = 0;
             pxSegment->u.bits.bIsForRx = ( xIsForRx != 0 );
@@ -417,29 +417,29 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : xTCPWindowRxEmpty
-*  å‡½æ•°æè¿°       : æŸ¥çœ‹æ¥æ”¶çª—å£æ˜¯å¦ä¸ºç©º
-*  å‚æ•°           : pxWindowï¼šçª—å£
-*  è¿”å›å€¼         : 
-                    pdFALSEï¼šä¸ä¸ºç©º
-                    pdTRUEï¼šä¸ºç©º
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : xTCPWindowRxEmpty
+*  º¯ÊıÃèÊö       : ²é¿´½ÓÊÕ´°¿ÚÊÇ·ñÎª¿Õ
+*  ²ÎÊı           : pxWindow£º´°¿Ú
+*  ·µ»ØÖµ         : 
+                    pdFALSE£º²»Îª¿Õ
+                    pdTRUE£ºÎª¿Õ
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     BaseType_t xTCPWindowRxEmpty( TCPWindow_t *pxWindow )
     {
     BaseType_t xReturn;
-        /*2016--12--03--18--28--01(ZJYC): å½“å¯¹æ–¹æœ‰å…³é—­è¯·æ±‚æ—¶ï¼ˆFINï¼‰ï¼Œé©±åŠ¨ä¼šæ£€æŸ¥æ¥å—é˜Ÿåˆ—æ˜¯å¦å­˜åœ¨
-        ä¸¢å¤±çš„åŒ…ï¼Œå¦‚æœæ¥å—é˜Ÿåˆ—ä¸ºç©ºæˆ–è€…æœ€é«˜æ¥æ”¶åºåˆ—å·å·²è¢«åº”ç­”ï¼Œåˆ™ä¼šæ¥æ”¶å…³é—­è¯·æ±‚*/ 
+        /*2016--12--03--18--28--01(ZJYC): µ±¶Ô·½ÓĞ¹Ø±ÕÇëÇóÊ±£¨FIN£©£¬Çı¶¯»á¼ì²é½ÓÊÜ¶ÓÁĞÊÇ·ñ´æÔÚ
+        ¶ªÊ§µÄ°ü£¬Èç¹û½ÓÊÜ¶ÓÁĞÎª¿Õ»òÕß×î¸ß½ÓÊÕĞòÁĞºÅÒÑ±»Ó¦´ğ£¬Ôò»á½ÓÊÕ¹Ø±ÕÇëÇó*/ 
         if( listLIST_IS_EMPTY( ( &pxWindow->xRxSegments ) ) == pdFALSE )
         {
-            /*2016--12--03--18--30--01(ZJYC): æ•°æ®å·²å­˜å‚¨ä½†æ˜¯æ—©äº›çš„æ•°æ®ä¸¢å¤±äº†   */ 
+            /*2016--12--03--18--30--01(ZJYC): Êı¾İÒÑ´æ´¢µ«ÊÇÔçĞ©µÄÊı¾İ¶ªÊ§ÁË   */ 
             xReturn = pdFALSE;
         }
         else if( xSequenceGreaterThanOrEqual( pxWindow->rx.ulCurrentSequenceNumber, pxWindow->rx.ulHighestSequenceNumber ) != pdFALSE )
         {
-            /*2016--12--03--18--30--31(ZJYC): æ²¡æœ‰æ¥æ”¶åŒ…è¢«å­˜å‚¨ï¼Œå¹¶ä¸”æœ€é«˜åºåˆ—å·å·²ç»è¢«åº”ç­”   */ 
+            /*2016--12--03--18--30--31(ZJYC): Ã»ÓĞ½ÓÊÕ°ü±»´æ´¢£¬²¢ÇÒ×î¸ßĞòÁĞºÅÒÑ¾­±»Ó¦´ğ   */ 
             xReturn = pdTRUE;
         }
         else
@@ -459,14 +459,14 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : xTCPWindowGetHead
-*  å‡½æ•°æè¿°       : ä»pxListæ‹¿èµ°ä¸€ä¸ªæ®µï¼Œå¹¶å°†å…¶è¿”å›ï¼Œ
-*  å‚æ•°           : pxListï¼šåˆ—è¡¨
-*  è¿”å›å€¼         : 
-                    æˆåŠŸï¼šè¿”å›æ‹¿åˆ°çš„æ®µ
-                    å¤±è´¥ï¼šè¿”å›NULL
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : xTCPWindowGetHead
+*  º¯ÊıÃèÊö       : ´ÓpxListÄÃ×ßÒ»¸ö¶Î£¬²¢½«Æä·µ»Ø£¬
+*  ²ÎÊı           : pxList£ºÁĞ±í
+*  ·µ»ØÖµ         : 
+                    ³É¹¦£º·µ»ØÄÃµ½µÄ¶Î
+                    Ê§°Ü£º·µ»ØNULL
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     static TCPSegment_t *xTCPWindowGetHead( List_t *pxList )
@@ -494,14 +494,14 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : xTCPWindowPeekHead
-*  å‡½æ•°æè¿°       : çœ‹ä¸€çœ‹pxListçš„é¦–éƒ¨ï¼Œå¹¶ä¸çœŸæ­£çš„æ‹¿èµ°
-*  å‚æ•°           : pxListï¼šåˆ—è¡¨
-*  è¿”å›å€¼         : 
-                    æˆåŠŸï¼šè¿”å›æ‹¿åˆ°çš„æ®µ
-                    å¤±è´¥ï¼šè¿”å›NULL
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : xTCPWindowPeekHead
+*  º¯ÊıÃèÊö       : ¿´Ò»¿´pxListµÄÊ×²¿£¬²¢²»ÕæÕıµÄÄÃ×ß
+*  ²ÎÊı           : pxList£ºÁĞ±í
+*  ·µ»ØÖµ         : 
+                    ³É¹¦£º·µ»ØÄÃµ½µÄ¶Î
+                    Ê§°Ü£º·µ»ØNULL
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     static TCPSegment_t *xTCPWindowPeekHead( List_t *pxList )
@@ -529,17 +529,17 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : vTCPWindowFree
-*  å‡½æ•°æè¿°       : 
-*  å‚æ•°           : 
-*  è¿”å›å€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : vTCPWindowFree
+*  º¯ÊıÃèÊö       : 
+*  ²ÎÊı           : 
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     static void vTCPWindowFree( TCPSegment_t *pxSegment )
     {
-        /*2016--12--02--17--30--37(ZJYC): å°†å†…å­˜è¿”å›åˆ°segment poolä¸­   */ 
+        /*2016--12--02--17--30--37(ZJYC): ½«ÄÚ´æ·µ»Øµ½segment poolÖĞ   */ 
         if( listLIST_ITEM_CONTAINER( &( pxSegment->xQueueItem ) ) != NULL )
         {
             uxListRemove( &( pxSegment->xQueueItem ) );
@@ -547,12 +547,12 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
         pxSegment->ulSequenceNumber = 0u;
         pxSegment->lDataLength = 0l;
         pxSegment->u.ulFlags = 0u;
-        /*2016--12--03--18--38--34(ZJYC): ä»xRxSegments/xTxSegmentsä¸­å–å‡º   */ 
+        /*2016--12--03--18--38--34(ZJYC): ´ÓxRxSegments/xTxSegmentsÖĞÈ¡³ö   */ 
         if( listLIST_ITEM_CONTAINER( &( pxSegment->xListItem ) ) != NULL )
         {
             uxListRemove( &( pxSegment->xListItem ) );
         }
-        /*2016--12--03--18--38--54(ZJYC): è¿”å›åˆ°xSegmentList   */ 
+        /*2016--12--03--18--38--54(ZJYC): ·µ»Øµ½xSegmentList   */ 
         vListInsertFifo( &xSegmentList, &( pxSegment->xListItem ) );
     }
 #endif /* ipconfigUSE_TCP_WIN == 1 */
@@ -565,7 +565,7 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
     List_t * pxSegments;
     BaseType_t xRound;
     TCPSegment_t *pxSegment;
-        /*2016--12--02--17--31--32(ZJYC): ç”±äºTCPçª—å£ä¸å†ä½¿ç”¨ï¼Œåˆ é™¤ä¹‹ï¼Œåˆ†åˆ«RXå’ŒTX   */ 
+        /*2016--12--02--17--31--32(ZJYC): ÓÉÓÚTCP´°¿Ú²»ÔÙÊ¹ÓÃ£¬É¾³ıÖ®£¬·Ö±ğRXºÍTX   */ 
         for( xRound = 0; xRound < 2; xRound++ )
         {
             if( xRound != 0 )
@@ -593,18 +593,18 @@ void vListInsertGeneric( List_t * const pxList, ListItem_t * const pxNewListItem
 void vTCPWindowCreate( TCPWindow_t *pxWindow, uint32_t ulRxWindowLength,
     uint32_t ulTxWindowLength, uint32_t ulAckNumber, uint32_t ulSequenceNumber, uint32_t ulMSS )
 {
-    /*2016--12--02--17--32--29(ZJYC): åˆ›å»ºå¹¶åˆå§‹åŒ–ä¸€çª—å£   */ 
+    /*2016--12--02--17--32--29(ZJYC): ´´½¨²¢³õÊ¼»¯Ò»´°¿Ú   */ 
     #if( ipconfigUSE_TCP_WIN == 1 )
     {
         if( xTCPSegments == NULL )
         {
             prvCreateSectors();
         }
-        vListInitialise( &pxWindow->xTxSegments );      /*2016--12--02--17--33--02(ZJYC): éœ€å‘é€ç»„   */ 
-        vListInitialise( &pxWindow->xRxSegments );      /*2016--12--02--17--33--11(ZJYC): éœ€æ¥æ”¶ç»„   */ 
-        vListInitialise( &pxWindow->xPriorityQueue );   /*2016--12--02--17--33--26(ZJYC): ä¼˜å…ˆç»„ï¼ˆå¿…é¡»è¢«é©¬ä¸Šå‘é€ï¼‰   */ 
-        vListInitialise( &pxWindow->xTxQueue   );       /*2016--12--02--17--37--14(ZJYC): æ’é˜Ÿç­‰å¾…å‘é€   */ 
-        vListInitialise( &pxWindow->xWaitQueue );       /*2016--12--02--17--37--44(ZJYC): ç­‰å¾…ç¡®è®¤ç»„   */ 
+        vListInitialise( &pxWindow->xTxSegments );      /*2016--12--02--17--33--02(ZJYC): Ğè·¢ËÍ×é   */ 
+        vListInitialise( &pxWindow->xRxSegments );      /*2016--12--02--17--33--11(ZJYC): Ğè½ÓÊÕ×é   */ 
+        vListInitialise( &pxWindow->xPriorityQueue );   /*2016--12--02--17--33--26(ZJYC): ÓÅÏÈ×é£¨±ØĞë±»ÂíÉÏ·¢ËÍ£©   */ 
+        vListInitialise( &pxWindow->xTxQueue   );       /*2016--12--02--17--37--14(ZJYC): ÅÅ¶ÓµÈ´ı·¢ËÍ   */ 
+        vListInitialise( &pxWindow->xWaitQueue );       /*2016--12--02--17--37--44(ZJYC): µÈ´ıÈ·ÈÏ×é   */ 
     }
     #endif /* ipconfigUSE_TCP_WIN == 1 */
     if( xTCPWindowLoggingLevel != 0 )
@@ -687,7 +687,7 @@ const int32_t l500ms = 500;
  *=============================================================================*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-    /*2016--12--02--18--41--19(ZJYC): æ”¶åˆ°ä¸€ä¸ªå¸¦ç€ulSequenceNumberçš„æ®µï¼Œå½“ulCurrentSequenceNumber =  ulSequenceNumberè¡¨ç¤ºè¿™ç¡®å®æ˜¯æˆ‘ä»¬æ‰€æœŸæœ›çš„ã€‚æœ¬å‡½æ•°ç”¨äºæ£€æŸ¥æ˜¯å¦å­˜åœ¨åºåˆ—å·ä»‹äºulSequenceNumberå’Œ(ulSequenceNumber+ulLength)çš„åŒ…ï¼Œä¸€èˆ¬æƒ…å†µä¸‹æ˜¯æ²¡æœ‰çš„ï¼Œä¸‹ä¸€ä¸ªåº”è¯¥æ¥å—çš„æ®µçš„åºåˆ—å·åº”ç­‰äº(ulSequenceNumber+ulLength)*/ 
+    /*2016--12--02--18--41--19(ZJYC): ÊÕµ½Ò»¸ö´ø×ÅulSequenceNumberµÄ¶Î£¬µ±ulCurrentSequenceNumber =  ulSequenceNumber±íÊ¾ÕâÈ·ÊµÊÇÎÒÃÇËùÆÚÍûµÄ¡£±¾º¯ÊıÓÃÓÚ¼ì²éÊÇ·ñ´æÔÚĞòÁĞºÅ½éÓÚulSequenceNumberºÍ(ulSequenceNumber+ulLength)µÄ°ü£¬Ò»°ãÇé¿öÏÂÊÇÃ»ÓĞµÄ£¬ÏÂÒ»¸öÓ¦¸Ã½ÓÊÜµÄ¶ÎµÄĞòÁĞºÅÓ¦µÈÓÚ(ulSequenceNumber+ulLength)*/ 
     static TCPSegment_t *xTCPWindowRxConfirm( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength )
     {
     TCPSegment_t *pxBest = NULL;
@@ -745,8 +745,8 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-    /*2016--12--02--18--45--44(ZJYC): å¦‚æœlTCPWindowRxCheckè¿”å›0ï¼ŒåŒ…ä¼šç›´æ¥ä¼ é€’ç»™ç”¨æˆ·ï¼Œå¦‚æœè¿”å›æ­£æ•°ï¼Œä¸€ä¸ªä¹‹å‰çš„æŠ¥ä¸¢å¤±äº†
-    ä½†æ˜¯è¿™ä¸ªåŒ…ä¼šè¢«ä¿å­˜ï¼Œå¦‚æœæ˜¯è´Ÿæ•°ï¼ŒåŒ…æ—©å°±è¢«ä¿å­˜äº†ï¼Œåè€…ï¼Œè¿™æ˜¯ä¸€éé¡ºåºåŒ…æˆ–æ²¡æœ‰è¶³å¤Ÿçš„å†…å­˜äº†ã€‚*/ 
+    /*2016--12--02--18--45--44(ZJYC): Èç¹ûlTCPWindowRxCheck·µ»Ø0£¬°ü»áÖ±½Ó´«µİ¸øÓÃ»§£¬Èç¹û·µ»ØÕıÊı£¬Ò»¸öÖ®Ç°µÄ±¨¶ªÊ§ÁË
+    µ«ÊÇÕâ¸ö°ü»á±»±£´æ£¬Èç¹ûÊÇ¸ºÊı£¬°üÔç¾Í±»±£´æÁË£¬ºóÕß£¬ÕâÊÇÒ»·ÇË³Ğò°ü»òÃ»ÓĞ×ã¹»µÄÄÚ´æÁË¡£*/ 
     int32_t lTCPWindowRxCheck( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength, uint32_t ulSpace )
     {
     uint32_t ulCurrentSequenceNumber, ulLast, ulSavedSequenceNumber;
@@ -983,16 +983,16 @@ const int32_t l500ms = 500;
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : lTCPWindowTxAdd
-*  å‡½æ•°æè¿°       : æˆ‘ä»¬æœ‰ulLengthæ•°æ®è¦å‘é€ï¼Œ
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulLengthï¼šéœ€è¦å‘é€çš„æ•°æ®é•¿åº¦
-                    lPositionï¼šç¼“å†²åŒºä½ç½®
-                    lMaxï¼šç¼“å†²åŒºé•¿åº¦
-*  è¿”å›å€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : lTCPWindowTxAdd
+*  º¯ÊıÃèÊö       : ÎÒÃÇÓĞulLengthÊı¾İÒª·¢ËÍ£¬
+*  ²ÎÊı           : 
+                    pxWindow£º´°¿Ú
+                    ulLength£ºĞèÒª·¢ËÍµÄÊı¾İ³¤¶È
+                    lPosition£º»º³åÇøÎ»ÖÃ
+                    lMax£º»º³åÇø³¤¶È
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     int32_t lTCPWindowTxAdd( TCPWindow_t *pxWindow, uint32_t ulLength, int32_t lPosition, int32_t lMax )
@@ -1005,27 +1005,27 @@ const int32_t l500ms = 500;
         verified). */
         if( pxSegment != NULL )
         {
-            /* æ­¤æ®µè¿˜æœ‰ç©ºé—²ç©ºé—´ */
+            /* ´Ë¶Î»¹ÓĞ¿ÕÏĞ¿Õ¼ä */
             if( pxSegment->lDataLength < pxSegment->lMaxLength )
             {
-                /* æ­¤æ®µæ²¡æœ‰ç­‰å¾…åº”ç­” && æ­¤æ®µæ•°æ®éç©º */
+                /* ´Ë¶ÎÃ»ÓĞµÈ´ıÓ¦´ğ && ´Ë¶ÎÊı¾İ·Ç¿Õ */
                 if( ( pxSegment->u.bits.bOutstanding == pdFALSE_UNSIGNED ) && ( pxSegment->lDataLength != 0 ) )
                 {
-                    /*2016--12--02--18--50--21(ZJYC): æŠŠæ•°æ®æ·»åŠ åˆ°TXé˜Ÿåˆ—ï¼Œå°†ä¼šè¢«è°ƒæ•´åˆ°MSS   */ 
-                    /*2016--12--02--18--54--13(ZJYC): å¯»æ‰¾å¾…å‘é€æ•°æ®å’Œpoolç©ºé—²å€¼ä¹‹ä¸­çš„æœ€å°å€¼   */ 
-                    /* è®¡ç®—æ­¤æ®µå¯ä»¥å­˜å‚¨å¤šå°‘å­—èŠ‚ */
+                    /*2016--12--02--18--50--21(ZJYC): °ÑÊı¾İÌí¼Óµ½TX¶ÓÁĞ£¬½«»á±»µ÷Õûµ½MSS   */ 
+                    /*2016--12--02--18--54--13(ZJYC): Ñ°ÕÒ´ı·¢ËÍÊı¾İºÍpool¿ÕÏĞÖµÖ®ÖĞµÄ×îĞ¡Öµ   */ 
+                    /* ¼ÆËã´Ë¶Î¿ÉÒÔ´æ´¢¶àÉÙ×Ö½Ú */
                     lToWrite = FreeRTOS_min_int32( lBytesLeft, pxSegment->lMaxLength - pxSegment->lDataLength );
                     pxSegment->lDataLength += lToWrite;
                     if( pxSegment->lDataLength >= pxSegment->lMaxLength )
                     {
-                        /* æœ¬æ®µå·²ç»å¡«æ»¡äº† */
+                        /* ±¾¶ÎÒÑ¾­ÌîÂúÁË */
                         pxWindow->pxHeadSegment = NULL;
                     }
-                    /* æ€»å­—èŠ‚æ•°å‡å°‘lToWrite */
+                    /* ×Ü×Ö½ÚÊı¼õÉÙlToWrite */
                     lBytesLeft -= lToWrite;
-                    /* è®¡ç®—ä¸‹ä¸€æ¬¡å‘é€çš„åºåˆ—å· */
+                    /* ¼ÆËãÏÂÒ»´Î·¢ËÍµÄĞòÁĞºÅ */
                     pxWindow->ulNextTxSequenceNumber += ( uint32_t ) lToWrite;
-                    /* æˆ‘ä»¬å¡«å…¥äº†å¤šå°‘å­—èŠ‚ */
+                    /* ÎÒÃÇÌîÈëÁË¶àÉÙ×Ö½Ú */
                     lDone += lToWrite;
 
                     /* Some detailed logging, for those who're interested. */
@@ -1040,15 +1040,15 @@ const int32_t l500ms = 500;
                         FreeRTOS_flush_logging( );
                     }
 
-                    /* åœ¨å·²çŸ¥æœ€å¤§ä¸ºlMaxçš„æƒ…å†µä¸‹è®¡ç®—ä¸‹ä¸€æ¬¡éœ€è¦å†™å…¥çš„ä½ç½® */
+                    /* ÔÚÒÑÖª×î´óÎªlMaxµÄÇé¿öÏÂ¼ÆËãÏÂÒ»´ÎĞèÒªĞ´ÈëµÄÎ»ÖÃ */
                     lPosition = lTCPIncrementTxPosition( lPosition, lMax, lToWrite );
                 }
             }
         }
-        /* è¿˜æœ‰æ•°æ®éœ€è¦å‘é€ */
+        /* »¹ÓĞÊı¾İĞèÒª·¢ËÍ */
         while( lBytesLeft > 0 )
         {
-            /*2016--12--02--18--54--45(ZJYC): Poolå¹¶æ²¡æœ‰åŸä¸‹æ‰€æœ‰çš„å¾…å‘é€æ•°æ®ï¼Œéœ€è¦æ–°å»º   */ 
+            /*2016--12--02--18--54--45(ZJYC): Pool²¢Ã»ÓĞ³ÇÏÂËùÓĞµÄ´ı·¢ËÍÊı¾İ£¬ĞèÒªĞÂ½¨   */ 
             pxSegment = xTCPWindowTxNew( pxWindow, pxWindow->ulNextTxSequenceNumber, pxWindow->usMSS );
             if( pxSegment != NULL )
             {
@@ -1061,7 +1061,7 @@ const int32_t l500ms = 500;
                 lPosition = lTCPIncrementTxPosition( lPosition, lMax, lToWrite );
                 pxWindow->ulNextTxSequenceNumber += ( uint32_t ) lToWrite;
                 lDone += lToWrite;
-                /*2016--12--02--18--53--04(ZJYC): åŠ å…¥å‘é€é˜Ÿåˆ—   */ 
+                /*2016--12--02--18--53--04(ZJYC): ¼ÓÈë·¢ËÍ¶ÓÁĞ   */ 
                 vListInsertFifo( &( pxWindow->xTxQueue ), &( pxSegment->xQueueItem ) );
                 /* Let 'pxHeadSegment' point to this segment if there is still
                 space. */
@@ -1118,8 +1118,8 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-    /*2016--12--02--18--56--30(ZJYC): çœ‹çœ‹æ˜¯å¦è¿˜æœ‰æ•°æ®éœ€è¦å‘é€ï¼Œæ˜¯è¿”å›true   */ 
-    /* çœ‹çœ‹æ»‘åŠ¨çª—å£æ˜¯å¦è¿˜æœ‰å‘é€çš„ç©ºé—´ */
+    /*2016--12--02--18--56--30(ZJYC): ¿´¿´ÊÇ·ñ»¹ÓĞÊı¾İĞèÒª·¢ËÍ£¬ÊÇ·µ»Øtrue   */ 
+    /* ¿´¿´»¬¶¯´°¿ÚÊÇ·ñ»¹ÓĞ·¢ËÍµÄ¿Õ¼ä */
     static BaseType_t prvTCPWindowTxHasSpace( TCPWindow_t *pxWindow, uint32_t ulWindowSize )
     {
     uint32_t ulTxOutstanding;
@@ -1132,7 +1132,7 @@ const int32_t l500ms = 500;
         }
         else
         {
-            /*2016--12--02--18--57--11(ZJYC): æœ‰å¤šå°‘æ•°æ®åœ¨ç­‰å¾…åº”ç­”   */ 
+            /*2016--12--02--18--57--11(ZJYC): ÓĞ¶àÉÙÊı¾İÔÚµÈ´ıÓ¦´ğ   */ 
             if( pxWindow->tx.ulHighestSequenceNumber >= pxWindow->tx.ulCurrentSequenceNumber )
             {
                 ulTxOutstanding = pxWindow->tx.ulHighestSequenceNumber - pxWindow->tx.ulCurrentSequenceNumber;
@@ -1174,17 +1174,17 @@ const int32_t l500ms = 500;
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : xTCPWindowTxHasData
-*  å‡½æ•°æè¿°       : ç¡®è®¤æ˜¯å¦æœ‰æ•°æ®è¦å‘é€ï¼Œå¹¶è®¡ç®—å‘é€å»¶è¿Ÿæ—¶é—´
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulWindowSizeï¼šçª—å£å¤§å°
-                    pulDelayï¼šç­‰å¾…æ—¶é—´
-*  è¿”å›å€¼         : 
-                    pdTRUEï¼šæœ‰æ•°æ®éœ€è¦å‘é€
-                    pdFALSEï¼šæ²¡æœ‰æ•°æ®éœ€è¦å‘é€
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : xTCPWindowTxHasData
+*  º¯ÊıÃèÊö       : È·ÈÏÊÇ·ñÓĞÊı¾İÒª·¢ËÍ£¬²¢¼ÆËã·¢ËÍÑÓ³ÙÊ±¼ä
+*  ²ÎÊı           : 
+                    pxWindow£º´°¿Ú
+                    ulWindowSize£º´°¿Ú´óĞ¡
+                    pulDelay£ºµÈ´ıÊ±¼ä
+*  ·µ»ØÖµ         : 
+                    pdTRUE£ºÓĞÊı¾İĞèÒª·¢ËÍ
+                    pdFALSE£ºÃ»ÓĞÊı¾İĞèÒª·¢ËÍ
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     BaseType_t xTCPWindowTxHasData( TCPWindow_t *pxWindow, uint32_t ulWindowSize, TickType_t *pulDelay )
@@ -1195,8 +1195,8 @@ const int32_t l500ms = 500;
         *pulDelay = 0u;
         if( listLIST_IS_EMPTY( &pxWindow->xPriorityQueue ) == pdFALSE )
         {
-            /*2016--12--02--18--58--49(ZJYC): å¦‚æœä¼˜å…ˆç»„å­˜åœ¨ï¼Œå°±æ²¡æœ‰å¿…è¦é‡ä¼ 
-            pulDelayä¸º0 è¡¨ç¤ºå¿…é¡»ç«‹å³å‘é€*/ 
+            /*2016--12--02--18--58--49(ZJYC): Èç¹ûÓÅÏÈ×é´æÔÚ£¬¾ÍÃ»ÓĞ±ØÒªÖØ´«
+            pulDelayÎª0 ±íÊ¾±ØĞëÁ¢¼´·¢ËÍ*/ 
             xReturn = pdTRUE;
         }
         else
@@ -1204,28 +1204,28 @@ const int32_t l500ms = 500;
             pxSegment = xTCPWindowPeekHead( &( pxWindow->xWaitQueue ) );
             if( pxSegment != NULL )
             {
-                /*2016--12--02--19--00--40(ZJYC): å­˜åœ¨ç­‰å¾…åº”ç­”ç»„ï¼Œçœ‹çœ‹æ˜¯å¦éœ€è¦è¶…æ—¶é‡ä¼    */ 
+                /*2016--12--02--19--00--40(ZJYC): ´æÔÚµÈ´ıÓ¦´ğ×é£¬¿´¿´ÊÇ·ñĞèÒª³¬Ê±ÖØ´«   */ 
                 ulAge = ulTimerGetAge( &pxSegment->xTransmitTimer );
                 ulMaxAge = ( 1u << pxSegment->u.bits.ucTransmitCount ) * ( ( uint32_t ) pxWindow->lSRTT );
                 if( ulMaxAge > ulAge )
                 {
-                    /*2016--12--02--19--01--24(ZJYC): è¿™äº›æ—¶é—´åå‘é€   */ 
+                    /*2016--12--02--19--01--24(ZJYC): ÕâĞ©Ê±¼äºó·¢ËÍ   */ 
                     *pulDelay = ulMaxAge - ulAge;
                 }
                 xReturn = pdTRUE;
             }
             else
             {
-                /*2016--12--02--19--01--51(ZJYC): ä¸å­˜åœ¨ä¼˜å…ˆç»„ï¼Œä¸å­˜åœ¨ç­‰å¾…åº”ç­”ï¼Œçœ‹çœ‹æ˜¯å¦æœ‰æ•°æ®è¦å‘é€   */ 
+                /*2016--12--02--19--01--51(ZJYC): ²»´æÔÚÓÅÏÈ×é£¬²»´æÔÚµÈ´ıÓ¦´ğ£¬¿´¿´ÊÇ·ñÓĞÊı¾İÒª·¢ËÍ   */ 
                 pxSegment = xTCPWindowPeekHead( &pxWindow->xTxQueue );
-                /*2016--12--02--19--02--31(ZJYC): æ˜¯å¦ä¸å¯¹æ–¹çš„æ¥æ”¶çª—å£ç›¸åŒ¹é…   */ 
+                /*2016--12--02--19--02--31(ZJYC): ÊÇ·ñÓë¶Ô·½µÄ½ÓÊÕ´°¿ÚÏàÆ¥Åä   */ 
                 if( pxSegment == NULL )
                 {
                     xReturn = pdFALSE;
                 }
                 else if( prvTCPWindowTxHasSpace( pxWindow, ulWindowSize ) == pdFALSE )
                 {
-                    /*2016--12--02--19--03--36(ZJYC): ç­‰å¾…åº”ç­”çš„å¤ªå¤šäº†   */ 
+                    /*2016--12--02--19--03--36(ZJYC): µÈ´ıÓ¦´ğµÄÌ«¶àÁË   */ 
                     xReturn = pdFALSE;
                 }
                 else if( ( pxWindow->u.bits.bSendFullSize != pdFALSE_UNSIGNED ) && ( pxSegment->lDataLength < pxSegment->lMaxLength ) )
@@ -1249,15 +1249,15 @@ const int32_t l500ms = 500;
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : ulTCPWindowTxGet
-*  å‡½æ•°æè¿°       : å¾—åˆ°ç°åœ¨éœ€è¦å‘é€çš„æ•°æ®
-*  å‚æ•°           : 
-                    ulTCPWindowTxGetï¼š
-                    ulWindowSizeï¼š
-                    plPositionï¼š
-*  è¿”å›å€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : ulTCPWindowTxGet
+*  º¯ÊıÃèÊö       : µÃµ½ÏÖÔÚĞèÒª·¢ËÍµÄÊı¾İ
+*  ²ÎÊı           : 
+                    ulTCPWindowTxGet£º
+                    ulWindowSize£º
+                    plPosition£º
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     uint32_t ulTCPWindowTxGet( TCPWindow_t *pxWindow, uint32_t ulWindowSize, int32_t *plPosition )
@@ -1265,21 +1265,21 @@ const int32_t l500ms = 500;
     TCPSegment_t *pxSegment;
     uint32_t ulMaxTime;
     uint32_t ulReturn  = ~0UL;
-        /*2016--12--02--19--04--31(ZJYC): å¾—åˆ°ç°åœ¨éœ€è¦å‘é€çš„æ•°æ®ï¼Œä¼˜å…ˆç»„ä¸éœ€è¦æ£€æŸ¥çª—å£å¤§å°   */ 
+        /*2016--12--02--19--04--31(ZJYC): µÃµ½ÏÖÔÚĞèÒª·¢ËÍµÄÊı¾İ£¬ÓÅÏÈ×é²»ĞèÒª¼ì²é´°¿Ú´óĞ¡   */ 
         pxSegment = xTCPWindowGetHead( &( pxWindow->xPriorityQueue ) );
         pxWindow->ulOurSequenceNumber = pxWindow->tx.ulHighestSequenceNumber;
         if( pxSegment == NULL )
         {
-            /*2016--12--02--19--06--15(ZJYC): ç­‰å¾…åº”ç­”ç»„ï¼šè¿™ä¹Ÿä¸éœ€è¦æ£€æŸ¥çª—å£å¤§å°
-            å› ä¸ºä»–ä»¬æ—©å°±è¢«å‘é€äº†*/ 
+            /*2016--12--02--19--06--15(ZJYC): µÈ´ıÓ¦´ğ×é£ºÕâÒ²²»ĞèÒª¼ì²é´°¿Ú´óĞ¡
+            ÒòÎªËûÃÇÔç¾Í±»·¢ËÍÁË*/ 
             pxSegment = xTCPWindowPeekHead( &( pxWindow->xWaitQueue ) );
             if( pxSegment != NULL )
             {
-                /*2016--12--02--19--07--13(ZJYC): æ£€æŸ¥æ—¶é—´   */ 
+                /*2016--12--02--19--07--13(ZJYC): ¼ì²éÊ±¼ä   */ 
                 ulMaxTime = ( 1u << pxSegment->u.bits.ucTransmitCount ) * ( ( uint32_t ) pxWindow->lSRTT );
                 if( ulTimerGetAge( &pxSegment->xTransmitTimer ) > ulMaxTime )
                 {
-                    /*2016--12--02--19--09--00(ZJYC): æ™®é€šé‡ä¼ ï¼Œä»ç­‰å¾…åˆ—è¡¨åˆ é™¤   */ 
+                    /*2016--12--02--19--09--00(ZJYC): ÆÕÍ¨ÖØ´«£¬´ÓµÈ´ıÁĞ±íÉ¾³ı   */ 
                     pxSegment = xTCPWindowGetHead( &( pxWindow->xWaitQueue ) );
                     pxSegment->u.bits.ucDupAckCount = pdFALSE_UNSIGNED;
                     /* Some detailed logging. */
@@ -1301,26 +1301,26 @@ const int32_t l500ms = 500;
             }
             if( pxSegment == NULL )
             {
-                /*2016--12--02--19--09--53(ZJYC): æ–°çš„è¦å‘é€çš„æ•°æ®ï¼Œæ£€æŸ¥çª—å£   */ 
+                /*2016--12--02--19--09--53(ZJYC): ĞÂµÄÒª·¢ËÍµÄÊı¾İ£¬¼ì²é´°¿Ú   */ 
                 pxSegment = xTCPWindowPeekHead( &( pxWindow->xTxQueue ) );
                 if( pxSegment == NULL )
                 {
-                    /*2016--12--02--19--10--17(ZJYC): æ²¡æœ‰è¦å‘é€çš„æ•°æ®   */ 
+                    /*2016--12--02--19--10--17(ZJYC): Ã»ÓĞÒª·¢ËÍµÄÊı¾İ   */ 
                     ulReturn = 0UL;
                 }
                 else if( ( pxWindow->u.bits.bSendFullSize != pdFALSE_UNSIGNED ) && ( pxSegment->lDataLength < pxSegment->lMaxLength ) )
                 {
-                    /*2016--12--02--19--10--43(ZJYC): æœ‰æ•°æ®è¦å‘é€ï¼Œä½†æ˜¯é©±åŠ¨éœ€è¦æŸä¸€å¤§å°çš„æ•°æ®   */ 
+                    /*2016--12--02--19--10--43(ZJYC): ÓĞÊı¾İÒª·¢ËÍ£¬µ«ÊÇÇı¶¯ĞèÒªÄ³Ò»´óĞ¡µÄÊı¾İ   */ 
                     ulReturn = 0;
                 }
                 else if( prvTCPWindowTxHasSpace( pxWindow, ulWindowSize ) == pdFALSE )
                 {
-                    /*2016--12--02--19--11--19(ZJYC): å¯¹æ–¹æ²¡æœ‰ç©ºé—´äº†   */ 
+                    /*2016--12--02--19--11--19(ZJYC): ¶Ô·½Ã»ÓĞ¿Õ¼äÁË   */ 
                     ulReturn = 0;
                 }
                 else
                 {
-                    /*2016--12--02--19--11--40(ZJYC): ä»Txé˜Ÿåˆ—åˆ é™¤ï¼Œ   */ 
+                    /*2016--12--02--19--11--40(ZJYC): ´ÓTx¶ÓÁĞÉ¾³ı£¬   */ 
                     pxSegment = xTCPWindowGetHead( &( pxWindow->xTxQueue ) );
                     if( pxWindow->pxHeadSegment == pxSegment )
                     {
@@ -1347,7 +1347,7 @@ const int32_t l500ms = 500;
         }
         else
         {
-            /*2016--12--02--19--12--41(ZJYC): å­˜åœ¨ä¼˜å…ˆç»„ä¸åšè¶…æ—¶æ£€æŸ¥å’Œç©ºé—´æ£€æŸ¥   */ 
+            /*2016--12--02--19--12--41(ZJYC): ´æÔÚÓÅÏÈ×é²»×ö³¬Ê±¼ì²éºÍ¿Õ¼ä¼ì²é   */ 
             if( xTCPWindowLoggingLevel != 0 )
             {
                 FreeRTOS_debug_printf( ( "ulTCPWindowTxGet[%u,%u]: PrioQueue %ld bytes for sequence number %lu (ws %lu)\n",
@@ -1408,15 +1408,15 @@ const int32_t l500ms = 500;
 /*-----------------------------------------------------------*/
 
 #if( ipconfigUSE_TCP_WIN == 1 )
-    /*2016--12--05--14--00--46(ZJYC): ulFirstå’ŒulLastæŒ‡æ˜äº†ç¡®è®¤çš„èŒƒå›´ï¼Œåœ¨æ­¤èŒƒå›´å†…çš„æ•°æ®è¢«ç¡®è®¤   */ 
+    /*2016--12--05--14--00--46(ZJYC): ulFirstºÍulLastÖ¸Ã÷ÁËÈ·ÈÏµÄ·¶Î§£¬ÔÚ´Ë·¶Î§ÄÚµÄÊı¾İ±»È·ÈÏ   */ 
 /*
 ****************************************************
-*  å‡½æ•°å         : prvTCPWindowTxCheckAck
-*  å‡½æ•°æè¿°       : æ”¶åˆ°ä¸€SACKï¼Œå¤„ç†ä¹‹
-*  å‚æ•°           : 
-*  è¿”å›å€¼         : è¢«åº”ç­”çš„æ•°æ®é•¿åº¦
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : prvTCPWindowTxCheckAck
+*  º¯ÊıÃèÊö       : ÊÕµ½Ò»SACK£¬´¦ÀíÖ®
+*  ²ÎÊı           : 
+*  ·µ»ØÖµ         : ±»Ó¦´ğµÄÊı¾İ³¤¶È
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     static uint32_t prvTCPWindowTxCheckAck( TCPWindow_t *pxWindow, uint32_t ulFirst, uint32_t ulLast )
@@ -1427,7 +1427,7 @@ const int32_t l500ms = 500;
     const MiniListItem_t *pxEnd = ( const MiniListItem_t* )listGET_END_MARKER( &pxWindow->xTxSegments );
     BaseType_t xDoUnlink;
     TCPSegment_t *pxSegment;
-    /*2016--12--02--19--18--20(ZJYC): æ”¶åˆ°äº†åº”ç­”æˆ–è€…æ˜¯é€‰æ‹©æ€§åº”ç­”ï¼Œçœ‹çœ‹é‚£äº›ç­‰å¾…åº”ç­”çš„æ•°æ®åŒ…å¯ä»¥ä»å‘é€å¯¹æµæ¸…é™¤   */ 
+    /*2016--12--02--19--18--20(ZJYC): ÊÕµ½ÁËÓ¦´ğ»òÕßÊÇÑ¡ÔñĞÔÓ¦´ğ£¬¿´¿´ÄÇĞ©µÈ´ıÓ¦´ğµÄÊı¾İ°ü¿ÉÒÔ´Ó·¢ËÍ¶ÔÁ÷Çå³ı   */ 
         for(
                 pxIterator  = ( const ListItem_t * ) listGET_NEXT( pxEnd );
                 ( pxIterator != ( const ListItem_t * ) pxEnd ) && ( xSequenceLessThan( ulSequenceNumber, ulLast ) != 0 );
@@ -1438,7 +1438,7 @@ const int32_t l500ms = 500;
             /* Move to the next item because the current item might get
             removed. */
             pxIterator = ( const ListItem_t * ) listGET_NEXT( pxIterator );
-            /*2016--12--05--13--56--33(ZJYC): å¦‚æœæ®µä¸åœ¨ACKèŒƒå›´ä¹‹å†…åˆ™è·³è¿‡   */ 
+            /*2016--12--05--13--56--33(ZJYC): Èç¹û¶Î²»ÔÚACK·¶Î§Ö®ÄÚÔòÌø¹ı   */ 
             if( xSequenceGreaterThan( ulSequenceNumber, pxSegment->ulSequenceNumber ) != pdFALSE )
             {
                 continue;
@@ -1453,7 +1453,7 @@ const int32_t l500ms = 500;
             {
                 if( xSequenceGreaterThan( pxSegment->ulSequenceNumber + ( uint32_t )ulDataLength, ulLast ) != pdFALSE )
                 {
-                    /* åè¾¹çš„æ•°æ®æˆ‘ä»¬è¿˜æ²¡å‘é€ï¼Œå´åº”ç­”äº† */
+                    /* ºó±ßµÄÊı¾İÎÒÃÇ»¹Ã»·¢ËÍ£¬È´Ó¦´ğÁË */
                     /* What happens?  Only part of this segment was accepted,
                     probably due to WND limits
 
@@ -1535,12 +1535,12 @@ const int32_t l500ms = 500;
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : prvTCPWindowFastRetransmit
-*  å‡½æ•°æè¿°       : ä»xWaitQueueå¯»æ‰¾éœ€è¦é‡ä¼ çš„æ®µ
-*  å‚æ•°           : 
-*  è¿”å›å€¼         : éœ€è¦é‡ä¼ çš„æ®µçš„ä¸ªæ•°
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : prvTCPWindowFastRetransmit
+*  º¯ÊıÃèÊö       : ´ÓxWaitQueueÑ°ÕÒĞèÒªÖØ´«µÄ¶Î
+*  ²ÎÊı           : 
+*  ·µ»ØÖµ         : ĞèÒªÖØ´«µÄ¶ÎµÄ¸öÊı
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     static uint32_t prvTCPWindowFastRetransmit( TCPWindow_t *pxWindow, uint32_t ulFirst )
@@ -1602,16 +1602,16 @@ const int32_t l500ms = 500;
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : ulTCPWindowTxAck
-*  å‡½æ•°æè¿°       : æ”¶åˆ°ä¸€ä¸ªå¸¸è§„åº”ç­”
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulSequenceNumberï¼šæ”¶åˆ°çš„åºåˆ—å·
-*  è¿”å›å€¼         : 
-                    0ï¼š
-                    è¢«åº”ç­”çš„å­—èŠ‚æ•°
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : ulTCPWindowTxAck
+*  º¯ÊıÃèÊö       : ÊÕµ½Ò»¸ö³£¹æÓ¦´ğ
+*  ²ÎÊı           : 
+                    pxWindow£º´°¿Ú
+                    ulSequenceNumber£ºÊÕµ½µÄĞòÁĞºÅ
+*  ·µ»ØÖµ         : 
+                    0£º
+                    ±»Ó¦´ğµÄ×Ö½ÚÊı
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     uint32_t ulTCPWindowTxAck( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber )
@@ -1640,15 +1640,15 @@ const int32_t l500ms = 500;
 #if( ipconfigUSE_TCP_WIN == 1 )
 /*
 ****************************************************
-*  å‡½æ•°å         : ulTCPWindowTxSack
-*  å‡½æ•°æè¿°       : æ”¶åˆ°ä¸€é€‰æ‹©æ€§åº”ç­”
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulFirstï¼šèµ·å§‹åºåˆ—å·
-                    ulLastï¼šç»“æŸåºåˆ—å·
-*  è¿”å›å€¼         : è¢«åº”ç­”çš„å­—èŠ‚æ•°
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : ulTCPWindowTxSack
+*  º¯ÊıÃèÊö       : ÊÕµ½Ò»Ñ¡ÔñĞÔÓ¦´ğ
+*  ²ÎÊı           : 
+                    pxWindow£º´°¿Ú
+                    ulFirst£ºÆğÊ¼ĞòÁĞºÅ
+                    ulLast£º½áÊøĞòÁĞºÅ
+*  ·µ»ØÖµ         : ±»Ó¦´ğµÄ×Ö½ÚÊı
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
     uint32_t ulTCPWindowTxSack( TCPWindow_t *pxWindow, uint32_t ulFirst, uint32_t ulLast )
@@ -1692,18 +1692,18 @@ const int32_t l500ms = 500;
 */
 /*
 ****************************************************
-*  å‡½æ•°å         : lTCPWindowRxCheck
-*  å‡½æ•°æè¿°       : æ ¹æ®æ¥æ”¶å°è¯•ç€å¢åŠ pxWindow->rx.ulCurrentSequenceNumber
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulSequenceNumberï¼šæ¥æ”¶åˆ°çš„åºåˆ—å·
-                    ulLengthï¼šæ¥æ”¶åˆ°çš„æ•°æ®é•¿åº¦
-                    ulSpaceï¼šæ¥æ”¶ç¼“å†²åŒºå¯ç”¨ç©ºé—´
-*  è¿”å›å€¼         : 
-                    -1ï¼šåºåˆ—å·éæœŸæœ›æˆ–è€…æ˜¯å­˜å‚¨ç©ºé—´ä¸è¶³
-                    0ï¼šåºå·å¥½æ­£å¸¸å¹¶ä¸”ç©ºé—´å……è¶³
-*  ä½œè€…           : -5A4A5943-
-*  å†å²ç‰ˆæœ¬       : 
+*  º¯ÊıÃû         : lTCPWindowRxCheck
+*  º¯ÊıÃèÊö       : ¸ù¾İ½ÓÊÕ³¢ÊÔ×ÅÔö¼ÓpxWindow->rx.ulCurrentSequenceNumber
+*  ²ÎÊı           : 
+                    pxWindow£º´°¿Ú
+                    ulSequenceNumber£º½ÓÊÕµ½µÄĞòÁĞºÅ
+                    ulLength£º½ÓÊÕµ½µÄÊı¾İ³¤¶È
+                    ulSpace£º½ÓÊÕ»º³åÇø¿ÉÓÃ¿Õ¼ä
+*  ·µ»ØÖµ         : 
+                    -1£ºĞòÁĞºÅ·ÇÆÚÍû»òÕßÊÇ´æ´¢¿Õ¼ä²»×ã
+                    0£ºĞòºÅºÃÕı³£²¢ÇÒ¿Õ¼ä³ä×ã
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 #if( ipconfigUSE_TCP_WIN == 0 )

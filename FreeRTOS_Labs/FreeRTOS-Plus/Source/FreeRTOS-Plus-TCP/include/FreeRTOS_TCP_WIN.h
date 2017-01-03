@@ -20,27 +20,27 @@ typedef struct xTCPTimer
 
 typedef struct xTCP_SEGMENT
 {
-    uint32_t ulSequenceNumber;      /* æœ¬åŒ…ä¸­ç¬¬ä¸€å­—èŠ‚çš„åºåˆ—å· */
-    int32_t lMaxLength;             /* æœ€å¤§ç©ºé—´, èƒ½è¢«å­˜å‚¨åœ¨æœ¬æ®µçš„å­—èŠ‚æ•° */
-    int32_t lDataLength;            /* å®žé™…çš„å­—èŠ‚æ•° */
-    int32_t lStreamPos;             /* å¥—æŽ¥å­—å‘é€/æŽ¥æ”¶æµçš„ç´¢å¼• */
-    TCPTimer_t xTransmitTimer;      /* æœ¬æ®µè¢«å‘é€æ—¶å­˜å‚¨ä¸€ä¸‹æ—¶é—´ (TX only) */
+    uint32_t ulSequenceNumber;      /* ±¾°üÖÐµÚÒ»×Ö½ÚµÄÐòÁÐºÅ */
+    int32_t lMaxLength;             /* ×î´ó¿Õ¼ä, ÄÜ±»´æ´¢ÔÚ±¾¶ÎµÄ×Ö½ÚÊý */
+    int32_t lDataLength;            /* Êµ¼ÊµÄ×Ö½ÚÊý */
+    int32_t lStreamPos;             /* Ì×½Ó×Ö·¢ËÍ/½ÓÊÕÁ÷µÄË÷Òý */
+    TCPTimer_t xTransmitTimer;      /* ±¾¶Î±»·¢ËÍÊ±´æ´¢Ò»ÏÂÊ±¼ä (TX only) */
     union
     {
         struct
         {
             uint32_t
-                ucTransmitCount : 8,/* æœ¬æ®µè¢«å‘é€äº†å¤šå°‘æ¬¡ï¼ˆé‡ä¼ ï¼‰,ç”¨äºŽè®¡ç®—RTT*/
-                ucDupAckCount : 8,  /* è®°å½•ä¸€ä¸ªæ¯”æœ¬æ®µæ›´é«˜çš„åºåˆ—å·è¢«åº”ç­”çš„æ¬¡æ•°ï¼Œ3æ¬¡ä¹‹åŽä¼šå‘é€å¿«é€Ÿé‡ä¼  */
-                bOutstanding : 1,   /* ç­‰å¾…å¯¹æ–¹åº”ç­” */
-                bAcked : 1,         /* æœ¬æ®µå·²è¢«ç¡®è®¤ */
-                bIsForRx : 1;       /* pdTRUE å¦‚æžœæ®µç”¨æ¥æŽ¥æ”¶ */
+                ucTransmitCount : 8,/* ±¾¶Î±»·¢ËÍÁË¶àÉÙ´Î£¨ÖØ´«£©,ÓÃÓÚ¼ÆËãRTT*/
+                ucDupAckCount : 8,  /* ¼ÇÂ¼Ò»¸ö±È±¾¶Î¸ü¸ßµÄÐòÁÐºÅ±»Ó¦´ðµÄ´ÎÊý£¬3´ÎÖ®ºó»á·¢ËÍ¿ìËÙÖØ´« */
+                bOutstanding : 1,   /* µÈ´ý¶Ô·½Ó¦´ð */
+                bAcked : 1,         /* ±¾¶ÎÒÑ±»È·ÈÏ */
+                bIsForRx : 1;       /* pdTRUE Èç¹û¶ÎÓÃÀ´½ÓÊÕ */
         } bits;
         uint32_t ulFlags;
     } u;
 #if( ipconfigUSE_TCP_WIN != 0 )
-    struct xLIST_ITEM xQueueItem;  /* åªç”¨äºŽå‘é€ï¼Œæ®µå¯ä»¥è¢«è¿žæŽ¥åˆ°ä¸‰ç§é“¾è¡¨ä¸­ï¼šxPriorityQueue, xTxQueue, and xWaitQueue */ 
-    struct xLIST_ITEM xListItem;   /* é€šè¿‡è¿™ä¸ªæ‰€æœ‰çš„æ®µè¿žæŽ¥åˆ°å†…å­˜æ±  */
+    struct xLIST_ITEM xQueueItem;  /* Ö»ÓÃÓÚ·¢ËÍ£¬¶Î¿ÉÒÔ±»Á¬½Óµ½ÈýÖÖÁ´±íÖÐ£ºxPriorityQueue, xTxQueue, and xWaitQueue */ 
+    struct xLIST_ITEM xListItem;   /* Í¨¹ýÕâ¸öËùÓÐµÄ¶ÎÁ¬½Óµ½ÄÚ´æ³Ø */
 #endif
 } TCPSegment_t;
 
@@ -80,9 +80,9 @@ typedef struct xTCP_WINDOW
         struct
         {
             uint32_t
-                bHasInit : 1,       /* çª—å£ç»“æž„ä½“å·²è¢«åˆå§‹åŒ– */
-                bSendFullSize : 1,  /* åªå‘é€å¤§å°ä¸ºMSSçš„æ®µ */
-                bTimeStamps : 1;    /* å¥—æŽ¥å­—ä½¿ç”¨æ—¶é—´æˆ³ */
+                bHasInit : 1,       /* ´°¿Ú½á¹¹ÌåÒÑ±»³õÊ¼»¯ */
+                bSendFullSize : 1,  /* Ö»·¢ËÍ´óÐ¡ÎªMSSµÄ¶Î */
+                bTimeStamps : 1;    /* Ì×½Ó×ÖÊ¹ÓÃÊ±¼ä´Á */
         } bits;                     /* party which opens the connection */
         uint32_t ulFlags;
     } u;
@@ -90,84 +90,84 @@ typedef struct xTCP_WINDOW
     struct
     {
         uint32_t ulFirstSequenceNumber;  /* Logging & debug: the first segment received/sent in this connection
-                                          * for Tx: åˆå§‹åºåˆ—å· (ISS)
-                                          * for Rx: åˆå§‹æŽ¥æ”¶åºåˆ—å· (IRS) */
-        uint32_t ulCurrentSequenceNumber;/* Tx/Rx: æ»‘åŠ¨çª—å£çš„å·¦è¾¹å€¼ */
-        uint32_t ulFINSequenceNumber;    /* å¸¦æœ‰FINæ ‡å¿—çš„åºåˆ—å· */
-        uint32_t ulHighestSequenceNumber;/* æœ€å³è¾¹çš„å­—èŠ‚åŠ ä¸€çš„åºåˆ—å· */
+                                          * for Tx: ³õÊ¼ÐòÁÐºÅ (ISS)
+                                          * for Rx: ³õÊ¼½ÓÊÕÐòÁÐºÅ (IRS) */
+        uint32_t ulCurrentSequenceNumber;/* Tx/Rx: »¬¶¯´°¿ÚµÄ×ó±ßÖµ */
+        uint32_t ulFINSequenceNumber;    /* ´øÓÐFIN±êÖ¾µÄÐòÁÐºÅ */
+        uint32_t ulHighestSequenceNumber;/* ×îÓÒ±ßµÄ×Ö½Ú¼ÓÒ»µÄÐòÁÐºÅ */
 #if( ipconfigUSE_TCP_TIMESTAMPS == 1 )
-        uint32_t ulTimeStamp;            /* æ—¶é—´æˆ³ */
+        uint32_t ulTimeStamp;            /* Ê±¼ä´Á */
 #endif
     } rx, tx;
-    uint32_t ulOurSequenceNumber;       /* æˆ‘ä»¬å‘é€çš„åºåˆ—å· */
+    uint32_t ulOurSequenceNumber;       /* ÎÒÃÇ·¢ËÍµÄÐòÁÐºÅ */
     uint32_t ulUserDataLength;          /* Number of bytes in Rx buffer which may be passed to the user, after having received a 'missing packet' */
-    uint32_t ulNextTxSequenceNumber;    /* ä¸‹ä¸€æ¬¡è¦å‘é€çš„åºåˆ—å· */
-    int32_t lSRTT;                      /* æ»‘åŠ¨æ‹¥å¡žæŽ§åˆ¶ */
-    uint8_t ucOptionLength;             /* é€‰é¡¹å­—æ®µé•¿åº¦*/
+    uint32_t ulNextTxSequenceNumber;    /* ÏÂÒ»´ÎÒª·¢ËÍµÄÐòÁÐºÅ */
+    int32_t lSRTT;                      /* »¬¶¯ÓµÈû¿ØÖÆ */
+    uint8_t ucOptionLength;             /* Ñ¡Ïî×Ö¶Î³¤¶È*/
 #if( ipconfigUSE_TCP_WIN == 1 )
-    List_t xPriorityQueue;              /* ä¼˜å…ˆç»„: å¿…é¡»è¢«ç«‹å³å‘é€çš„æ®µ */
-    List_t xTxQueue;                    /* å‘é€æ®µ: ä¼ è¾“çš„æ®µ */
-    List_t xWaitQueue;                  /* ç­‰å¾…æ®µ: ç­‰å¾…ç¡®è®¤çš„æ®µ */
-    TCPSegment_t *pxHeadSegment;        /* æŒ‡å‘ä¸€ä¸ªæ®µï¼Œæ²¡æœ‰è¢«å‘é€ä½†æ˜¯å¤§å°åœ¨å¢žé•¿(ç”¨æˆ·å¢žåŠ äº†æ•°æ®) */
-    uint32_t ulOptionsData[ipSIZE_TCP_OPTIONS/sizeof(uint32_t)];    /* åŒ…å«äº†æˆ‘ä»¬å‘å‡ºçš„é€‰é¡¹å­—æ®µ */
-    List_t xTxSegments;                 /*2016--12--02--18--36--48(ZJYC): æ‰€æœ‰å‘é€æ®µçš„é“¾è¡¨ï¼Œé€šè¿‡åºåˆ—å·æŽ’åˆ—   */ 
-    List_t xRxSegments;                 /* æ‰€æœ‰å‘é€æ®µçš„é“¾è¡¨ï¼Œé€šè¿‡åºåˆ—å·æŽ’åˆ— */
+    List_t xPriorityQueue;              /* ÓÅÏÈ×é: ±ØÐë±»Á¢¼´·¢ËÍµÄ¶Î */
+    List_t xTxQueue;                    /* ·¢ËÍ¶Î: ´«ÊäµÄ¶Î */
+    List_t xWaitQueue;                  /* µÈ´ý¶Î: µÈ´ýÈ·ÈÏµÄ¶Î */
+    TCPSegment_t *pxHeadSegment;        /* Ö¸ÏòÒ»¸ö¶Î£¬Ã»ÓÐ±»·¢ËÍµ«ÊÇ´óÐ¡ÔÚÔö³¤(ÓÃ»§Ôö¼ÓÁËÊý¾Ý) */
+    uint32_t ulOptionsData[ipSIZE_TCP_OPTIONS/sizeof(uint32_t)];    /* °üº¬ÁËÎÒÃÇ·¢³öµÄÑ¡Ïî×Ö¶Î */
+    List_t xTxSegments;                 /*2016--12--02--18--36--48(ZJYC): ËùÓÐ·¢ËÍ¶ÎµÄÁ´±í£¬Í¨¹ýÐòÁÐºÅÅÅÁÐ   */ 
+    List_t xRxSegments;                 /* ËùÓÐ·¢ËÍ¶ÎµÄÁ´±í£¬Í¨¹ýÐòÁÐºÅÅÅÁÐ */
 #else
-    /* å¯¹äºŽå¾®åž‹TCPï¼Œåªæœ‰ä¸€ä¸ªç­‰å¾…ç¡®è®¤çš„æ®µ */
-    TCPSegment_t xTxSegment;            /* ä¼˜å…ˆç»„ */
+    /* ¶ÔÓÚÎ¢ÐÍTCP£¬Ö»ÓÐÒ»¸öµÈ´ýÈ·ÈÏµÄ¶Î */
+    TCPSegment_t xTxSegment;            /* ÓÅÏÈ×é */
 #endif
-    uint16_t usOurPortNumber;           /* ä¸ºäº†è°ƒè¯•å’Œæ—¥å¿—:æˆ‘ä»¬è‡ªå·±çš„ç«¯å£ */
-    uint16_t usPeerPortNumber;          /* è°ƒè¯•å’Œæ—¥å¿—: å¯¹æ–¹çš„TCPç«¯å£å· */
-    uint16_t usMSS;                     /* å½“å‰æŽ¥å—çš„ MSS */
-    uint16_t usMSSInit;                 /* å¥—æŽ¥å­—æ‹¥æœ‰è€…è®¾ç½®çš„MSSå€¼ */
+    uint16_t usOurPortNumber;           /* ÎªÁËµ÷ÊÔºÍÈÕÖ¾:ÎÒÃÇ×Ô¼ºµÄ¶Ë¿Ú */
+    uint16_t usPeerPortNumber;          /* µ÷ÊÔºÍÈÕÖ¾: ¶Ô·½µÄTCP¶Ë¿ÚºÅ */
+    uint16_t usMSS;                     /* µ±Ç°½ÓÊÜµÄ MSS */
+    uint16_t usMSSInit;                 /* Ì×½Ó×ÖÓµÓÐÕßÉèÖÃµÄMSSÖµ */
 } TCPWindow_t;
 
 
 /*=============================================================================
  *
- * åˆ›å»ºå’Œæ‘§æ¯
+ * ´´½¨ºÍ´Ý»Ù
  *
  *=============================================================================*/
 /*
 ****************************************************
-*  å‡½æ•°å         : vTCPWindowCreate
-*  å‡½æ•°æè¿°       : åˆ›å»ºå¹¶åˆå§‹åŒ–ä¸€ä¸ªçª—å£
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£æŒ‡é’ˆ
-                    ulRxWindowLengthï¼šæŽ¥æ”¶çª—å£é•¿åº¦
-                    ulTxWindowLengthï¼šå‘é€çª—å£é•¿åº¦
-                    ulAckNumberï¼šåº”ç­”å·
-                    ulSequenceNumberï¼šåºåˆ—å·
-                    ulMSSï¼šMSS
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : vTCPWindowCreate
+*  º¯ÊýÃèÊö       : ´´½¨²¢³õÊ¼»¯Ò»¸ö´°¿Ú
+*  ²ÎÊý           : 
+                    pxWindow£º´°¿ÚÖ¸Õë
+                    ulRxWindowLength£º½ÓÊÕ´°¿Ú³¤¶È
+                    ulTxWindowLength£º·¢ËÍ´°¿Ú³¤¶È
+                    ulAckNumber£ºÓ¦´ðºÅ
+                    ulSequenceNumber£ºÐòÁÐºÅ
+                    ulMSS£ºMSS
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 void vTCPWindowCreate( TCPWindow_t *pxWindow, uint32_t ulRxWindowLength,uint32_t ulTxWindowLength, uint32_t ulAckNumber, uint32_t ulSequenceNumber, uint32_t ulMSS );
 /*
 ****************************************************
-*  å‡½æ•°å         : vTCPWindowDestroy
-*  å‡½æ•°æè¿°       : æ‘§æ¯ä¸€ä¸ªçª—å£ï¼Œå°†ä¼šå›žæ”¶ä¸€ç³»åˆ—çš„æ®µ
-*  å‚æ•°           : pxWindowï¼šå¾…æ‘§æ¯çª—å£
-*  è¿”å›žå€¼         : NULL
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : vTCPWindowDestroy
+*  º¯ÊýÃèÊö       : ´Ý»ÙÒ»¸ö´°¿Ú£¬½«»á»ØÊÕÒ»ÏµÁÐµÄ¶Î
+*  ²ÎÊý           : pxWindow£º´ý´Ý»Ù´°¿Ú
+*  ·µ»ØÖµ         : NULL
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 void vTCPWindowDestroy( TCPWindow_t *pxWindow );
 /*
 ****************************************************
-*  å‡½æ•°å         : vTCPWindowInit
-*  å‡½æ•°æè¿°       : åˆå§‹åŒ–ä¸€ä¸ªçª—å£
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulAckNumberï¼šåº”ç­”å·
-                    ulSequenceNumberï¼šåºåˆ—å·
-                    ulMSSï¼šMSS
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : vTCPWindowInit
+*  º¯ÊýÃèÊö       : ³õÊ¼»¯Ò»¸ö´°¿Ú
+*  ²ÎÊý           : 
+                    pxWindow£º´°¿Ú
+                    ulAckNumber£ºÓ¦´ðºÅ
+                    ulSequenceNumber£ºÐòÁÐºÅ
+                    ulMSS£ºMSS
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 void vTCPWindowInit( TCPWindow_t *pxWindow, uint32_t ulAckNumber, uint32_t ulSequenceNumber, uint32_t ulMSS );
@@ -182,35 +182,35 @@ void vTCPWindowInit( TCPWindow_t *pxWindow, uint32_t ulAckNumber, uint32_t ulSeq
  * But pxWindow->ackno should always be used to set "BUF->ackno" */
 /*
 ****************************************************
-*  å‡½æ•°å         : lTCPWindowRxCheck
-*  å‡½æ•°æè¿°       : 
-                    è¿”å›ž0,ulCurrentSequenceNumberå¢žåŠ äº†ulLength
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulSequenceNumberï¼šæŽ¥æ”¶åˆ°çš„åºåˆ—å·
-                    ulLengthï¼šæŽ¥æ”¶åˆ°çš„æ•°æ®é•¿åº¦
-                    ulSpaceï¼šæŽ¥æ”¶ç¼“å†²åŒºå¯ç”¨ç©ºé—´
-*  è¿”å›žå€¼         : 
-                    -1ï¼šåºåˆ—å·éžæœŸæœ›æˆ–è€…æ˜¯å­˜å‚¨ç©ºé—´ä¸è¶³
-                    0ï¼šåºå·å¥½æ­£å¸¸å¹¶ä¸”ç©ºé—´å……è¶³
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : lTCPWindowRxCheck
+*  º¯ÊýÃèÊö       : 
+                    ·µ»Ø0,ulCurrentSequenceNumberÔö¼ÓÁËulLength
+*  ²ÎÊý           : 
+                    pxWindow£º´°¿Ú
+                    ulSequenceNumber£º½ÓÊÕµ½µÄÐòÁÐºÅ
+                    ulLength£º½ÓÊÕµ½µÄÊý¾Ý³¤¶È
+                    ulSpace£º½ÓÊÕ»º³åÇø¿ÉÓÃ¿Õ¼ä
+*  ·µ»ØÖµ         : 
+                    -1£ºÐòÁÐºÅ·ÇÆÚÍû»òÕßÊÇ´æ´¢¿Õ¼ä²»×ã
+                    0£ºÐòºÅºÃÕý³£²¢ÇÒ¿Õ¼ä³ä×ã
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
-int32_t lTCPWindowRxCheck( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength, uint32_t ulLength );
+int32_t lTCPWindowRxCheck(TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength, uint32_t ulSpace);
 
 /* When lTCPWindowRxCheck returned false, please call store for this unexpected data */
 /*
 ****************************************************
-*  å‡½æ•°å         : xTCPWindowRxStore
-*  å‡½æ•°æè¿°       : ç”¨ä»¥å­˜å‚¨éžé¡ºåºçš„æ•°æ®
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulSequenceNumberï¼šåºåˆ—å·
-                    ulLengthï¼šæ•°æ®é•¿åº¦
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : xTCPWindowRxStore
+*  º¯ÊýÃèÊö       : ÓÃÒÔ´æ´¢·ÇË³ÐòµÄÊý¾Ý
+*  ²ÎÊý           : 
+                    pxWindow£º´°¿Ú
+                    ulSequenceNumber£ºÐòÁÐºÅ
+                    ulLength£ºÊý¾Ý³¤¶È
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 BaseType_t xTCPWindowRxStore( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, uint32_t ulLength );
@@ -219,14 +219,14 @@ BaseType_t xTCPWindowRxStore( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber, 
  * if there are no 'open' reception segments */
 /*
 ****************************************************
-*  å‡½æ•°å         : xTCPWindowRxEmpty
-*  å‡½æ•°æè¿°       : æŸ¥çœ‹æŽ¥æ”¶çª—å£æ˜¯å¦ä¸ºç©º
-*  å‚æ•°           : pxWindowï¼šçª—å£
-*  è¿”å›žå€¼         : 
-                    pdFALSEï¼šä¸ä¸ºç©º
-                    pdTRUEï¼šä¸ºç©º
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : xTCPWindowRxEmpty
+*  º¯ÊýÃèÊö       : ²é¿´½ÓÊÕ´°¿ÚÊÇ·ñÎª¿Õ
+*  ²ÎÊý           : pxWindow£º´°¿Ú
+*  ·µ»ØÖµ         : 
+                    pdFALSE£º²»Îª¿Õ
+                    pdTRUE£ºÎª¿Õ
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 BaseType_t xTCPWindowRxEmpty( TCPWindow_t *pxWindow );
@@ -242,32 +242,32 @@ void vTCPWinShowSegments( TCPWindow_t *pxWindow, BaseType_t bForRx );
  *=============================================================================*/
 /*
 ****************************************************
-*  å‡½æ•°å         : lTCPWindowTxAdd
-*  å‡½æ•°æè¿°       : æˆ‘ä»¬æœ‰ulLengthæ•°æ®è¦å‘é€ï¼ŒæŠŠæ•°æ®é˜²ç›—çª—å£
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulLengthï¼šéœ€è¦å‘é€çš„æ•°æ®é•¿åº¦
-                    lPositionï¼šç¼“å†²åŒºä½ç½®
-                    lMaxï¼šç¼“å†²åŒºé•¿åº¦
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : lTCPWindowTxAdd
+*  º¯ÊýÃèÊö       : ÎÒÃÇÓÐulLengthÊý¾ÝÒª·¢ËÍ£¬°ÑÊý¾Ý·ÀµÁ´°¿Ú
+*  ²ÎÊý           : 
+                    pxWindow£º´°¿Ú
+                    ulLength£ºÐèÒª·¢ËÍµÄÊý¾Ý³¤¶È
+                    lPosition£º»º³åÇøÎ»ÖÃ
+                    lMax£º»º³åÇø³¤¶È
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 int32_t lTCPWindowTxAdd( TCPWindow_t *pxWindow, uint32_t ulLength, int32_t lPosition, int32_t lMax );
 /*
 ****************************************************
-*  å‡½æ•°å         : xTCPWindowTxHasData
-*  å‡½æ•°æè¿°       : ç¡®è®¤æ˜¯å¦æœ‰æ•°æ®è¦å‘é€ï¼Œå¹¶è®¡ç®—å‘é€å»¶è¿Ÿæ—¶é—´Check data to be sent and calculate the time period we may sleep
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulWindowSizeï¼šçª—å£å¤§å°
-                    pulDelayï¼šç­‰å¾…æ—¶é—´
-*  è¿”å›žå€¼         : 
-                    pdTRUEï¼šæœ‰æ•°æ®éœ€è¦å‘é€
-                    pdFALSEï¼šæ²¡æœ‰æ•°æ®éœ€è¦å‘é€
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : xTCPWindowTxHasData
+*  º¯ÊýÃèÊö       : È·ÈÏÊÇ·ñÓÐÊý¾ÝÒª·¢ËÍ£¬²¢¼ÆËã·¢ËÍÑÓ³ÙÊ±¼äCheck data to be sent and calculate the time period we may sleep
+*  ²ÎÊý           : 
+                    pxWindow£º´°¿Ú
+                    ulWindowSize£º´°¿Ú´óÐ¡
+                    pulDelay£ºµÈ´ýÊ±¼ä
+*  ·µ»ØÖµ         : 
+                    pdTRUE£ºÓÐÊý¾ÝÐèÒª·¢ËÍ
+                    pdFALSE£ºÃ»ÓÐÊý¾ÝÐèÒª·¢ËÍ
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 BaseType_t xTCPWindowTxHasData( TCPWindow_t *pxWindow, uint32_t ulWindowSize, TickType_t *pulDelay );
@@ -277,13 +277,13 @@ BaseType_t xTCPWindowTxHasData( TCPWindow_t *pxWindow, uint32_t ulWindowSize, Ti
  * it will return pdTRUE */
 /*
 ****************************************************
-*  å‡½æ•°å         : 
-*  å‡½æ•°æè¿°       : æŸ¥çœ‹æ˜¯å¦å­˜åœ¨æ²¡æœ‰è¢«å‘é€çš„
-                    å‡½æ•°åœ¨æŽ¥æ”¶åˆ°FINä¹‹åŽè¢«è°ƒç”¨ï¼Œåªæœ‰TX çª—å£è¢«æ¸…ç©ºçš„æƒ…å†µä¸‹æ‰ä¼šè¿”å›žpdTRUE
-*  å‚æ•°           : 
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : 
+*  º¯ÊýÃèÊö       : ²é¿´ÊÇ·ñ´æÔÚÃ»ÓÐ±»·¢ËÍµÄ
+                    º¯ÊýÔÚ½ÓÊÕµ½FINÖ®ºó±»µ÷ÓÃ£¬Ö»ÓÐTX ´°¿Ú±»Çå¿ÕµÄÇé¿öÏÂ²Å»á·µ»ØpdTRUE
+*  ²ÎÊý           : 
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 BaseType_t xTCPWindowTxDone( TCPWindow_t *pxWindow );
@@ -292,44 +292,44 @@ BaseType_t xTCPWindowTxDone( TCPWindow_t *pxWindow );
  * apPos will point to a location with the circular data buffer: txStream */
 /*
 ****************************************************
-*  å‡½æ•°å         : ulTCPWindowTxGet
-*  å‡½æ•°æè¿°       : 
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulWindowSizeï¼šçª—å£å¤§å°
-                    plPositionï¼šæ•°æ®æ‰€åœ¨ä½ç½®
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : ulTCPWindowTxGet
+*  º¯ÊýÃèÊö       : 
+*  ²ÎÊý           : 
+                    pxWindow£º´°¿Ú
+                    ulWindowSize£º´°¿Ú´óÐ¡
+                    plPosition£ºÊý¾ÝËùÔÚÎ»ÖÃ
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 uint32_t ulTCPWindowTxGet( TCPWindow_t *pxWindow, uint32_t ulWindowSize, int32_t *plPosition );
 /*
 ****************************************************
-*  å‡½æ•°å         : ulTCPWindowTxAck
-*  å‡½æ•°æè¿°       : æ”¶åˆ°ä¸€ä¸ªå¸¸è§„åº”ç­”
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulSequenceNumberï¼šæ”¶åˆ°çš„åºåˆ—å·
-*  è¿”å›žå€¼         : 
-                    0ï¼š
-                    è¢«åº”ç­”çš„å­—èŠ‚æ•°
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : ulTCPWindowTxAck
+*  º¯ÊýÃèÊö       : ÊÕµ½Ò»¸ö³£¹æÓ¦´ð
+*  ²ÎÊý           : 
+                    pxWindow£º´°¿Ú
+                    ulSequenceNumber£ºÊÕµ½µÄÐòÁÐºÅ
+*  ·µ»ØÖµ         : 
+                    0£º
+                    ±»Ó¦´ðµÄ×Ö½ÚÊý
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 uint32_t ulTCPWindowTxAck( TCPWindow_t *pxWindow, uint32_t ulSequenceNumber );
 /*
 ****************************************************
-*  å‡½æ•°å         : ulTCPWindowTxSack
-*  å‡½æ•°æè¿°       : æ”¶åˆ°ä¸€é€‰æ‹©æ€§åº”ç­”
-*  å‚æ•°           : 
-                    pxWindowï¼šçª—å£
-                    ulFirstï¼šèµ·å§‹åºåˆ—å·
-                    ulLastï¼šç»“æŸåºåˆ—å·
-*  è¿”å›žå€¼         : è¢«åº”ç­”çš„å­—èŠ‚æ•°
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : ulTCPWindowTxSack
+*  º¯ÊýÃèÊö       : ÊÕµ½Ò»Ñ¡ÔñÐÔÓ¦´ð
+*  ²ÎÊý           : 
+                    pxWindow£º´°¿Ú
+                    ulFirst£ºÆðÊ¼ÐòÁÐºÅ
+                    ulLast£º½áÊøÐòÁÐºÅ
+*  ·µ»ØÖµ         : ±»Ó¦´ðµÄ×Ö½ÚÊý
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 uint32_t ulTCPWindowTxSack( TCPWindow_t *pxWindow, uint32_t ulFirst, uint32_t ulLast );

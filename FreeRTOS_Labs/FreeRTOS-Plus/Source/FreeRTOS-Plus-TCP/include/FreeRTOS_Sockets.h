@@ -6,17 +6,17 @@
 extern "C" {
 #endif
 
-/* æ ‡å‡†å¤´æ–‡ä»¶ */
+/* ±ê×¼Í·ÎÄ¼ş */
 #include <string.h>
 
-/* ç”¨æˆ·å±‚é…ç½® */
+/* ÓÃ»§²ãÅäÖÃ */
 #include "FreeRTOSIPConfig.h"
 
 #ifndef FREERTOS_IP_CONFIG_H
     #error FreeRTOSIPConfig.h has not been included yet
 #endif
 
-/* äº‹ä»¶ä½è¢«é€‰æ‹©å‡½æ•°éœ€è¦ */
+/* ÊÂ¼şÎ»±»Ñ¡Ôñº¯ÊıĞèÒª */
 #include "event_groups.h"
 
 #ifndef INC_FREERTOS_H
@@ -24,12 +24,12 @@ extern "C" {
 #endif
 
 #ifndef INC_TASK_H
-    #ifndef TASK_H /* ä¸è€ç‰ˆæœ¬FREERTOSå…¼å®¹ */
+    #ifndef TASK_H /* ÓëÀÏ°æ±¾FREERTOS¼æÈİ */
         #error The FreeRTOS header file task.h must be included before FreeRTOS_Sockets.h.
     #endif
 #endif
 
-/* å¥—æ¥å­—æ— æ•ˆæ—¶è¢«èµ‹çš„å€¼ï¼Œæœ‰å¯èƒ½å› ä¸ºä»–ä¸èƒ½è¢«åˆ›å»º */
+/* Ì×½Ó×ÖÎŞĞ§Ê±±»¸³µÄÖµ£¬ÓĞ¿ÉÄÜÒòÎªËû²»ÄÜ±»´´½¨ */
 #define FREERTOS_INVALID_SOCKET ( ( void * ) ~0U )
 
 /* API function error values.  As errno is supported, the FreeRTOS sockets
@@ -41,8 +41,8 @@ In case of an error, API's will still return negative numbers, e.g.
 in case an operation would block */
 
 /* The following defines are obsolete, please use -pdFREERTOS_ERRNO_Exxx */
-/* API å‡½æ•°é”™è¯¯å€¼ã€‚FreeRTOSä¼ å›é”™è¯¯ä»£ç è€Œä¸æ˜¯ä»…ä»…ä¸€ä¸ªfailï¼Œåœ¨errno.hä¸­å¯ä»¥æ‰¾åˆ°ä¸€äº›
-åœ¨é”™è¯¯çš„æƒ…å†µä¸‹ï¼Œ */
+/* API º¯Êı´íÎóÖµ¡£FreeRTOS´«»Ø´íÎó´úÂë¶ø²»ÊÇ½ö½öÒ»¸öfail£¬ÔÚerrno.hÖĞ¿ÉÒÔÕÒµ½Ò»Ğ©
+ÔÚ´íÎóµÄÇé¿öÏÂ£¬ */
 #define FREERTOS_SOCKET_ERROR   ( -1 )
 #define FREERTOS_EWOULDBLOCK    ( - pdFREERTOS_ERRNO_EWOULDBLOCK )
 #define FREERTOS_EINVAL         ( - pdFREERTOS_ERRNO_EINVAL )
@@ -52,7 +52,7 @@ in case an operation would block */
 #define FREERTOS_ENOPROTOOPT    ( - pdFREERTOS_ERRNO_ENOPROTOOPT )
 #define FREERTOS_ECLOSED        ( - pdFREERTOS_ERRNO_ENOTCONN )
 
-/* FreeRTOS_socket() çš„å‚æ•°å€¼ ä¸ ä¼¯é‡Œå…‹æ ‡å‡†ä¸€è‡´ æ›´å¤šä¿¡æ¯è¯·æŸ¥çœ‹ FreeRTOS_socket()çš„æ–‡æ¡£*/
+/* FreeRTOS_socket() µÄ²ÎÊıÖµ Óë ²®Àï¿Ë±ê×¼Ò»ÖÂ ¸ü¶àĞÅÏ¢Çë²é¿´ FreeRTOS_socket()µÄÎÄµµ*/
 #define FREERTOS_AF_INET        ( 2 )
 #define FREERTOS_AF_INET6       ( 10 )
 #define FREERTOS_SOCK_DGRAM     ( 2 )
@@ -65,71 +65,71 @@ in case an operation would block */
  */
 #define FREERTOS_IPPROTO_USR_LAN  ( 63 )
 
-/* ä¼ é€’ç»™ FreeRTOS_sendto() çš„æ ‡å¿—ä½ï¼Œè¡¨æ˜ä½¿ç”¨é›¶å¤åˆ¶ï¼Œæ›´å¤šä¿¡æ¯æŸ¥çœ‹ FreeRTOS_sockets() æ–‡æ¡£*/
+/* ´«µİ¸ø FreeRTOS_sendto() µÄ±êÖ¾Î»£¬±íÃ÷Ê¹ÓÃÁã¸´ÖÆ£¬¸ü¶àĞÅÏ¢²é¿´ FreeRTOS_sockets() ÎÄµµ*/
 #define FREERTOS_ZERO_COPY      ( 1 )
 
-/* ä¼ é€’ç»™ FreeRTOS_setsockopt() çš„é€‰é¡¹å€¼  */
-#define FREERTOS_SO_RCVTIMEO            ( 0 )       /* è®¾ç½®æ¥æ”¶è¶…æ—¶ */
-#define FREERTOS_SO_SNDTIMEO            ( 1 )       /* è®¾ç½®å‘é€è¶…æ—¶ */
-#define FREERTOS_SO_UDPCKSUM_OUT        ( 2 )       /* ç”¨äºæ‰“å¼€æˆ–å…³é—­ä¸€ä¸ªsocketçš„UDPæ ¡éªŒå’Œä½¿ç”¨ã€‚è¿™ä¹Ÿå¯ä»¥ä½œä¸ºä¸€ä¸ª8ä½ä½å¥—æ¥å­—é€‰é¡¹éƒ¨åˆ†ã€‚ */
+/* ´«µİ¸ø FreeRTOS_setsockopt() µÄÑ¡ÏîÖµ  */
+#define FREERTOS_SO_RCVTIMEO            ( 0 )       /* ÉèÖÃ½ÓÊÕ³¬Ê± */
+#define FREERTOS_SO_SNDTIMEO            ( 1 )       /* ÉèÖÃ·¢ËÍ³¬Ê± */
+#define FREERTOS_SO_UDPCKSUM_OUT        ( 2 )       /* ÓÃÓÚ´ò¿ª»ò¹Ø±ÕÒ»¸ösocketµÄUDPĞ£ÑéºÍÊ¹ÓÃ¡£ÕâÒ²¿ÉÒÔ×÷ÎªÒ»¸ö8Î»Î»Ì×½Ó×ÖÑ¡Ïî²¿·Ö¡£ */
 #if( ipconfigSOCKET_HAS_USER_SEMAPHORE == 1 )
-    #define FREERTOS_SO_SET_SEMAPHORE   ( 3 )       /* è®¾ç½®ç”¨æˆ·ä¿¡å·é‡ */
+    #define FREERTOS_SO_SET_SEMAPHORE   ( 3 )       /* ÉèÖÃÓÃ»§ĞÅºÅÁ¿ */
 #endif
-#define FREERTOS_SO_SNDBUF              ( 4 )       /* è®¾ç½®å‘é€ç¼“å­˜å¤§å° (TCP only) */
-#define FREERTOS_SO_RCVBUF              ( 5 )       /* è®¾ç½®æ¥å—ç¼“å­˜å¤§å° (TCP only) */
+#define FREERTOS_SO_SNDBUF              ( 4 )       /* ÉèÖÃ·¢ËÍ»º´æ´óĞ¡ (TCP only) */
+#define FREERTOS_SO_RCVBUF              ( 5 )       /* ÉèÖÃ½ÓÊÜ»º´æ´óĞ¡ (TCP only) */
 
 #if ipconfigUSE_CALLBACKS == 1
-#define FREERTOS_SO_TCP_CONN_HANDLER    ( 6 )       /* å®‰è£…(æ–­å¼€)è¿æ¥äº‹ä»¶å›è°ƒå‡½æ•° æä¾›åˆ°F_TCP_UDP_Handler_tçš„æŒ‡é’ˆ */
-#define FREERTOS_SO_TCP_RECV_HANDLER    ( 7 )       /* å®‰è£…æ¥æ”¶TCPæ•°æ®äº‹ä»¶å›è°ƒå‡½æ•° æä¾›åˆ°F_TCP_UDP_Handler_tçš„æŒ‡é’ˆ */
-#define FREERTOS_SO_TCP_SENT_HANDLER    ( 8 )       /* å®‰è£…å‘é€TCPæ•°æ®äº‹ä»¶å›è°ƒå‡½æ•° æä¾›åˆ°F_TCP_UDP_Handler_tçš„æŒ‡é’ˆ */
-#define FREERTOS_SO_UDP_RECV_HANDLER    ( 9 )       /* å®‰è£…æ¥æ”¶UDPæ•°æ®äº‹ä»¶å›è°ƒå‡½æ•° æä¾›åˆ°F_TCP_UDP_Handler_tçš„æŒ‡é’ˆ */
-#define FREERTOS_SO_UDP_SENT_HANDLER    ( 10 )      /* å®‰è£…å‘é€UDPæ•°æ®äº‹ä»¶å›è°ƒå‡½æ•° æä¾›åˆ°F_TCP_UDP_Handler_tçš„æŒ‡é’ˆ */
+#define FREERTOS_SO_TCP_CONN_HANDLER    ( 6 )       /* °²×°(¶Ï¿ª)Á¬½ÓÊÂ¼ş»Øµ÷º¯Êı Ìá¹©µ½F_TCP_UDP_Handler_tµÄÖ¸Õë */
+#define FREERTOS_SO_TCP_RECV_HANDLER    ( 7 )       /* °²×°½ÓÊÕTCPÊı¾İÊÂ¼ş»Øµ÷º¯Êı Ìá¹©µ½F_TCP_UDP_Handler_tµÄÖ¸Õë */
+#define FREERTOS_SO_TCP_SENT_HANDLER    ( 8 )       /* °²×°·¢ËÍTCPÊı¾İÊÂ¼ş»Øµ÷º¯Êı Ìá¹©µ½F_TCP_UDP_Handler_tµÄÖ¸Õë */
+#define FREERTOS_SO_UDP_RECV_HANDLER    ( 9 )       /* °²×°½ÓÊÕUDPÊı¾İÊÂ¼ş»Øµ÷º¯Êı Ìá¹©µ½F_TCP_UDP_Handler_tµÄÖ¸Õë */
+#define FREERTOS_SO_UDP_SENT_HANDLER    ( 10 )      /* °²×°·¢ËÍUDPÊı¾İÊÂ¼ş»Øµ÷º¯Êı Ìá¹©µ½F_TCP_UDP_Handler_tµÄÖ¸Õë */
 #endif /* ipconfigUSE_CALLBACKS */
 
-#define FREERTOS_SO_REUSE_LISTEN_SOCKET ( 11 )      /* æ­£åœ¨ç›‘å¬çš„å¥—æ¥å­—å¾—åˆ°è¿æ¥ï¼Œä¸åˆ›å»ºè€Œæ˜¯é‡å¤åˆ©ç”¨æ­¤å¥—æ¥å­— */
-#define FREERTOS_SO_CLOSE_AFTER_SEND    ( 12 )      /* ä¸€æ—¦æœ€åçš„æ•°æ®ä¼ è¾“å®Œæˆï¼Œå…³é—­è¿æ¥ */
-#define FREERTOS_SO_WIN_PROPERTIES      ( 13 )      /* åœ¨ä¸€ä¸ªè°ƒç”¨ä¸­è®¾ç½®æ‰€æœ‰ç¼“å†²å’Œçª—å£çš„å±æ€§ï¼Œå‚æ•°æŒ‡å‘WinProperties_t */
-#define FREERTOS_SO_SET_FULL_SIZE       ( 14 )      /* æ‹’ç»å‘é€å°äºMSSçš„åŒ… */
+#define FREERTOS_SO_REUSE_LISTEN_SOCKET ( 11 )      /* ÕıÔÚ¼àÌıµÄÌ×½Ó×ÖµÃµ½Á¬½Ó£¬²»´´½¨¶øÊÇÖØ¸´ÀûÓÃ´ËÌ×½Ó×Ö */
+#define FREERTOS_SO_CLOSE_AFTER_SEND    ( 12 )      /* Ò»µ©×îºóµÄÊı¾İ´«ÊäÍê³É£¬¹Ø±ÕÁ¬½Ó */
+#define FREERTOS_SO_WIN_PROPERTIES      ( 13 )      /* ÔÚÒ»¸öµ÷ÓÃÖĞÉèÖÃËùÓĞ»º³åºÍ´°¿ÚµÄÊôĞÔ£¬²ÎÊıÖ¸ÏòWinProperties_t */
+#define FREERTOS_SO_SET_FULL_SIZE       ( 14 )      /* ¾Ü¾ø·¢ËÍĞ¡ÓÚMSSµÄ°ü */
 
-#define FREERTOS_SO_STOP_RX             ( 15 )      /* ç®€å•çš„æŒ‚èµ·æ¥æ”¶ï¼Œç”¨äºæµåª’ä½“å®¢æˆ·ç«¯ */
+#define FREERTOS_SO_STOP_RX             ( 15 )      /* ¼òµ¥µÄ¹ÒÆğ½ÓÊÕ£¬ÓÃÓÚÁ÷Ã½Ìå¿Í»§¶Ë */
 
 #if( ipconfigUDP_MAX_RX_PACKETS > 0 )
-    #define FREERTOS_SO_UDP_MAX_RX_PACKETS  ( 16 )      /* æ­¤é€‰é¡¹å¸®åŠ©ä¸é™åˆ¶UDPå¥—æ¥å­—çš„å°†ä¼šç¼“å­˜çš„æœ€å¤§åŒ…ä¸ªæ•° */
+    #define FREERTOS_SO_UDP_MAX_RX_PACKETS  ( 16 )      /* ´ËÑ¡Ïî°ïÖúÓëÏŞÖÆUDPÌ×½Ó×ÖµÄ½«»á»º´æµÄ×î´ó°ü¸öÊı */
 #endif
 
-#define FREERTOS_NOT_LAST_IN_FRAGMENTED_PACKET  ( 0x80 )  /* ä»…ä¾›å†…éƒ¨ä½¿ç”¨ï¼Œä½†ä¹Ÿæœ‰ä¸€éƒ¨åˆ†æ˜¯8ä½å€¼ã€‚ */
-#define FREERTOS_FRAGMENTED_PACKET              ( 0x40 )  /* ä»…ä¾›å†…éƒ¨ä½¿ç”¨ï¼Œä½†ä¹Ÿæœ‰ä¸€éƒ¨åˆ†æ˜¯8ä½å€¼ã€‚ */
+#define FREERTOS_NOT_LAST_IN_FRAGMENTED_PACKET  ( 0x80 )  /* ½ö¹©ÄÚ²¿Ê¹ÓÃ£¬µ«Ò²ÓĞÒ»²¿·ÖÊÇ8Î»Öµ¡£ */
+#define FREERTOS_FRAGMENTED_PACKET              ( 0x40 )  /* ½ö¹©ÄÚ²¿Ê¹ÓÃ£¬µ«Ò²ÓĞÒ»²¿·ÖÊÇ8Î»Öµ¡£ */
 
 /* Values for flag for FreeRTOS_shutdown(). */
-#define FREERTOS_SHUT_RD                ( 0 )       /* Not really at this moment, åªæ˜¯ä¸ºäº†æ¥å£çš„å…¼å®¹æ€§ */
+#define FREERTOS_SHUT_RD                ( 0 )       /* Not really at this moment, Ö»ÊÇÎªÁË½Ó¿ÚµÄ¼æÈİĞÔ */
 #define FREERTOS_SHUT_WR                ( 1 )
 #define FREERTOS_SHUT_RDWR              ( 2 )
 
 /* Values for flag for FreeRTOS_recv(). */
-#define FREERTOS_MSG_OOB                ( 2 )       /* å¤„ç†å¸¦å¤–æ•°æ® */
-#define FREERTOS_MSG_PEEK               ( 4 )       /* å·çœ‹è¿›æ¥çš„ä¿¡æ¯ */
-#define FREERTOS_MSG_DONTROUTE          ( 8 )       /* ä¸ä½¿ç”¨è·¯ç”±è¡¨å‘é€ */
-#define FREERTOS_MSG_DONTWAIT           ( 16 )      /* å¯ä»¥è¢« recvfrom(), sendto(), recv(), and send().ä½¿ç”¨ */
+#define FREERTOS_MSG_OOB                ( 2 )       /* ´¦Àí´øÍâÊı¾İ */
+#define FREERTOS_MSG_PEEK               ( 4 )       /* Íµ¿´½øÀ´µÄĞÅÏ¢ */
+#define FREERTOS_MSG_DONTROUTE          ( 8 )       /* ²»Ê¹ÓÃÂ·ÓÉ±í·¢ËÍ */
+#define FREERTOS_MSG_DONTWAIT           ( 16 )      /* ¿ÉÒÔ±» recvfrom(), sendto(), recv(), and send().Ê¹ÓÃ */
 
 typedef struct xWIN_PROPS {
-    /* Tx Buffer å’Œ windows çš„å±æ€§ */
-    int32_t lTxBufSize; /* å•ä½ï¼šå­—èŠ‚ */
-    int32_t lTxWinSize; /* å•ä½ï¼šMSS */
+    /* Tx Buffer ºÍ windows µÄÊôĞÔ */
+    int32_t lTxBufSize; /* µ¥Î»£º×Ö½Ú */
+    int32_t lTxWinSize; /* µ¥Î»£ºMSS */
 
-    /* Rx Buffer å’Œ windows çš„å±æ€§ */
-    int32_t lRxBufSize; /* å•ä½ï¼šå­—èŠ‚ */
-    int32_t lRxWinSize; /* å•ä½ï¼šMSS */
+    /* Rx Buffer ºÍ windows µÄÊôĞÔ */
+    int32_t lRxBufSize; /* µ¥Î»£º×Ö½Ú */
+    int32_t lRxWinSize; /* µ¥Î»£ºMSS */
 } WinProperties_t;
 
-/* ä¸ºäº†ä¸é¢„æœŸä¼¯å…‹åˆ©å¥—æ¥å­—å‘½åå…¼å®¹ */
+/* ÎªÁËÓëÔ¤ÆÚ²®¿ËÀûÌ×½Ó×ÖÃüÃû¼æÈİ */
 #define socklen_t uint32_t
 
-/* å¯¹äºè¿™ä¸ªæœ‰é™çš„å®ç°, åœ¨ä¼¯åŠ›å…‹é£æ ¼çš„å¥—æ¥å­—ç»“æ„ä¸­åªæœ‰ä¸¤ä¸ªæˆå‘˜æ˜¯å¿…é¡»çš„ */
+/* ¶ÔÓÚÕâ¸öÓĞÏŞµÄÊµÏÖ, ÔÚ²®Á¦¿Ë·ç¸ñµÄÌ×½Ó×Ö½á¹¹ÖĞÖ»ÓĞÁ½¸ö³ÉÔ±ÊÇ±ØĞëµÄ */
 struct freertos_sockaddr
 {
-    /* åœ¨32ä½å’Œ64ä½æ¶æ„ä¸Šï¼Œæ·»åŠ çš„ä¸¤ä¸ªuint8_tåŒºåŸŸä¸ä¼šä½¿å¾—ç»“æ„ä½“å˜å¤§ï¼Œç”±äºå¯¹å…¶çš„åŸå› ï¼Œè¿™åŒºåŸŸä¸ºIPv6ä¸ºå‡†å¤‡ */
-    /* sin_len å’Œ sin_family åªåœ¨IPv4ä¸­ä½¿ç”¨ */
-    uint8_t sin_len;        /* ç»“æ„ä½“é•¿åº¦ */
+    /* ÔÚ32Î»ºÍ64Î»¼Ü¹¹ÉÏ£¬Ìí¼ÓµÄÁ½¸öuint8_tÇøÓò²»»áÊ¹µÃ½á¹¹Ìå±ä´ó£¬ÓÉÓÚ¶ÔÆäµÄÔ­Òò£¬ÕâÇøÓòÎªIPv6Îª×¼±¸ */
+    /* sin_len ºÍ sin_family Ö»ÔÚIPv4ÖĞÊ¹ÓÃ */
+    uint8_t sin_len;        /* ½á¹¹Ìå³¤¶È */
     uint8_t sin_family;     /* FREERTOS_AF_INET. */
     uint16_t sin_port;
     uint32_t sin_addr;
@@ -167,22 +167,22 @@ struct freertos_sockaddr
 
 #endif /* ipconfigBYTE_ORDER */
 
-/* å¥—æ¥å­—ç±»å‹. */
+/* Ì×½Ó×ÖÀàĞÍ. */
 typedef void *Socket_t;
 
-/* å¥—æ¥å­—é›†åˆ */
+/* Ì×½Ó×Ö¼¯ºÏ */
 typedef void *SocketSet_t;
 
-/* å®Œæ•´çš„ æœ€æ–°çš„å’Œ**çš„å‚è€ƒæ–‡æ¡£åœ¨å¦‚ä¸‹çš„URLä¸­æœ‰æ•ˆï¼šhttp://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_TCP/FreeRTOS_TCP_API_Functions.html */
+/* ÍêÕûµÄ ×îĞÂµÄºÍ**µÄ²Î¿¼ÎÄµµÔÚÈçÏÂµÄURLÖĞÓĞĞ§£ºhttp://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_TCP/FreeRTOS_TCP_API_Functions.html */
 Socket_t FreeRTOS_socket( BaseType_t xDomain, BaseType_t xType, BaseType_t xProtocol );
 int32_t FreeRTOS_recvfrom( Socket_t xSocket, void *pvBuffer, size_t xBufferLength, BaseType_t xFlags, struct freertos_sockaddr *pxSourceAddress, socklen_t *pxSourceAddressLength );
 int32_t FreeRTOS_sendto( Socket_t xSocket, const void *pvBuffer, size_t xTotalDataLength, BaseType_t xFlags, const struct freertos_sockaddr *pxDestinationAddress, socklen_t xDestinationAddressLength );
 BaseType_t FreeRTOS_bind( Socket_t xSocket, struct freertos_sockaddr *pxAddress, socklen_t xAddressLength );
 
-/* è·å–æœ¬åœ°åœ°å€å’Œç«¯å£çš„å‡½æ•° */
+/* »ñÈ¡±¾µØµØÖ·ºÍ¶Ë¿ÚµÄº¯Êı */
 size_t FreeRTOS_GetLocalAddress( Socket_t xSocket, struct freertos_sockaddr *pxAddress );
 
-/* å½“ipconfigETHERNET_DRIVER_FILTERS_PACKETSä¸º1æ—¶æœ‰æ•ˆ */
+/* µ±ipconfigETHERNET_DRIVER_FILTERS_PACKETSÎª1Ê±ÓĞĞ§ */
 BaseType_t xPortHasUDPSocket( uint16_t usPortNr );
 
 #if ipconfigUSE_TCP == 1
@@ -195,33 +195,33 @@ Socket_t FreeRTOS_accept( Socket_t xServerSocket, struct freertos_sockaddr *pxAd
 BaseType_t FreeRTOS_shutdown (Socket_t xSocket, BaseType_t xHow);
 
 #if( ipconfigSUPPORT_SIGNALS != 0 )
-    /* ç»™ç­‰å¾…ç»™å®šå¥—æ¥å­—çš„ä»»åŠ¡ä¸€ä¸ªä¿¡å· */
+    /* ¸øµÈ´ı¸ø¶¨Ì×½Ó×ÖµÄÈÎÎñÒ»¸öĞÅºÅ */
     BaseType_t FreeRTOS_SignalSocket( Socket_t xSocket );
-    /* ç»™ä»è¿™ä¸ªå¥—æ¥å­—è¯»å–æ•°æ®çš„ ä»»åŠ¡ ä¸€ä¸ªä¿¡å·ï¼ˆFromISR ç‰ˆæœ¬ï¼‰ */
+    /* ¸ø´ÓÕâ¸öÌ×½Ó×Ö¶ÁÈ¡Êı¾İµÄ ÈÎÎñ Ò»¸öĞÅºÅ£¨FromISR °æ±¾£© */
     BaseType_t FreeRTOS_SignalSocketFromISR( Socket_t xSocket, BaseType_t *pxHigherPriorityTaskWoken );
 #endif /* ipconfigSUPPORT_SIGNALS */
-/* è¿”å›è¿œç¨‹çš„åœ°å€å’Œç«¯å£å· */
+/* ·µ»ØÔ¶³ÌµÄµØÖ·ºÍ¶Ë¿ÚºÅ */
 BaseType_t FreeRTOS_GetRemoteAddress( Socket_t xSocket, struct freertos_sockaddr *pxAddress );
-/* å¦‚æœTCPå¥—æ¥å­—è¿æ¥ï¼Œè¿”å› pdTRUE*/
+/* Èç¹ûTCPÌ×½Ó×ÖÁ¬½Ó£¬·µ»Ø pdTRUE*/
 BaseType_t FreeRTOS_issocketconnected( Socket_t xSocket );
-/* è¿”å›è¢«ä½¿ç”¨çš„å®é™…çš„MSSå€¼ */
+/* ·µ»Ø±»Ê¹ÓÃµÄÊµ¼ÊµÄMSSÖµ */
 BaseType_t FreeRTOS_mss( Socket_t xSocket );
-/* åªæ˜¯å†…éƒ¨ä½¿ç”¨ï¼Œè¿”å›è¿æ¥çŠ¶æ€ */
+/* Ö»ÊÇÄÚ²¿Ê¹ÓÃ£¬·µ»ØÁ¬½Ó×´Ì¬ */
 BaseType_t FreeRTOS_connstatus( Socket_t xSocket );
-/* è¿”å›å¯ä»¥åŠ å…¥åˆ°txStreamçš„å­—èŠ‚æ•° */
+/* ·µ»Ø¿ÉÒÔ¼ÓÈëµ½txStreamµÄ×Ö½ÚÊı */
 BaseType_t FreeRTOS_maywrite( Socket_t xSocket );
-/* ä¸¤ä¸ªè¾…åŠ©å‡½æ•°ä¸»è¦æ˜¯ç”¨äºæµ‹è¯• rx_sizeè¿”å›Rxç¼“å†²åŒºä¸­å¯åˆ©ç”¨çš„å­—èŠ‚æ•°ï¼Œ
-tx_space è¿”å› Tx ç¼“å†²ä¸­çš„ç©ºé—²å¤§å°*/
+/* Á½¸ö¸¨Öúº¯ÊıÖ÷ÒªÊÇÓÃÓÚ²âÊÔ rx_size·µ»ØRx»º³åÇøÖĞ¿ÉÀûÓÃµÄ×Ö½ÚÊı£¬
+tx_space ·µ»Ø Tx »º³åÖĞµÄ¿ÕÏĞ´óĞ¡*/
 BaseType_t FreeRTOS_rx_size( Socket_t xSocket );
 BaseType_t FreeRTOS_tx_space( Socket_t xSocket );
 BaseType_t FreeRTOS_tx_size( Socket_t xSocket );
-/* è¿”å›txStreamç­‰å¾… ç¡®è®¤çš„å­—èŠ‚æ•° */
-/* å‡½æ•° FreeRTOS_outstanding() ç”¨ FreeRTOS_tx_size()å®ç°*/
+/* ·µ»ØtxStreamµÈ´ı È·ÈÏµÄ×Ö½ÚÊı */
+/* º¯Êı FreeRTOS_outstanding() ÓÃ FreeRTOS_tx_size()ÊµÏÖ*/
 #define FreeRTOS_outstanding( xSocket ) FreeRTOS_tx_size( xSocket )
-/* è¿”å› rxStream ä¸­çš„å­—èŠ‚æ•°ï¼Œå‡½æ•° FreeRTOS_recvcount() ç”¨ FreeRTOS_rx_size()å®ç° */
+/* ·µ»Ø rxStream ÖĞµÄ×Ö½ÚÊı£¬º¯Êı FreeRTOS_recvcount() ÓÃ FreeRTOS_rx_size()ÊµÏÖ */
 #define FreeRTOS_recvcount( xSocket )   FreeRTOS_rx_size( xSocket )
-/* ä¸ºé«˜çº§ç”¨æˆ·ä½¿ç”¨ï¼š
-è·å–æŒ‡å‘ç¯å½¢ç¼“å†²å™¨çš„æŒ‡é’ˆ *pxLength ä¼šæŒ‡æ˜å¯å†™çš„å­—èŠ‚æ•° */
+/* Îª¸ß¼¶ÓÃ»§Ê¹ÓÃ£º
+»ñÈ¡Ö¸Ïò»·ĞÎ»º³åÆ÷µÄÖ¸Õë *pxLength »áÖ¸Ã÷¿ÉĞ´µÄ×Ö½ÚÊı */
 uint8_t *FreeRTOS_get_tx_head( Socket_t xSocket, BaseType_t *pxLength );
 
 #endif /* ipconfigUSE_TCP */
@@ -235,7 +235,7 @@ uint8_t *FreeRTOS_get_tx_head( Socket_t xSocket, BaseType_t *pxLength );
  *      F_TCP_UDP_Handler_t xHnd = { vMyConnectHandler };
  *      FreeRTOS_setsockopt( sock, 0, FREERTOS_SO_TCP_CONN_HANDLER, ( void * ) &xHnd, sizeof( xHnd ) );
  */
-/* TCP å¥—æ¥å­—çš„ è¿æ¥/æ–­å¼€ å¥æŸ„ */
+/* TCP Ì×½Ó×ÖµÄ Á¬½Ó/¶Ï¿ª ¾ä±ú */
 typedef void (* FOnConnected_t )( Socket_t /* xSocket */, BaseType_t /* ulConnected */ );
 
 /*
@@ -251,7 +251,7 @@ typedef void (* FOnConnected_t )( Socket_t /* xSocket */, BaseType_t /* ulConnec
  *      F_TCP_UDP_Handler_t xHand = { xOnTCPReceive };
  *      FreeRTOS_setsockopt( sock, 0, FREERTOS_SO_TCP_RECV_HANDLER, ( void * ) &xHand, sizeof( xHand ) );
  */
-/* TCP å¥—æ¥å­—çš„ æ¥æ”¶å¥æŸ„ */
+/* TCP Ì×½Ó×ÖµÄ ½ÓÊÕ¾ä±ú */
 typedef BaseType_t (* FOnTCPReceive_t )( Socket_t /* xSocket */, void * /* pData */, size_t /* xLength */ );
 typedef void (* FOnTCPSent_t )( Socket_t /* xSocket */, size_t /* xLength */ );
 
@@ -260,7 +260,7 @@ typedef void (* FOnTCPSent_t )( Socket_t /* xSocket */, size_t /* xLength */ );
  * A user-proved function will be called on reception of a message
  * If the handler returns a positive number, the messages will not be stored
  */
-/* UDP å¥—æ¥å­—çš„ æ¥æ”¶å¥æŸ„ */
+/* UDP Ì×½Ó×ÖµÄ ½ÓÊÕ¾ä±ú */
 typedef BaseType_t (* FOnUDPReceive_t ) (Socket_t /* xSocket */, void * /* pData */, size_t /* xLength */,
     const struct freertos_sockaddr * /* pxFrom */, const struct freertos_sockaddr * /* pxDest */ );
 typedef void (* FOnUDPSent_t )( Socket_t /* xSocket */, size_t /* xLength */ );
@@ -279,20 +279,20 @@ BaseType_t FreeRTOS_setsockopt( Socket_t xSocket, int32_t lLevel, int32_t lOptio
 BaseType_t FreeRTOS_closesocket( Socket_t xSocket );
 uint32_t FreeRTOS_gethostbyname( const char *pcHostName );
 uint32_t FreeRTOS_inet_addr( const char * pcIPAddress );
-/* å¯¹äºç½‘ç»œæœåŠ¡å™¨ï¼Œå€Ÿç¯å½¢ç¼“å†²æ¥æ£€æŸ¥ï¼ŒHTMLé©±åŠ¨æƒ³çœ‹ä¸€çœ‹æ˜¯å¦åºåˆ—13/10/13/10å¯ç”¨ */
+/* ¶ÔÓÚÍøÂç·şÎñÆ÷£¬½è»·ĞÎ»º³åÀ´¼ì²é£¬HTMLÇı¶¯Ïë¿´Ò»¿´ÊÇ·ñĞòÁĞ13/10/13/10¿ÉÓÃ */
 const struct xSTREAM_BUFFER *FreeRTOS_get_rx_buf( Socket_t xSocket );
 
 void FreeRTOS_netstat( void );
 
 #if ipconfigSUPPORT_SELECT_FUNCTION == 1
-    /* å¯¹äº FD_SET å’Œ FD_CLR å¦‚ä¸‹çš„ç»“åˆå¯ä»¥è¢«ä½¿ç”¨*/
+    /* ¶ÔÓÚ FD_SET ºÍ FD_CLR ÈçÏÂµÄ½áºÏ¿ÉÒÔ±»Ê¹ÓÃ*/
     typedef enum eSELECT_EVENT {
         eSELECT_READ    = 0x0001,
         eSELECT_WRITE   = 0x0002,
         eSELECT_EXCEPT  = 0x0004,
         eSELECT_INTR    = 0x0008,
         eSELECT_ALL     = 0x000F,
-        /* ä¿ç•™ä¸ºå†…éƒ¨ä½¿ç”¨ */
+        /* ±£ÁôÎªÄÚ²¿Ê¹ÓÃ */
         eSELECT_CALL_IP = 0x0010,
         /* end */
     } eSelectEvent_t;

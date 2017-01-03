@@ -6,35 +6,35 @@
 extern "C" {
 #endif
 
-/* ç”¨æˆ·å±‚é…ç½®é€‰é¡¹ */
+/* ÓÃ»§²ãÅäÖÃÑ¡Ïî */
 #include "FreeRTOSIPConfig.h"
 #include "FreeRTOSIPConfigDefaults.h"
 #include "IPTraceMacroDefaults.h"
 
 /*-----------------------------------------------------------*/
-/* æ‚é¡¹ç»“æ„ä½“å’Œå®šä¹‰ */
+/* ÔÓÏî½á¹¹ÌåºÍ¶¨Òå */
 /*-----------------------------------------------------------*/
-//ARPç¼“å­˜è¡¨ç»“æ„
+//ARP»º´æ±í½á¹¹
 typedef struct xARP_CACHE_TABLE_ROW
 {
-    uint32_t ulIPAddress;       /* IPåœ°å€ */
-    MACAddress_t xMACAddress;  /* MACåœ°å€ */
-    uint8_t ucAge;              /* ä¸€ä¸ªæ•°å€¼ï¼Œè¢«å‘¨æœŸæ€§é€’å‡ï¼Œè¢«äº¤æµåˆ·æ–°  å¦‚æœä¸º0ï¼Œç¼“å­˜è¢«æ¸…é™¤ */
-    uint8_t ucValid;            /* pdTRUE: MACåœ°å€æœ‰æ•ˆ, pdFALSE: ç­‰å¾…ARPå›å¤ */
+    uint32_t ulIPAddress;       /* IPµØÖ· */
+    MACAddress_t xMACAddress;  /* MACµØÖ· */
+    uint8_t ucAge;              /* Ò»¸öÊıÖµ£¬±»ÖÜÆÚĞÔµİ¼õ£¬±»½»Á÷Ë¢ĞÂ  Èç¹ûÎª0£¬»º´æ±»Çå³ı */
+    uint8_t ucValid;            /* pdTRUE: MACµØÖ·ÓĞĞ§, pdFALSE: µÈ´ıARP»Ø¸´ */
 } ARPCacheRow_t;
-//ARPæŸ¥è¯¢ç»“æœ
+//ARP²éÑ¯½á¹û
 typedef enum
 {
-    eARPCacheMiss = 0,          /* 0 æ²¡æœ‰å‘ç°æœ‰æ•ˆçš„é¡¹ */
-    eARPCacheHit,               /* 1 å‘ç°äº†ä¸€ä¸ªæœ‰æ•ˆçš„é¡¹ */
-    eCantSendPacket             /* 2 æ²¡æœ‰IPåœ°å€ï¼Œæˆ–è€…æ˜¯ARPä»ç„¶åœ¨å¤„ç†ä¸­ï¼Œæ‰€ä»¥åŒ…ä¸èƒ½è¢«å‘é€ */
+    eARPCacheMiss = 0,          /* 0 Ã»ÓĞ·¢ÏÖÓĞĞ§µÄÏî */
+    eARPCacheHit,               /* 1 ·¢ÏÖÁËÒ»¸öÓĞĞ§µÄÏî */
+    eCantSendPacket             /* 2 Ã»ÓĞIPµØÖ·£¬»òÕßÊÇARPÈÔÈ»ÔÚ´¦ÀíÖĞ£¬ËùÒÔ°ü²»ÄÜ±»·¢ËÍ */
 } eARPLookupResult_t;
 
 typedef enum
 {
-    eNotFragment = 0,           /* æ­£åœ¨å‘é€çš„IPæ•°æ®åŒ…ä¸æ˜¯ç‰‡æ®µçš„ä¸€éƒ¨åˆ†ã€‚ */
-    eFirstFragment,             /* æ­£åœ¨å‘é€çš„IPåŒ…æ˜¯ä¸€ç»„æ”¯ç¦»ç ´ç¢çš„æ•°æ®åŒ…ä¸­çš„ç¬¬ä¸€ä¸ª */
-    eFollowingFragment          /* æ­£åœ¨å‘é€çš„IPåŒ…æ˜¯ä¸€ç»„æ”¯ç¦»ç ´ç¢çš„æ•°æ®åŒ…çš„ä¸€éƒ¨åˆ† */
+    eNotFragment = 0,           /* ÕıÔÚ·¢ËÍµÄIPÊı¾İ°ü²»ÊÇÆ¬¶ÎµÄÒ»²¿·Ö¡£ */
+    eFirstFragment,             /* ÕıÔÚ·¢ËÍµÄIP°üÊÇÒ»×éÖ§ÀëÆÆËéµÄÊı¾İ°üÖĞµÄµÚÒ»¸ö */
+    eFollowingFragment          /* ÕıÔÚ·¢ËÍµÄIP°üÊÇÒ»×éÖ§ÀëÆÆËéµÄÊı¾İ°üµÄÒ»²¿·Ö */
 } eIPFragmentStatus_t;
 
 /*

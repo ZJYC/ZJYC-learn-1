@@ -1,6 +1,6 @@
 
-/* ä¸€ä¸ªçŽ¯å½¢ç¼“å†²åŒºï¼Œä¸€ç§çŽ¯å½¢ç¼“å†²åŒºçš„å®žçŽ°ï¼Œæ²¡æœ‰é•¿åº¦åŒºåŸŸï¼Œå¦‚æžœå®šä¹‰LENGTHä¸ºç¼“å†²åŒºçš„å¤§å°ï¼Œ
- ä¾¿å¯ä»¥å­˜å‚¨(LENGT-1)ä¸ªå­—èŠ‚ï¼Œä¸ºäº†èƒ½å¤Ÿæ·»åŠ æˆ–è€…åˆ é™¤æ•°æ®ï¼Œmemcpy()ä¼šè¢«è°ƒç”¨*/
+/* Ò»¸ö»·ÐÎ»º³åÇø£¬Ò»ÖÖ»·ÐÎ»º³åÇøµÄÊµÏÖ£¬Ã»ÓÐ³¤¶ÈÇøÓò£¬Èç¹û¶¨ÒåLENGTHÎª»º³åÇøµÄ´óÐ¡£¬
+ ±ã¿ÉÒÔ´æ´¢(LENGT-1)¸ö×Ö½Ú£¬ÎªÁËÄÜ¹»Ìí¼Ó»òÕßÉ¾³ýÊý¾Ý£¬memcpy()»á±»µ÷ÓÃ*/
 #ifndef FREERTOS_STREAM_BUFFER_H
 #define FREERTOS_STREAM_BUFFER_H
 
@@ -9,18 +9,18 @@ extern "C" {
 #endif
 
 typedef struct xSTREAM_BUFFER {
-    volatile size_t uxTail;     /* ä¸‹ä¸€ä¸ªè¦è¯»çš„é¡¹ */       /* è¯»æŒ‡é’ˆ */
-    volatile size_t uxMid;      /* æœ‰æ•ˆé¡¹çš„è¿­ä»£å™¨ */       /* è¯»æŒ‡é’ˆè¿­ä»£å™¨ */
-    volatile size_t uxHead;     /* å­˜å‚¨æ–°é¡¹çš„ä¸‹ä¸€ä¸ªåœ°å€ */  /* å†™æŒ‡é’ˆ */
-    volatile size_t uxFront;    /* ç©ºé—²ç©ºé—´çš„è¿­ä»£å™¨ */      /* å†™æŒ‡é’ˆè¿­ä»£å™¨ */
-    size_t LENGTH;              /* å¸¸é‡:ä¿ç•™é¡¹æ•°é‡ */
+    volatile size_t uxTail;     /* ÏÂÒ»¸öÒª¶ÁµÄÏî */       /* ¶ÁÖ¸Õë */
+    volatile size_t uxMid;      /* ÓÐÐ§ÏîµÄµü´úÆ÷ */       /* ¶ÁÖ¸Õëµü´úÆ÷ */
+    volatile size_t uxHead;     /* ´æ´¢ÐÂÏîµÄÏÂÒ»¸öµØÖ· */  /* Ð´Ö¸Õë */
+    volatile size_t uxFront;    /* ¿ÕÏÐ¿Õ¼äµÄµü´úÆ÷ */      /* Ð´Ö¸Õëµü´úÆ÷ */
+    size_t LENGTH;              /* ³£Á¿:±£ÁôÏîÊýÁ¿ */
     uint8_t ucArray[ sizeof( size_t ) ];
 } StreamBuffer_t;
 
 static portINLINE void vStreamBufferClear( StreamBuffer_t *pxBuffer );
 static portINLINE void vStreamBufferClear( StreamBuffer_t *pxBuffer )
 {
-    /* æ˜¯çŽ¯å½¢ç¼“å†²åŒºä¸ºç©º */
+    /* ÊÇ»·ÐÎ»º³åÇøÎª¿Õ */
     pxBuffer->uxHead = 0u;
     pxBuffer->uxTail = 0u;
     pxBuffer->uxFront = 0u;
@@ -31,7 +31,7 @@ static portINLINE void vStreamBufferClear( StreamBuffer_t *pxBuffer )
 static portINLINE size_t uxStreamBufferSpace( const StreamBuffer_t *pxBuffer, const size_t uxLower, const size_t uxUpper );
 static portINLINE size_t uxStreamBufferSpace( const StreamBuffer_t *pxBuffer, const size_t uxLower, const size_t uxUpper )
 {
-/* è¿”å›žuxLowerå’ŒuxUpperä¹‹é—´çš„ç©ºé—´*/
+/* ·µ»ØuxLowerºÍuxUpperÖ®¼äµÄ¿Õ¼ä*/
 size_t uxCount;
 
     uxCount = pxBuffer->LENGTH + uxUpper - uxLower - 1u;
@@ -47,7 +47,7 @@ size_t uxCount;
 static portINLINE size_t uxStreamBufferDistance( const StreamBuffer_t *pxBuffer, const size_t uxLower, const size_t uxUpper );
 static portINLINE size_t uxStreamBufferDistance( const StreamBuffer_t *pxBuffer, const size_t uxLower, const size_t uxUpper )
 {
-/* è¿”å›žuxLower and uxUpperä¹‹é—´çš„è·ç¦» */
+/* ·µ»ØuxLower and uxUpperÖ®¼äµÄ¾àÀë */
 size_t uxCount;
 
     uxCount = pxBuffer->LENGTH + uxUpper - uxLower;
@@ -63,7 +63,7 @@ size_t uxCount;
 static portINLINE size_t uxStreamBufferGetSpace( const StreamBuffer_t *pxBuffer );
 static portINLINE size_t uxStreamBufferGetSpace( const StreamBuffer_t *pxBuffer )
 {
-/* è¿”å›žå¯å†™ç©ºé—´ */
+/* ·µ»Ø¿ÉÐ´¿Õ¼ä */
 size_t uxHead = pxBuffer->uxHead;
 size_t uxTail = pxBuffer->uxTail;
 
@@ -88,7 +88,7 @@ size_t uxTail = pxBuffer->uxTail;
 static portINLINE size_t uxStreamBufferGetSize( const StreamBuffer_t *pxBuffer );
 static portINLINE size_t uxStreamBufferGetSize( const StreamBuffer_t *pxBuffer )
 {
-/* è¿”å›žå¯è¯»é‡ */
+/* ·µ»Ø¿É¶ÁÁ¿ */
 size_t uxHead = pxBuffer->uxHead;
 size_t uxTail = pxBuffer->uxTail;
 

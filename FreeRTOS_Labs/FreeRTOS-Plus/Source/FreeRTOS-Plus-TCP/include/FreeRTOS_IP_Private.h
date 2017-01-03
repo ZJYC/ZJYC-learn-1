@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-/* ç”¨æˆ·å±‚é…ç½®é€‰é¡¹ */
+/* ÓÃ»§²ãÅäÖÃÑ¡Ïî */
 #include "FreeRTOSIPConfig.h"
 #include "FreeRTOSIPConfigDefaults.h"
 #include "FreeRTOS_Sockets.h"
@@ -31,17 +31,17 @@ typedef struct xNetworkAddressingParameters
 extern BaseType_t xTCPWindowLoggingLevel;
 
 /*-----------------------------------------------------------*/
-/* åè®®å¤´                                                    */
+/* Ğ­ÒéÍ·                                                    */
 /*-----------------------------------------------------------*/
 
 #include "pack_struct_start.h"
 struct xETH_HEADER
 {
-    /* ç›®çš„åœ°å€ */
+    /* Ä¿µÄµØÖ· */
     MACAddress_t xDestinationAddress; /*  0 + 6 = 6  */
-    /* æºåœ°å€ */
+    /* Ô´µØÖ· */
     MACAddress_t xSourceAddress;      /*  6 + 6 = 12 */
-    /* å¸§ç±»å‹ */
+    /* Ö¡ÀàĞÍ */
     uint16_t usFrameType;              /* 12 + 2 = 14 */
 }
 #include "pack_struct_end.h"
@@ -50,23 +50,23 @@ typedef struct xETH_HEADER EthernetHeader_t;
 #include "pack_struct_start.h"
 struct xARP_HEADER
 {
-    /* ç¡¬ä»¶ç±»å‹ */
+    /* Ó²¼şÀàĞÍ */
     uint16_t usHardwareType;                /*  0 +  2 =  2 */
-    /* åè®®ç±»å‹ */
+    /* Ğ­ÒéÀàĞÍ */
     uint16_t usProtocolType;                /*  2 +  2 =  4 */
-    /* ç¡¬ä»¶åœ°å€é•¿åº¦ */
+    /* Ó²¼şµØÖ·³¤¶È */
     uint8_t ucHardwareAddressLength;        /*  4 +  1 =  5 */
-    /* åè®®åœ°å€é•¿åº¦ */
+    /* Ğ­ÒéµØÖ·³¤¶È */
     uint8_t ucProtocolAddressLength;        /*  5 +  1 =  6 */
-    /* æ“ä½œç±»å‹ */
+    /* ²Ù×÷ÀàĞÍ */
     uint16_t usOperation;                   /*  6 +  2 =  8 */
-    /* å‘é€è€…ç¡¬ä»¶åœ°å€ */
+    /* ·¢ËÍÕßÓ²¼şµØÖ· */
     MACAddress_t xSenderHardwareAddress;    /*  8 +  6 = 14 */
-    /* å‘é€è€…åè®®åœ°å€ */
+    /* ·¢ËÍÕßĞ­ÒéµØÖ· */
     uint32_t ulSenderProtocolAddress;       /* 14 +  4 = 18  */
-    /* ç›®æ ‡ç¡¬ä»¶åœ°å€ */
+    /* Ä¿±êÓ²¼şµØÖ· */
     MACAddress_t xTargetHardwareAddress;    /* 18 +  6 = 24  */
-    /* ç›®æ ‡åè®®åœ°å€ */
+    /* Ä¿±êĞ­ÒéµØÖ· */
     uint32_t ulTargetProtocolAddress;       /* 24 +  4 = 28  */
 }
 #include "pack_struct_end.h"
@@ -75,25 +75,25 @@ typedef struct xARP_HEADER ARPHeader_t;
 #include "pack_struct_start.h"
 struct xIP_HEADER
 {
-    /* ç‰ˆæœ¬ä»¥åŠå¤´éƒ¨é•¿åº¦ */
+    /* °æ±¾ÒÔ¼°Í·²¿³¤¶È */
     uint8_t ucVersionHeaderLength;        /*  0 + 1 =  1 */
-    /* æœåŠ¡ç±»å‹ */
+    /* ·şÎñÀàĞÍ */
     uint8_t ucDifferentiatedServicesCode; /*  1 + 1 =  2 */
-    /* å°åŒ…æ€»é•¿åº¦ */
+    /* ·â°ü×Ü³¤¶È */
     uint16_t usLength;                    /*  2 + 2 =  4 */
-    /* å°åŒ…æ ‡è¯† */
+    /* ·â°ü±êÊ¶ */
     uint16_t usIdentification;            /*  4 + 2 =  6 */
-    /* ç‰‡æ®µåç§»åœ°å€ */
+    /* Æ¬¶ÎÆ«ÒÆµØÖ· */
     uint16_t usFragmentOffset;            /*  6 + 2 =  8 */
     /* TTL */
     uint8_t ucTimeToLive;                 /*  8 + 1 =  9 */
-    /* åè®® */
+    /* Ğ­Òé */
     uint8_t ucProtocol;                   /*  9 + 1 = 10 */
-    /* å¤´éƒ¨æ ¡éªŒ */
+    /* Í·²¿Ğ£Ñé */
     uint16_t usHeaderChecksum;            /* 10 + 2 = 12 */
-    /* æºIPåœ°å€ */
+    /* Ô´IPµØÖ· */
     uint32_t ulSourceIPAddress;           /* 12 + 4 = 16 */
-    /* ç›®çš„IPåœ°å€ */
+    /* Ä¿µÄIPµØÖ· */
     uint32_t ulDestinationIPAddress;      /* 16 + 4 = 20 */
 }
 #include "pack_struct_end.h"
@@ -126,13 +126,13 @@ typedef struct xICMP_HEADER ICMPHeader_t;
 #include "pack_struct_start.h"
 struct xUDP_HEADER
 {
-    /* æºç«¯å£ */
+    /* Ô´¶Ë¿Ú */
     uint16_t usSourcePort;      /* 0 + 2 = 2 */
-    /* ç›®çš„ç«¯å£ */
+    /* Ä¿µÄ¶Ë¿Ú */
     uint16_t usDestinationPort; /* 2 + 2 = 4 */
-    /* é•¿åº¦ */
+    /* ³¤¶È */
     uint16_t usLength;          /* 4 + 2 = 6 */
-    /* æ ¡éªŒ */
+    /* Ğ£Ñé */
     uint16_t usChecksum;        /* 6 + 2 = 8 */
 }
 #include "pack_struct_end.h"
@@ -141,26 +141,26 @@ typedef struct xUDP_HEADER UDPHeader_t;
 #include "pack_struct_start.h"
 struct xTCP_HEADER
 {
-    /* æºç«¯å£ */
+    /* Ô´¶Ë¿Ú */
     uint16_t usSourcePort;      /* +  2 =  2 */
-    /* ç›®çš„ç«¯å£ */
+    /* Ä¿µÄ¶Ë¿Ú */
     uint16_t usDestinationPort; /* +  2 =  4 */
-    /* åºåˆ—å· */
+    /* ĞòÁĞºÅ */
     uint32_t ulSequenceNumber;  /* +  4 =  8 */
-    /* åº”ç­”å· */
+    /* Ó¦´ğºÅ */
     uint32_t ulAckNr;           /* +  4 = 12 */
-    /* é¦–éƒ¨é•¿åº¦ */
+    /* Ê×²¿³¤¶È */
     uint8_t  ucTCPOffset;       /* +  1 = 13 */
-    /* æ ‡å¿— */
+    /* ±êÖ¾ */
     uint8_t  ucTCPFlags;        /* +  1 = 14 */
-    /* çª—å£å¤§å° */
+    /* ´°¿Ú´óĞ¡ */
     uint16_t usWindow;          /* +  2 = 15 */
-    /* æ ¡éªŒå’Œ */
+    /* Ğ£ÑéºÍ */
     uint16_t usChecksum;        /* +  2 = 18 */
-    /* ç´§æ€¥æŒ‡é’ˆ */
+    /* ½ô¼±Ö¸Õë */
     uint16_t usUrgent;          /* +  2 = 20 */
 #if ipconfigUSE_TCP == 1
-    /* é€‰é¡¹å­—èŠ‚ä¸å±äºå¤´éƒ¨ */
+    /* Ñ¡Ïî×Ö½Ú²»ÊôÓÚÍ·²¿ */
     uint8_t  ucOptdata[ipSIZE_TCP_OPTIONS];     /* + 12 = 32 */
 #endif
 }
@@ -186,9 +186,9 @@ typedef struct xPSEUDO_HEADER PseudoHeader_t;
 #include "pack_struct_start.h"
 struct xARP_PACKET
 {
-    /* ä»¥å¤ªç½‘å¤´ */
+    /* ÒÔÌ«ÍøÍ· */
     EthernetHeader_t xEthernetHeader;   /*  0 + 14 = 14 */
-    /* ARPå¤´ */
+    /* ARPÍ· */
     ARPHeader_t xARPHeader;         /* 14 + 28 = 42 */
 }
 #include "pack_struct_end.h"
@@ -197,9 +197,9 @@ typedef struct xARP_PACKET ARPPacket_t;
 #include "pack_struct_start.h"
 struct xIP_PACKET
 {
-    /* ä»¥å¤ªç½‘å¤´ */
+    /* ÒÔÌ«ÍøÍ· */
     EthernetHeader_t xEthernetHeader;
-    /* IPå¤´ */
+    /* IPÍ· */
     IPHeader_t xIPHeader;
 }
 #include "pack_struct_end.h"
@@ -208,11 +208,11 @@ typedef struct xIP_PACKET IPPacket_t;
 #include "pack_struct_start.h"
 struct xICMP_PACKET
 {
-    /* ä»¥å¤ªç½‘å¤´ */
+    /* ÒÔÌ«ÍøÍ· */
     EthernetHeader_t xEthernetHeader;
-    /* IPå¤´ */
+    /* IPÍ· */
     IPHeader_t xIPHeader;
-    /* ICMPæŠ¥æ–‡å¤´ */
+    /* ICMP±¨ÎÄÍ· */
     ICMPHeader_t xICMPHeader;
 }
 #include "pack_struct_end.h"
@@ -221,11 +221,11 @@ typedef struct xICMP_PACKET ICMPPacket_t;
 #include "pack_struct_start.h"
 struct xUDP_PACKET
 {
-    /* ä»¥å¤ªç½‘å¤´ */
+    /* ÒÔÌ«ÍøÍ· */
     EthernetHeader_t xEthernetHeader; /*  0 + 14 = 14 */
-    /* IPå¤´ */
+    /* IPÍ· */
     IPHeader_t xIPHeader;             /* 14 + 20 = 34 */
-    /* UDPå¤´ */
+    /* UDPÍ· */
     UDPHeader_t xUDPHeader;           /* 34 +  8 = 42 */
 }
 #include "pack_struct_end.h"
@@ -234,11 +234,11 @@ typedef struct xUDP_PACKET UDPPacket_t;
 #include "pack_struct_start.h"
 struct xTCP_PACKET
 {
-    /* ä»¥å¤ªç½‘å¤´ */
+    /* ÒÔÌ«ÍøÍ· */
     EthernetHeader_t xEthernetHeader; /*  0 + 14 = 14 */
-    /* IPå¤´ */
+    /* IPÍ· */
     IPHeader_t xIPHeader;             /* 14 + 20 = 34 */
-    /* TCPå¤´ */
+    /* TCPÍ· */
     TCPHeader_t xTCPHeader;           /* 34 + 32 = 66 */
 }
 #include "pack_struct_end.h"
@@ -253,31 +253,31 @@ typedef union XPROT_PACKET
 } ProtocolPacket_t;
 
 
-/* UDPè´Ÿè·æœ€å¤§é•¿åº¦ */
+/* UDP¸ººÉ×î´ó³¤¶È */
 #define ipMAX_UDP_PAYLOAD_LENGTH ( ( ipconfigNETWORK_MTU - ipSIZE_OF_IPv4_HEADER ) - ipSIZE_OF_UDP_HEADER )
 
 typedef enum
 {
-    eReleaseBuffer = 0,     /* å¤„ç† å¸§ æ²¡æœ‰å‘ç°æ˜¯ä»€ä¹ˆäº‹æƒ…å¯åš--ç›´æ¥é‡Šæ”¾ç¼“å†² */
-    eProcessBuffer,         /* ä¸€ä¸ªä»¥å¤ªç½‘å¸§æ²¡æœ‰æœ‰æ•ˆçš„åœ°å€--ç»§ç»­å¤„ç†å…¶å†…å®¹ */
-    eReturnEthernetFrame,   /* è¿™ä¸ªä»¥å¤ªç½‘å¸§åŒ…å«ARPæˆ–è€…ICMPåŒ… æŠ¥æ–‡å¯ä»¥è¿”å›åˆ°æºå¤´ */
-    eFrameConsumed          /* å¤„ç†ä»¥å¤ªç½‘åŒ…å†…å®¹ï¼Œå¯¼è‡´æ•°æ®ç¬¦åˆè¢«ä¼ å…¥åè®®æ ˆ */
+    eReleaseBuffer = 0,     /* ´¦Àí Ö¡ Ã»ÓĞ·¢ÏÖÊÇÊ²Ã´ÊÂÇé¿É×ö--Ö±½ÓÊÍ·Å»º³å */
+    eProcessBuffer,         /* Ò»¸öÒÔÌ«ÍøÖ¡Ã»ÓĞÓĞĞ§µÄµØÖ·--¼ÌĞø´¦ÀíÆäÄÚÈİ */
+    eReturnEthernetFrame,   /* Õâ¸öÒÔÌ«ÍøÖ¡°üº¬ARP»òÕßICMP°ü ±¨ÎÄ¿ÉÒÔ·µ»Øµ½Ô´Í· */
+    eFrameConsumed          /* ´¦ÀíÒÔÌ«Íø°üÄÚÈİ£¬µ¼ÖÂÊı¾İ·ûºÏ±»´«ÈëĞ­ÒéÕ» */
 } eFrameProcessingResult_t;
 
 typedef enum
 {
     eNoEvent = -1,
-    eNetworkDownEvent,      /* 0: ç½‘ç»œæ¥å£å·²ç»æ–­å¼€æˆ–è€…æ˜¯éœ€è¦é‡æ–°è¿æ¥ */
-    eNetworkRxEvent,        /* 1: ç½‘ç»œæ¥å£å·²ç»å…¥é˜Ÿä¸€ä»¥å¤ªç½‘å¸§ */
-    eARPTimerEvent,         /* 2: ARPå®šæ—¶å™¨åˆ°æœŸ */
-    eStackTxEvent,          /* 3: è½¯ä»¶å·²ç»å…¥é˜Ÿä¸€ä¸ªåŒ…ç­‰å¾…å‘é€ */
-    eDHCPEvent,             /* 4: å¤„ç†DHCPçŠ¶æ€æœº */
-    eTCPTimerEvent,         /* 5: çœ‹çœ‹æ˜¯å¦æœ‰TCPå¥—æ¥å­—éœ€è¦æ³¨æ„ */
-    eTCPAcceptEvent,        /* 6: ç”¨æˆ·æ¥å£ FreeRTOS_accept()ç­‰å¾…å®¢æˆ·ç«¯è¿æ¥ */
+    eNetworkDownEvent,      /* 0: ÍøÂç½Ó¿ÚÒÑ¾­¶Ï¿ª»òÕßÊÇĞèÒªÖØĞÂÁ¬½Ó */
+    eNetworkRxEvent,        /* 1: ÍøÂç½Ó¿ÚÒÑ¾­Èë¶ÓÒ»ÒÔÌ«ÍøÖ¡ */
+    eARPTimerEvent,         /* 2: ARP¶¨Ê±Æ÷µ½ÆÚ */
+    eStackTxEvent,          /* 3: Èí¼şÒÑ¾­Èë¶ÓÒ»¸ö°üµÈ´ı·¢ËÍ */
+    eDHCPEvent,             /* 4: ´¦ÀíDHCP×´Ì¬»ú */
+    eTCPTimerEvent,         /* 5: ¿´¿´ÊÇ·ñÓĞTCPÌ×½Ó×ÖĞèÒª×¢Òâ */
+    eTCPAcceptEvent,        /* 6: ÓÃ»§½Ó¿Ú FreeRTOS_accept()µÈ´ı¿Í»§¶ËÁ¬½Ó */
     eTCPNetStat,            /* 7: IP-task is asked to produce a netstat listing. */
-    eSocketBindEvent,       /* 8: å‘é€æ¶ˆæ¯åˆ° IP-task æ¥æŠŠå¥—æ¥å­—ä¸ç«¯å£ç»‘å®š */
-    eSocketCloseEvent,      /* 9: å‘é€æ¶ˆæ¯åˆ° IP-task å…³é—­å¥—æ¥å­— */
-    eSocketSelectEvent,     /*10: å‘é€æ¶ˆæ¯åˆ° IP-task æ¥ select(). */
+    eSocketBindEvent,       /* 8: ·¢ËÍÏûÏ¢µ½ IP-task À´°ÑÌ×½Ó×ÖÓë¶Ë¿Ú°ó¶¨ */
+    eSocketCloseEvent,      /* 9: ·¢ËÍÏûÏ¢µ½ IP-task ¹Ø±ÕÌ×½Ó×Ö */
+    eSocketSelectEvent,     /*10: ·¢ËÍÏûÏ¢µ½ IP-task À´ select(). */
     eSocketSignalEvent,     /*11: A socket must be signalled. */
 } eIPEvent_t;
 

@@ -32,21 +32,21 @@ UDPPacketHeader_t xDefaultPartUDPPacketHeader =
 {
     /* .ucBytes : */
     {
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* æºåœ°å€MAC */
-        0x08, 0x00,                             /* å¸§ç±»åž‹ */
-        ipIP_VERSION_AND_HEADER_LENGTH_BYTE,    /* ç‰ˆæœ¬å’Œå¤´é•¿åº¦ */
-        0x00,                                   /* æœåŠ¡ç±»åž‹ */
-        0x00, 0x00,                             /* å°åŒ…æ€»é•¿åº¦ */
-        0x00, 0x00,                             /* å°åŒ…æ ‡è¯† */
-        0x00, 0x00,                             /* ç‰‡æ®µåç§»åœ°å€ */
-        ipconfigUDP_TIME_TO_LIVE,               /* å­˜æ´»æ—¶é—´ */
-        ipPROTOCOL_UDP,                         /* åè®®ç±»åž‹ */
-        0x00, 0x00,                             /* å¤´æ ¡éªŒ */
-        0x00, 0x00, 0x00, 0x00                  /* æºåœ°å€IP */
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* Ô´µØÖ·MAC */
+        0x08, 0x00,                             /* Ö¡ÀàÐÍ */
+        ipIP_VERSION_AND_HEADER_LENGTH_BYTE,    /* °æ±¾ºÍÍ·³¤¶È */
+        0x00,                                   /* ·þÎñÀàÐÍ */
+        0x00, 0x00,                             /* ·â°ü×Ü³¤¶È */
+        0x00, 0x00,                             /* ·â°ü±êÊ¶ */
+        0x00, 0x00,                             /* Æ¬¶ÎÆ«ÒÆµØÖ· */
+        ipconfigUDP_TIME_TO_LIVE,               /* ´æ»îÊ±¼ä */
+        ipPROTOCOL_UDP,                         /* Ð­ÒéÀàÐÍ */
+        0x00, 0x00,                             /* Í·Ð£Ñé */
+        0x00, 0x00, 0x00, 0x00                  /* Ô´µØÖ·IP */
     }
 };
 /*-----------------------------------------------------------*/
-/* äº§ç”ŸUDPåŒ… */
+/* ²úÉúUDP°ü */
 void vProcessGeneratedUDPPacket( NetworkBufferDescriptor_t * const pxNetworkBuffer )
 {
 UDPPacket_t *pxUDPPacket;
@@ -54,11 +54,11 @@ IPHeader_t *pxIPHeader;
 eARPLookupResult_t eReturned;
 uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
     pxUDPPacket = ( UDPPacket_t * ) pxNetworkBuffer->pucEthernetBuffer;
-    /* æœç´¢æœ‰æ²¡æœ‰å…¶ARPç¼“å­˜ */
+    /* ËÑË÷ÓÐÃ»ÓÐÆäARP»º´æ */
     eReturned = eARPGetCacheEntry( &( ulIPAddress ), &( pxUDPPacket->xEthernetHeader.xDestinationAddress ) );
-    if( eReturned != eCantSendPacket )/* æœ¬åœ°åœ°å€éž0 */
+    if( eReturned != eCantSendPacket )/* ±¾µØµØÖ··Ç0 */
     {
-        if( eReturned == eARPCacheHit )/* æ‰¾åˆ°å…¶åœ¨æœ¬åœ°çš„ARPç¼“å­˜ */
+        if( eReturned == eARPCacheHit )/* ÕÒµ½ÆäÔÚ±¾µØµÄARP»º´æ */
         {
             #if( ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM == 0 )
                 uint8_t ucSocketOptions;
@@ -66,7 +66,7 @@ uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
             iptraceSENDING_UDP_PACKET( pxNetworkBuffer->ulIPAddress );
             pxIPHeader = &( pxUDPPacket->xIPHeader );
         #if ( ipconfigSUPPORT_OUTGOING_PINGS == 1 )
-            /* ä¹Ÿæœ‰å¯èƒ½æ˜¯ICMPæŠ¥æ–‡ */
+            /* Ò²ÓÐ¿ÉÄÜÊÇICMP±¨ÎÄ */
             if( pxNetworkBuffer->usPort != ipPACKET_CONTAINS_ICMP_DATA )
         #endif /* ipconfigSUPPORT_OUTGOING_PINGS */
             {
@@ -141,7 +141,7 @@ uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
             }
             #endif
         }
-        else if( eReturned == eARPCacheMiss )/* æ‰¾ä¸åˆ°ç¼“å­˜ */
+        else if( eReturned == eARPCacheMiss )/* ÕÒ²»µ½»º´æ */
         {
             /* Add an entry to the ARP table with a null hardware address.
             This allows the ARP timer to know that an ARP reply is
@@ -163,7 +163,7 @@ uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
 
     if( eReturned != eCantSendPacket )
     {
-        #if defined( ipconfigETHERNET_MINIMUM_PACKET_BYTES )/* å®šä¹‰äº†ç½‘ç»œæœ€å°å‘é€å•å…ƒï¼Œåœ¨è¿™é‡Œè¿›è¡Œå¡«å…… */
+        #if defined( ipconfigETHERNET_MINIMUM_PACKET_BYTES )/* ¶¨ÒåÁËÍøÂç×îÐ¡·¢ËÍµ¥Ôª£¬ÔÚÕâÀï½øÐÐÌî³ä */
         {
             if( pxNetworkBuffer->xDataLength < ( size_t ) ipconfigETHERNET_MINIMUM_PACKET_BYTES )
             {
@@ -177,27 +177,27 @@ uint32_t ulIPAddress = pxNetworkBuffer->ulIPAddress;
             }
         }
         #endif
-        xNetworkInterfaceOutput( pxNetworkBuffer, pdTRUE );/* å‘é€å®Œå³é‡Šæ”¾å†…å­˜ */
+        xNetworkInterfaceOutput( pxNetworkBuffer, pdTRUE );/* ·¢ËÍÍê¼´ÊÍ·ÅÄÚ´æ */
     }
-    else/* åŒ…ä¸èƒ½è¢«å‘é€ï¼ˆDHCPä¸ºå®Œæˆï¼Ÿï¼‰ï¼ŒæŠŠåŒ…é‡Šæ”¾æŽ‰ */
+    else/* °ü²»ÄÜ±»·¢ËÍ£¨DHCPÎªÍê³É£¿£©£¬°Ñ°üÊÍ·Åµô */
     {
         vReleaseNetworkBufferAndDescriptor( pxNetworkBuffer );
     }
 }
-/* æŽ¥æ”¶UDPåŒ… */
+/* ½ÓÊÕUDP°ü */
 BaseType_t xProcessReceivedUDPPacket( NetworkBufferDescriptor_t *pxNetworkBuffer, uint16_t usPort )
 {
 BaseType_t xReturn = pdPASS;
 FreeRTOS_Socket_t *pxSocket;
 
 UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
-    /* æ ¹æ®ç«¯å£å·æ‰¾åˆ°å¥—æŽ¥å­— */
+    /* ¸ù¾Ý¶Ë¿ÚºÅÕÒµ½Ì×½Ó×Ö */
     pxSocket = pxUDPSocketLookup( usPort );
-    if( pxSocket )/* å¥—æŽ¥å­—å­˜åœ¨ */
+    if( pxSocket )/* Ì×½Ó×Ö´æÔÚ */
     {
-        /* åˆ·æ–°ARPç¼“å­˜è¦å°å¿ƒï¼Œæœ‰æ—¶å€™ï¼Œä¼šæœ‰æ•°ç™¾ä¸ªå¹¿æ’­ç»è¿‡ï¼Œå¢žåŠ ç¼“å­˜æ— äº‹äºŽè¡¥ */
+        /* Ë¢ÐÂARP»º´æÒªÐ¡ÐÄ£¬ÓÐÊ±ºò£¬»áÓÐÊý°Ù¸ö¹ã²¥¾­¹ý£¬Ôö¼Ó»º´æÎÞÊÂÓÚ²¹ */
         vARPRefreshCacheEntry( &( pxUDPPacket->xEthernetHeader.xSourceAddress ), pxUDPPacket->xIPHeader.ulSourceIPAddress );
-        #if( ipconfigUSE_CALLBACKS == 1 )/* å›žè°ƒå‡½æ•° */
+        #if( ipconfigUSE_CALLBACKS == 1 )/* »Øµ÷º¯Êý */
         {
             /* Did the owner of this socket register a reception handler ? */
             if( ipconfigIS_VALID_PROG_ADDRESS( pxSocket->u.xUDP.pxHandleReceive ) )
@@ -217,7 +217,7 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
             }
         }
         #endif /* ipconfigUSE_CALLBACKS */
-        #if( ipconfigUDP_MAX_RX_PACKETS > 0 )/* æˆ‘ä»¬å®šä¹‰äº†æœ€å¤§æŽ¥æ”¶åŒ…ï¼Œåœ¨è¿™é‡Œæ£€æŸ¥ */
+        #if( ipconfigUDP_MAX_RX_PACKETS > 0 )/* ÎÒÃÇ¶¨ÒåÁË×î´ó½ÓÊÕ°ü£¬ÔÚÕâÀï¼ì²é */
         {
             if( xReturn == pdPASS )
             {
@@ -239,17 +239,17 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
                 {
                     taskENTER_CRITICAL();
                     {
-                        /* æŠŠæ•°æ®åŒ…ä¼ é€’ç»™å¥—æŽ¥å­— */
+                        /* °ÑÊý¾Ý°ü´«µÝ¸øÌ×½Ó×Ö */
                         vListInsertEnd( &( pxSocket->u.xUDP.xWaitingPacketsList ), &( pxNetworkBuffer->xBufferListItem ) );
                     }
                     taskEXIT_CRITICAL();
                 }
             }
             xTaskResumeAll();
-            /* è®¾ç½®å¥—æŽ¥å­—çš„äº‹ä»¶æ ‡è¯† */
+            /* ÉèÖÃÌ×½Ó×ÖµÄÊÂ¼þ±êÊ¶ */
             if( pxSocket->xEventGroup != NULL )
             {
-                xEventGroupSetBits( pxSockï¼›et->xEventGroup, eSOCKET_RECEIVE );
+                xEventGroupSetBits( pxSocket->xEventGroup, eSOCKET_RECEIVE );
             }
             #if( ipconfigSUPPORT_SELECT_FUNCTION == 1 )
             {
@@ -267,7 +267,7 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
                 }
             }
             #endif
-            #if( ipconfigUSE_DHCP == 1 )/* æ˜¯ä¸æ˜¯DHCPäº‹ä»¶ï¼Ÿï¼Ÿ */
+            #if( ipconfigUSE_DHCP == 1 )/* ÊÇ²»ÊÇDHCPÊÂ¼þ£¿£¿ */
             {
                 if( xIsDHCPSocket( pxSocket ) )
                 {
@@ -277,10 +277,10 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
             #endif
         }
     }
-    else/* å¥—æŽ¥å­—ä¸å­˜åœ¨ */
+    else/* Ì×½Ó×Ö²»´æÔÚ */
     {
-        /* ä¸å­˜åœ¨ç›‘å¬æ­¤ç«¯å£çš„å¥—æŽ¥å­— */
-        #if( ipconfigUSE_DNS == 1 )/* ä¸€ä¸ªDNSåº”ç­”ï¼Ÿï¼Ÿ */
+        /* ²»´æÔÚ¼àÌý´Ë¶Ë¿ÚµÄÌ×½Ó×Ö */
+        #if( ipconfigUSE_DNS == 1 )/* Ò»¸öDNSÓ¦´ð£¿£¿ */
             if( FreeRTOS_ntohs( pxUDPPacket->xUDPHeader.usSourcePort ) == ipDNS_PORT )
             {
                 vARPRefreshCacheEntry( &( pxUDPPacket->xEthernetHeader.xSourceAddress ), pxUDPPacket->xIPHeader.ulSourceIPAddress );
@@ -288,7 +288,7 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
             }
             else
         #endif
-        #if( ipconfigUSE_LLMNR == 1 )/* LLMNRè¯·æ±‚ï¼Ÿï¼Ÿ */
+        #if( ipconfigUSE_LLMNR == 1 )/* LLMNRÇëÇó£¿£¿ */
             if( ( usPort == FreeRTOS_ntohs( ipLLMNR_PORT ) ) ||
                 ( pxUDPPacket->xUDPHeader.usSourcePort == FreeRTOS_ntohs( ipLLMNR_PORT ) ) )
             {
@@ -297,7 +297,7 @@ UDPPacket_t *pxUDPPacket = (UDPPacket_t *) pxNetworkBuffer->pucEthernetBuffer;
             }
             else
         #endif /* ipconfigUSE_LLMNR */
-        #if( ipconfigUSE_NBNS == 1 )/* NBNSè¯·æ±‚ï¼Ÿï¼Ÿ */
+        #if( ipconfigUSE_NBNS == 1 )/* NBNSÇëÇó£¿£¿ */
             if( ( usPort == FreeRTOS_ntohs( ipNBNS_PORT ) ) ||
                 ( pxUDPPacket->xUDPHeader.usSourcePort == FreeRTOS_ntohs( ipNBNS_PORT ) ) )
             {

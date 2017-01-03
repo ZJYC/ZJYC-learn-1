@@ -1,57 +1,57 @@
 /*
-    ARPåè®®å°±æ˜¯MACåœ°å€åˆ°IPåœ°å€çš„ä¸€ç§æ˜ å°„ç®¡ç†ï¼ŒMACä½œä¸ºç½‘å¡çš„å”¯ä¸€æ ‡ç¤ºéš¾ä»¥è®°å¿†å’Œç®¡ç†ï¼Œ
-    ç›¸åå°±æ˜¯IPåœ°å€ååˆ†æ–¹ä¾¿ï¼Œæ‰€ä»¥åœ¨ä¸ä»»ä½•ä¸€ä¸ªç½‘å¡è¿›è¡Œé€šä¿¡å‰ï¼Œéƒ½éœ€è¦è·å–å¯¹æ–¹çš„MACåœ°å€ï¼Œ
-    å³å‘é€ARPè¯·æ±‚ï¼š
-    ç›®çš„MAC+æºMAC+å¸§ç±»å‹+ç¡¬ä»¶ç±»å‹+åè®®ç±»å‹+ç¡¬ä»¶åœ°å€é•¿åº¦+åè®®åœ°å€é•¿åº¦+op+å‘é€è€…MAC+å‘é€è€…IP+æ¥å—è€…MAC+æ¥å—è€…MAC
-    |ä»¥å¤ªç½‘é¦–éƒ¨---------|arpé¦–éƒ¨-------------------------------------------|ARPå­—æ®µ-------------------------------|
-    ä»¥å¤ªç½‘é¦–éƒ¨çš„ç›®çš„åœ°å€æ˜¯FFFFFFFFFFFFï¼Œæ„æ€æ˜¯å‘ç»™æ‰€æœ‰åœ¨çº¿çš„ç½‘å¡ï¼Œ
-    ARPå­—æ®µä¸­çš„æ¥å—è€…MACä¸º000000000000è¡¨ç¤ºæ­¤MACåœ°å€éœ€è¦å¡«å……
-    ç›®æ ‡IPçš„ç½‘å¡æ”¶åˆ°æ­¤ARPè¯·æ±‚åä¼šå•ç‹¬å›å¤ï¼ˆå•æ’­ï¼‰
+    ARPĞ­Òé¾ÍÊÇMACµØÖ·µ½IPµØÖ·µÄÒ»ÖÖÓ³Éä¹ÜÀí£¬MAC×÷ÎªÍø¿¨µÄÎ¨Ò»±êÊ¾ÄÑÒÔ¼ÇÒäºÍ¹ÜÀí£¬
+    Ïà·´¾ÍÊÇIPµØÖ·Ê®·Ö·½±ã£¬ËùÒÔÔÚÓëÈÎºÎÒ»¸öÍø¿¨½øĞĞÍ¨ĞÅÇ°£¬¶¼ĞèÒª»ñÈ¡¶Ô·½µÄMACµØÖ·£¬
+    ¼´·¢ËÍARPÇëÇó£º
+    Ä¿µÄMAC+Ô´MAC+Ö¡ÀàĞÍ+Ó²¼şÀàĞÍ+Ğ­ÒéÀàĞÍ+Ó²¼şµØÖ·³¤¶È+Ğ­ÒéµØÖ·³¤¶È+op+·¢ËÍÕßMAC+·¢ËÍÕßIP+½ÓÊÜÕßMAC+½ÓÊÜÕßMAC
+    |ÒÔÌ«ÍøÊ×²¿---------|arpÊ×²¿-------------------------------------------|ARP×Ö¶Î-------------------------------|
+    ÒÔÌ«ÍøÊ×²¿µÄÄ¿µÄµØÖ·ÊÇFFFFFFFFFFFF£¬ÒâË¼ÊÇ·¢¸øËùÓĞÔÚÏßµÄÍø¿¨£¬
+    ARP×Ö¶ÎÖĞµÄ½ÓÊÜÕßMACÎª000000000000±íÊ¾´ËMACµØÖ·ĞèÒªÌî³ä
+    Ä¿±êIPµÄÍø¿¨ÊÕµ½´ËARPÇëÇóºó»áµ¥¶À»Ø¸´£¨µ¥²¥£©
     
-    å‡½æ•°ä»‹ç»ï¼š
+    º¯Êı½éÉÜ£º
     
     eFrameProcessingResult_t eARPProcessPacket( ARPPacket_t * const pxARPFrame );
-        å¤„ç†ARPè¯·æ±‚åŒ…ä¸ARPåº”ç­”åŒ…
-        pxARPFrameï¼šARPå¸§ä¿¡æ¯
+        ´¦ÀíARPÇëÇó°üÓëARPÓ¦´ğ°ü
+        pxARPFrame£ºARPÖ¡ĞÅÏ¢
     uint32_t ulARPRemoveCacheEntryByMac( const MACAddress_t * pxMACAddress )
-        é€šè¿‡MACåœ°å€æ¥åˆ é™¤ç¼“å­˜é¡¹
-        pxMACAddressï¼šå¾…åˆ é™¤MACåœ°å€
+        Í¨¹ıMACµØÖ·À´É¾³ı»º´æÏî
+        pxMACAddress£º´ıÉ¾³ıMACµØÖ·
     void vARPRefreshCacheEntry( const MACAddress_t * pxMACAddress, const uint32_t ulIPAddress )
-        åˆ·æ–°ç¼“å­˜
-        pxMACAddressï¼šï¼Ÿï¼Ÿï¼Ÿ
-        ulIPAddressï¼šï¼Ÿï¼Ÿï¼Ÿ
+        Ë¢ĞÂ»º´æ
+        pxMACAddress£º£¿£¿£¿
+        ulIPAddress£º£¿£¿£¿
     eARPLookupResult_t eARPGetCacheEntryByMac( MACAddress_t * const pxMACAddress, uint32_t *pulIPAddress )
-        æ ¹æ®MACè·å–IPåœ°å€
-        pxMACAddressï¼šå¾…è·å–MACåœ°å€
-        pulIPAddressï¼šè¿”å›çš„IPåœ°å€
+        ¸ù¾İMAC»ñÈ¡IPµØÖ·
+        pxMACAddress£º´ı»ñÈ¡MACµØÖ·
+        pulIPAddress£º·µ»ØµÄIPµØÖ·
     eARPLookupResult_t eARPGetCacheEntry( uint32_t *pulIPAddress, MACAddress_t * const pxMACAddress )
-        æ ¹æ®IPåœ°å€è·å–MACåœ°å€
-        pulIPAddressï¼šIPåœ°å€
-        pxMACAddressï¼šMACåœ°å€
+        ¸ù¾İIPµØÖ·»ñÈ¡MACµØÖ·
+        pulIPAddress£ºIPµØÖ·
+        pxMACAddress£ºMACµØÖ·
     static eARPLookupResult_t prvCacheLookup( uint32_t ulAddressToLookup, MACAddress_t * const pxMACAddress )
-        ç¼“å­˜è¡¨æœç´¢
+        »º´æ±íËÑË÷
     void vARPAgeCache( void )
-        ç¼“å­˜è¡¨ç”Ÿå‘½å‘¨æœŸé€’å‡
+        »º´æ±íÉúÃüÖÜÆÚµİ¼õ
     void vARPSendGratuitous( void )
-        å‘é€å…è´¹ARP
+        ·¢ËÍÃâ·ÑARP
     void FreeRTOS_OutputARPRequest( uint32_t ulIPAddress )
-        å‘é€ARPè¯·æ±‚
+        ·¢ËÍARPÇëÇó
     void vARPGenerateRequestPacket( NetworkBufferDescriptor_t * const pxNetworkBuffer )
-        äº§ç”ŸARPè¯·æ±‚åŒ…
+        ²úÉúARPÇëÇó°ü
     void FreeRTOS_ClearARP( void )
-        æ¸…é™¤ARPç¼“å­˜
+        Çå³ıARP»º´æ
     void FreeRTOS_PrintARPCache( void )
-        æ‰“å°ARPç¼“å­˜
+        ´òÓ¡ARP»º´æ
 */
-/* æ ‡å‡†å¤´æ–‡ä»¶ */
+/* ±ê×¼Í·ÎÄ¼ş */
 #include <stdint.h>
 #include <stdio.h>
-/* æ“ä½œç³»ç»Ÿå¤´æ–‡ä»¶ */
+/* ²Ù×÷ÏµÍ³Í·ÎÄ¼ş */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
-/* åè®®æ ˆå¤´æ–‡ä»¶ */
+/* Ğ­ÒéÕ»Í·ÎÄ¼ş */
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 #include "FreeRTOS_IP_Private.h"
@@ -63,42 +63,42 @@
 #endif /* ipconfigUSE_LLMNR */
 #include "NetworkInterface.h"
 #include "NetworkBufferManagement.h"
-/* å½“ARPç¼“å­˜é¡¹åˆ°æœŸæ—¶ï¼ˆåˆ°è¾¾æ­¤æ•°å€¼ï¼‰ï¼Œä¼šå‘é€ARPè¯·æ±‚åŒ…æ¥åˆ·æ–°ç¼“å­˜ */
+/* µ±ARP»º´æÏîµ½ÆÚÊ±£¨µ½´ï´ËÊıÖµ£©£¬»á·¢ËÍARPÇëÇó°üÀ´Ë¢ĞÂ»º´æ */
 #define arpMAX_ARP_AGE_BEFORE_NEW_ARP_REQUEST       ( 3 )
-/* å…è´¹ARPå‘¨æœŸï¼ˆç”¨äºä¸å®šæœŸæ£€æŸ¥æ˜¯å¦å­˜åœ¨IPå†²çªï¼‰ */
+/* Ãâ·ÑARPÖÜÆÚ£¨ÓÃÓÚÓë¶¨ÆÚ¼ì²éÊÇ·ñ´æÔÚIP³åÍ»£© */
 #ifndef arpGRATUITOUS_ARP_PERIOD
     #define arpGRATUITOUS_ARP_PERIOD                    ( pdMS_TO_TICKS( 20000 ) )
 #endif
-/* æ ¹æ®IPåœ°å€æŸ¥è¯¢MACåœ°å€ */
+/* ¸ù¾İIPµØÖ·²éÑ¯MACµØÖ· */
 static eARPLookupResult_t prvCacheLookup( uint32_t ulAddressToLookup, MACAddress_t * const pxMACAddress );
-/* ARPç¼“å­˜ */
+/* ARP»º´æ */
 static ARPCacheRow_t xARPCache[ ipconfigARP_CACHE_ENTRIES ];
-/* ä¸Šä¸€ä¸ªå…è´¹ARPå‘é€çš„æ—¶é—´ */
+/* ÉÏÒ»¸öÃâ·ÑARP·¢ËÍµÄÊ±¼ä */
 static TickType_t xLastGratuitousARPTime = ( TickType_t ) 0;
-/* IPå†²çªæ£€æµ‹ç›®å‰åªæ˜¯å†…éƒ¨ä½¿ç”¨ï¼Œå½“DHCPæ²¡æœ‰å›åº”æ—¶ï¼Œé©±åŠ¨ä¼šå°è¯•ä¸€ä¸ªéšæœºçš„é“¾è·¯å±‚åœ°å€ï¼ˆ169.254.x.xï¼‰
-ä»–ä¼šå‘å‡ºä¸€å…è´¹ARPæ¶ˆæ¯ï¼Œä¸€æ®µæ—¶é—´ä¹‹åï¼Œæ£€æŸ¥ä¸‹é¢çš„å˜é‡ */
+/* IP³åÍ»¼ì²âÄ¿Ç°Ö»ÊÇÄÚ²¿Ê¹ÓÃ£¬µ±DHCPÃ»ÓĞ»ØÓ¦Ê±£¬Çı¶¯»á³¢ÊÔÒ»¸öËæ»úµÄÁ´Â·²ãµØÖ·£¨169.254.x.x£©
+Ëû»á·¢³öÒ»Ãâ·ÑARPÏûÏ¢£¬Ò»¶ÎÊ±¼äÖ®ºó£¬¼ì²éÏÂÃæµÄ±äÁ¿ */
 #if( ipconfigARP_USE_CLASH_DETECTION != 0 )
-    /* å¦‚æœå…¶ä»–è®¾å¤‡å›å¤äº†å…è´¹ARPï¼Œåˆ™æ•°å€¼ä¸ºéé›¶å€¼ */
+    /* Èç¹ûÆäËûÉè±¸»Ø¸´ÁËÃâ·ÑARP£¬ÔòÊıÖµÎª·ÇÁãÖµ */
     BaseType_t xARPHadIPClash;
-    /* ä¸æœ¬æœºå†²çªçš„è®¾å¤‡çš„MACåœ°å€ */
+    /* Óë±¾»ú³åÍ»µÄÉè±¸µÄMACµØÖ· */
     MACAddress_t xARPClashMacAddress;
 #endif /* ipconfigARP_USE_CLASH_DETECTION */
-/* ä»¥å¤ªç½‘å’ŒARPå¤´ */
+/* ÒÔÌ«ÍøºÍARPÍ· */
 static const uint8_t xDefaultPartARPPacketHeader[] =
 {
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff,     /* ç›®çš„åœ°å€ */
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* æºåœ°å€ */
-    0x08, 0x06,                             /* å¸§ç±»å‹ */
-    0x00, 0x01,                             /* ç¡¬ä»¶ç±»å‹ */
-    0x08, 0x00,                             /* åè®®ç±»å‹ */
-    ipMAC_ADDRESS_LENGTH_BYTES,             /* ç¡¬ä»¶åœ°å€é•¿åº¦ */
-    ipIP_ADDRESS_LENGTH_BYTES,              /* åè®®åœ°å€é•¿åº¦ */
-    0x00, 0x01,                             /* æ“ä½œç±»å‹ */
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* å‘é€è€…ç¡¬ä»¶åœ°å€ */
-    0x00, 0x00, 0x00, 0x00,                 /* å‘é€è€…åè®®åœ°å€ */
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00      /* ç›®æ ‡ç¡¬ä»¶åœ°å€ */
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff,     /* Ä¿µÄµØÖ· */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* Ô´µØÖ· */
+    0x08, 0x06,                             /* Ö¡ÀàĞÍ */
+    0x00, 0x01,                             /* Ó²¼şÀàĞÍ */
+    0x08, 0x00,                             /* Ğ­ÒéÀàĞÍ */
+    ipMAC_ADDRESS_LENGTH_BYTES,             /* Ó²¼şµØÖ·³¤¶È */
+    ipIP_ADDRESS_LENGTH_BYTES,              /* Ğ­ÒéµØÖ·³¤¶È */
+    0x00, 0x01,                             /* ²Ù×÷ÀàĞÍ */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* ·¢ËÍÕßÓ²¼şµØÖ· */
+    0x00, 0x00, 0x00, 0x00,                 /* ·¢ËÍÕßĞ­ÒéµØÖ· */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00      /* Ä¿±êÓ²¼şµØÖ· */
 };
-/* ARPæ•°æ®åŒ…å¤„ç† */
+/* ARPÊı¾İ°ü´¦Àí */
 eFrameProcessingResult_t eARPProcessPacket( ARPPacket_t * const pxARPFrame )
 {
 eFrameProcessingResult_t eReturn = eReleaseBuffer;
@@ -106,49 +106,49 @@ ARPHeader_t *pxARPHeader;
 
     pxARPHeader = &( pxARPFrame->xARPHeader );
     traceARP_PACKET_RECEIVED();
-    /* å¦‚æœæœ¬åœ°åœ°å€ä¸º0åˆ™ä¸ä½œä»»ä½•äº‹æƒ…ï¼Œè¿™æ„å‘³ç€DHCPè¯·æ±‚è¿˜æ²¡æœ‰å®Œæˆ */
+    /* Èç¹û±¾µØµØÖ·Îª0Ôò²»×÷ÈÎºÎÊÂÇé£¬ÕâÒâÎ¶×ÅDHCPÇëÇó»¹Ã»ÓĞÍê³É */
     if( *ipLOCAL_IP_ADDRESS_POINTER != 0UL )
     {
         switch( pxARPHeader->usOperation )
         {
-            /* ARPè¯·æ±‚åŒ… */
+            /* ARPÇëÇó°ü */
             case ipARP_REQUEST  :
-                /* è¯·æ±‚æœ¬åœ°åœ°å€ */
+                /* ÇëÇó±¾µØµØÖ· */
                 if( pxARPHeader->ulTargetProtocolAddress == *ipLOCAL_IP_ADDRESS_POINTER )
                 {
                     iptraceSENDING_ARP_REPLY( pxARPHeader->ulSenderProtocolAddress );
-                    /* åŠ å…¥ARPç¼“å­˜ */
+                    /* ¼ÓÈëARP»º´æ */
                     vARPRefreshCacheEntry( &( pxARPHeader->xSenderHardwareAddress ), pxARPHeader->ulSenderProtocolAddress );
-                    /* äº§ç”ŸARPåº”ç­”åŒ… */
-                    pxARPHeader->usOperation = ( uint16_t ) ipARP_REPLY;//ç±»å‹ä¸ºåº”ç­”
+                    /* ²úÉúARPÓ¦´ğ°ü */
+                    pxARPHeader->usOperation = ( uint16_t ) ipARP_REPLY;//ÀàĞÍÎªÓ¦´ğ
                     if( pxARPHeader->ulTargetProtocolAddress == pxARPHeader->ulSenderProtocolAddress )
                     {
-                        /* ä»¥å¤ªç½‘å¤´éƒ¨çš„MACä¸ºå¹¿æ’­åœ°å€ */
+                        /* ÒÔÌ«ÍøÍ·²¿µÄMACÎª¹ã²¥µØÖ· */
                         memcpy( pxARPFrame->xEthernetHeader.xSourceAddress.ucBytes, xBroadcastMACAddress.ucBytes, sizeof( xBroadcastMACAddress ) );
-                        /* ç›®æ ‡ç¡¬ä»¶åœ°å€ä¸º0 */
+                        /* Ä¿±êÓ²¼şµØÖ·Îª0 */
                         memset( pxARPHeader->xTargetHardwareAddress.ucBytes, '\0', sizeof( MACAddress_t ) );
-                        /* ç›®æ ‡åè®®åœ°å€ä¸º0 */
+                        /* Ä¿±êĞ­ÒéµØÖ·Îª0 */
                         pxARPHeader->ulTargetProtocolAddress = 0UL;
                     }
                     else
                     {
-                        //å¡«å……ç›®æ ‡MACåœ°å€
+                        //Ìî³äÄ¿±êMACµØÖ·
                         memcpy( pxARPHeader->xTargetHardwareAddress.ucBytes, pxARPHeader->xSenderHardwareAddress.ucBytes, sizeof( MACAddress_t ) );
-                        //å¡«å……ç›®æ ‡åè®®åœ°å€
+                        //Ìî³äÄ¿±êĞ­ÒéµØÖ·
                         pxARPHeader->ulTargetProtocolAddress = pxARPHeader->ulSenderProtocolAddress;
                     }
-                    /* å‘é€è€…ç¡¬ä»¶åœ°å€å¡«å†™æœ¬åœ°åœ°å€ */
+                    /* ·¢ËÍÕßÓ²¼şµØÖ·ÌîĞ´±¾µØµØÖ· */
                     memcpy( pxARPHeader->xSenderHardwareAddress.ucBytes, ( void * ) ipLOCAL_MAC_ADDRESS, sizeof( MACAddress_t ) );
-                    /* å¡«å†™å‘é€è€…åè®®åœ°å€ */
+                    /* ÌîĞ´·¢ËÍÕßĞ­ÒéµØÖ· */
                     pxARPHeader->ulSenderProtocolAddress = *ipLOCAL_IP_ADDRESS_POINTER;
 
                     eReturn = eReturnEthernetFrame;
                 }
                 break;
-            /* ARPåº”ç­”åŒ… */
+            /* ARPÓ¦´ğ°ü */
             case ipARP_REPLY :
                 iptracePROCESSING_RECEIVED_ARP_REPLY( pxARPHeader->ulTargetProtocolAddress );
-                /* åŠ å…¥ç¼“å­˜è¡¨ */
+                /* ¼ÓÈë»º´æ±í */
                 vARPRefreshCacheEntry( &( pxARPHeader->xSenderHardwareAddress ), pxARPHeader->ulSenderProtocolAddress );
                 /* Process received ARP frame to see if there is a clash. */
                 #if( ipconfigARP_USE_CLASH_DETECTION != 0 )
@@ -194,55 +194,55 @@ ARPHeader_t *pxARPHeader;
     }
 
 #endif  /* ipconfigUSE_ARP_REMOVE_ENTRY != 0 */
-/* åˆ·æ–°ARPç¼“å­˜ */
+/* Ë¢ĞÂARP»º´æ */
 void vARPRefreshCacheEntry( const MACAddress_t * pxMACAddress, const uint32_t ulIPAddress )
 {
 BaseType_t x, xIpEntry = -1, xMacEntry = -1, xUseEntry = 0;
 uint8_t ucMinAgeFound = 0U;
-    /* å…è®¸å­˜å‚¨éå±€åŸŸç½‘IPåœ°å€ */
+    /* ÔÊĞí´æ´¢·Ç¾ÖÓòÍøIPµØÖ· */
     #if( ipconfigARP_STORES_REMOTE_ADDRESSES == 0 )
-        /* åªå¤„ç†å±€åŸŸç½‘çš„IPåœ°å€ */
+        /* Ö»´¦Àí¾ÖÓòÍøµÄIPµØÖ· */
         if( ( ( ulIPAddress & xNetworkAddressing.ulNetMask ) == ( ( *ipLOCAL_IP_ADDRESS_POINTER ) & xNetworkAddressing.ulNetMask ) ) ||
             ( *ipLOCAL_IP_ADDRESS_POINTER == 0ul ) )
     #else
-        /* è‹¥ä¸å…è®¸å¤„ç†éå±€åŸŸç½‘IPåœ°å€ï¼Œå‘ç½‘å…³æ±‚åŠ©æ˜¯å”¯ä¸€çš„é€‰æ‹© */
+        /* Èô²»ÔÊĞí´¦Àí·Ç¾ÖÓòÍøIPµØÖ·£¬ÏòÍø¹ØÇóÖúÊÇÎ¨Ò»µÄÑ¡Ôñ */
         if( pdTRUE )
     #endif
     {
-        /* å¾—åˆ°æœ€å¤§æ•°å€¼ */
+        /* µÃµ½×î´óÊıÖµ */
         ucMinAgeFound--;
-        /* éå†ç¼“å­˜è¡¨ */
+        /* ±éÀú»º´æ±í */
         for( x = 0; x < ipconfigARP_CACHE_ENTRIES; x++ )
         {
-            /* åˆ¤æ–­IPåœ°å€ */
+            /* ÅĞ¶ÏIPµØÖ· */
             if( xARPCache[ x ].ulIPAddress == ulIPAddress )
             {
                 if( pxMACAddress == NULL )
                 {
-                    /* å¯èƒ½ï¼Œè¿™ä¸ªç¼“å­˜é¡¹è¿˜æ²¡æœ‰å®Œæˆ */
+                    /* ¿ÉÄÜ£¬Õâ¸ö»º´æÏî»¹Ã»ÓĞÍê³É */
                     xIpEntry = x;
                     break;
                 }
-                /* åˆ¤æ–­MACåœ°å€ */
+                /* ÅĞ¶ÏMACµØÖ· */
                 if( memcmp( xARPCache[ x ].xMACAddress.ucBytes, pxMACAddress->ucBytes, sizeof( pxMACAddress->ucBytes ) ) == 0 )
                 {
-                    /* åˆ·æ–°æ­¤ç¼“å­˜é¡¹å¹¶è¿”å› */
+                    /* Ë¢ĞÂ´Ë»º´æÏî²¢·µ»Ø */
                     xARPCache[ x ].ucAge = ( uint8_t ) ipconfigMAX_ARP_AGE;
                     xARPCache[ x ].ucValid = ( uint8_t ) pdTRUE;
                     return;
                 }
-                /* å¯èƒ½ï¼Œè¿™ä¸ªç¼“å­˜é¡¹ä¹Ÿæ²¡æœ‰å®Œæˆ */
+                /* ¿ÉÄÜ£¬Õâ¸ö»º´æÏîÒ²Ã»ÓĞÍê³É */
                 xIpEntry = x;
             }
             else if( ( pxMACAddress != NULL ) && ( memcmp( xARPCache[ x ].xMACAddress.ucBytes, pxMACAddress->ucBytes, sizeof( pxMACAddress->ucBytes ) ) == 0 ) )
             {
-                /* IPåœ°å€ä¸åŒ¹é…ï¼Œä½†æ˜¯MACåœ°å€åŒ¹é… */
+                /* IPµØÖ·²»Æ¥Åä£¬µ«ÊÇMACµØÖ·Æ¥Åä */
     #if( ipconfigARP_STORES_REMOTE_ADDRESSES != 0 )
-                /* å¦‚æœå…è®¸å­˜å‚¨éå±€åŸŸç½‘åœ°å€ï¼Œåˆ™ç½‘å…³çš„MACåœ°å€ä¸èƒ½è¢«é‡å†™ */
+                /* Èç¹ûÔÊĞí´æ´¢·Ç¾ÖÓòÍøµØÖ·£¬ÔòÍø¹ØµÄMACµØÖ·²»ÄÜ±»ÖØĞ´ */
                 BaseType_t bIsLocal[ 2 ];
-                /* åˆ¤æ–­ç¼“å­˜é¡¹ ä¸ æœ¬åœ°åœ°å€ æ˜¯å¦å¤„äºåŒä¸€å±€åŸŸç½‘ */
+                /* ÅĞ¶Ï»º´æÏî Óë ±¾µØµØÖ· ÊÇ·ñ´¦ÓÚÍ¬Ò»¾ÖÓòÍø */
                 bIsLocal[ 0 ] = ( ( xARPCache[ x ].ulIPAddress & xNetworkAddressing.ulNetMask ) == ( ( *ipLOCAL_IP_ADDRESS_POINTER ) & xNetworkAddressing.ulNetMask ) );
-                /* åˆ¤æ–­ç›®æ ‡åœ°å€ ä¸ æœ¬åœ°åœ°å€ æ˜¯å¦å¤„äºåŒä¸€å±€åŸŸç½‘ */
+                /* ÅĞ¶ÏÄ¿±êµØÖ· Óë ±¾µØµØÖ· ÊÇ·ñ´¦ÓÚÍ¬Ò»¾ÖÓòÍø */
                 bIsLocal[ 1 ] = ( ( ulIPAddress & xNetworkAddressing.ulNetMask ) == ( ( *ipLOCAL_IP_ADDRESS_POINTER ) & xNetworkAddressing.ulNetMask ) );
                 if( bIsLocal[ 0 ] == bIsLocal[ 1 ] )
                 {
@@ -256,7 +256,7 @@ uint8_t ucMinAgeFound = 0U;
             Shouldn't we test for xARPCache[ x ].ucValid == pdFALSE here ? */
             else if( xARPCache[ x ].ucAge < ucMinAgeFound )
             {
-                /* å¯»æ‰¾æœ€è€çš„ç¼“å­˜é¡¹ï¼Œä¸è¡Œå°±æŠŠä»–ä½¿ç”¨äº† */
+                /* Ñ°ÕÒ×îÀÏµÄ»º´æÏî£¬²»ĞĞ¾Í°ÑËûÊ¹ÓÃÁË */
                 ucMinAgeFound = xARPCache[ x ].ucAge;
                 xUseEntry = x;
             }
@@ -266,16 +266,16 @@ uint8_t ucMinAgeFound = 0U;
             xUseEntry = xMacEntry;
             if( xIpEntry >= 0 )
             {
-                /* MACå’ŒIPéƒ½å‘ç°äº†ï¼Œä½†æ˜¯ä¸åœ¨ä¸€ä¸ªç¼“å­˜é¡¹ä¸­ï¼Œæ¸…é™¤IPé¡¹ */
+                /* MACºÍIP¶¼·¢ÏÖÁË£¬µ«ÊÇ²»ÔÚÒ»¸ö»º´æÏîÖĞ£¬Çå³ıIPÏî */
                 memset( &xARPCache[ xIpEntry ], '\0', sizeof( xARPCache[ xIpEntry ] ) );
             }
         }
         else if( xIpEntry >= 0 )
         {
-            /* æ‰¾åˆ°IPåœ°å€ï¼Œä½†æ˜¯MACåœ°å€ä¸åŒ¹é… */
+            /* ÕÒµ½IPµØÖ·£¬µ«ÊÇMACµØÖ·²»Æ¥Åä */
             xUseEntry = xIpEntry;
         }
-        /* ä½¿ç”¨æœ€è€çš„ç¼“å­˜é¡¹ */
+        /* Ê¹ÓÃ×îÀÏµÄ»º´æÏî */
         xARPCache[ xUseEntry ].ulIPAddress = ulIPAddress;
         if( pxMACAddress != NULL )
         {
@@ -293,17 +293,17 @@ uint8_t ucMinAgeFound = 0U;
     }
 }
 /*-----------------------------------------------------------*/
-/* æ ¹æ®MACåœ°å€è·å–IPåœ°å€ */
+/* ¸ù¾İMACµØÖ·»ñÈ¡IPµØÖ· */
 #if( ipconfigUSE_ARP_REVERSED_LOOKUP == 1 )
     eARPLookupResult_t eARPGetCacheEntryByMac( MACAddress_t * const pxMACAddress, uint32_t *pulIPAddress )
     {
     BaseType_t x;
     eARPLookupResult_t eReturn = eARPCacheMiss;
 
-        /* éå†ç¼“å­˜è¡¨ */
+        /* ±éÀú»º´æ±í */
         for( x = 0; x < ipconfigARP_CACHE_ENTRIES; x++ )
         {
-            /* åˆ¤æ–­MACæ˜¯å¦åŒ¹é… */
+            /* ÅĞ¶ÏMACÊÇ·ñÆ¥Åä */
             if( memcmp( pxMACAddress->ucBytes, xARPCache[ x ].xMACAddress.ucBytes, sizeof( MACAddress_t ) ) == 0 )
             {
                 *pulIPAddress = xARPCache[ x ].ulIPAddress;
@@ -324,7 +324,7 @@ uint32_t ulAddressToLookup;
 #if( ipconfigUSE_LLMNR == 1 )
     if( *pulIPAddress == ipLLMNR_IP_ADDR )
     {
-        /* LLMNR çš„IPåœ°å€æœ‰ä¸€ä¸ªå›ºå®šçš„è™šæ‹ŸIPåœ°å€ */
+        /* LLMNR µÄIPµØÖ·ÓĞÒ»¸ö¹Ì¶¨µÄĞéÄâIPµØÖ· */
         memcpy( pxMACAddress->ucBytes, xLLMNR_MacAdress.ucBytes, sizeof( MACAddress_t ) );
         eReturn = eARPCacheHit;
     }
@@ -333,42 +333,42 @@ uint32_t ulAddressToLookup;
     if( ( *pulIPAddress == ipBROADCAST_IP_ADDRESS ) ||  /* Is it the general broadcast address 255.255.255.255? */
         ( *pulIPAddress == xNetworkAddressing.ulBroadcastAddress ) )/* Or a local broadcast address, eg 192.168.1.255? */
     {
-        /* è¿™æ˜¯å¹¿æ’­IPï¼Œæ‰€ä»¥è¿”å›å…¶MAC */
+        /* ÕâÊÇ¹ã²¥IP£¬ËùÒÔ·µ»ØÆäMAC */
         memcpy( pxMACAddress->ucBytes, xBroadcastMACAddress.ucBytes, sizeof( MACAddress_t ) );
-        /* æ‰¾åˆ°ç¼“å­˜ */
+        /* ÕÒµ½»º´æ */
         eReturn = eARPCacheHit;
     }
     else if( *ipLOCAL_IP_ADDRESS_POINTER == 0UL )
     {
-        /* æœ¬åœ°åœ°å€ä¸ºé›¶ï¼Œä¸åšä»»ä½•äº‹æƒ… */
+        /* ±¾µØµØÖ·ÎªÁã£¬²»×öÈÎºÎÊÂÇé */
         eReturn = eCantSendPacket;
     }
     else
     {
-        /* æ‰¾ä¸åˆ°ç¼“å­˜ */
+        /* ÕÒ²»µ½»º´æ */
         eReturn = eARPCacheMiss;
 
         if( ( *pulIPAddress & xNetworkAddressing.ulNetMask ) != ( ( *ipLOCAL_IP_ADDRESS_POINTER ) & xNetworkAddressing.ulNetMask ) )
         {
-            /* ä¸åœ¨åŒä¸€ä¸ªå±€åŸŸç½‘ä¸‹ */
+            /* ²»ÔÚÍ¬Ò»¸ö¾ÖÓòÍøÏÂ */
 #if( ipconfigARP_STORES_REMOTE_ADDRESSES == 1 )
-            /* æœç´¢ç¼“å­˜è¡¨ */
+            /* ËÑË÷»º´æ±í */
             eReturn = prvCacheLookup( *pulIPAddress, pxMACAddress );
 
             if( eReturn == eARPCacheHit )
             {
-                /* æ‰¾åˆ°ç¼“å­˜ */
+                /* ÕÒµ½»º´æ */
             }
             else
 #endif
             {
-                /* æ‰¾ä¸åˆ°ç¼“å­˜é¡¹ï¼Œæ•°æ®å‘å‘è·¯ç”±å™¨ */
+                /* ÕÒ²»µ½»º´æÏî£¬Êı¾İ·¢ÏòÂ·ÓÉÆ÷ */
                 ulAddressToLookup = xNetworkAddressing.ulGatewayAddress;
             }
         }
         else
         {
-            /* IPåœ¨å±€åŸŸç½‘ä¸­ï¼Œæˆ‘ä»¬ç›´æ¥æœç´¢ç¼“å­˜è¡¨å³å¯ */
+            /* IPÔÚ¾ÖÓòÍøÖĞ£¬ÎÒÃÇÖ±½ÓËÑË÷»º´æ±í¼´¿É */
             ulAddressToLookup = *pulIPAddress;
         }
 
@@ -376,12 +376,12 @@ uint32_t ulAddressToLookup;
         {
             if( ulAddressToLookup == 0UL )
             {
-                /* IPä¸åœ¨å±€åŸŸç½‘å†…ï¼Œå¹¶ä¸”ä¸å­˜åœ¨è·¯ç”±å™¨ */
+                /* IP²»ÔÚ¾ÖÓòÍøÄÚ£¬²¢ÇÒ²»´æÔÚÂ·ÓÉÆ÷ */
                 eReturn = eCantSendPacket;
             }
             else
             {
-                /* æœç´¢ç¼“å­˜è¡¨ */
+                /* ËÑË÷»º´æ±í */
                 eReturn = prvCacheLookup( ulAddressToLookup, pxMACAddress );
 
                 if( eReturn == eARPCacheMiss )
@@ -396,28 +396,28 @@ uint32_t ulAddressToLookup;
     return eReturn;
 }
 
-/* æœç´¢ç¼“å­˜è¡¨ */
+/* ËÑË÷»º´æ±í */
 
 static eARPLookupResult_t prvCacheLookup( uint32_t ulAddressToLookup, MACAddress_t * const pxMACAddress )
 {
 BaseType_t x;
 eARPLookupResult_t eReturn = eARPCacheMiss;
 
-    /* éå†ç¼“å­˜è¡¨ */
+    /* ±éÀú»º´æ±í */
     for( x = 0; x < ipconfigARP_CACHE_ENTRIES; x++ )
     {
-        /* åˆ¤æ–­IPåœ°å€ */
+        /* ÅĞ¶ÏIPµØÖ· */
         if( xARPCache[ x ].ulIPAddress == ulAddressToLookup )
         {
-            /* å‘ç°åŒ¹é…é¡¹ */
+            /* ·¢ÏÖÆ¥ÅäÏî */
             if( xARPCache[ x ].ucValid == ( uint8_t ) pdFALSE )
             {
-                /* æ­¤é¡¹æ­£åœ¨ç­‰å¾…ARPå›å¤ */
+                /* ´ËÏîÕıÔÚµÈ´ıARP»Ø¸´ */
                 eReturn = eCantSendPacket;
             }
             else
             {
-                /* å‘ç°æœ‰æ•ˆé¡¹ */
+                /* ·¢ÏÖÓĞĞ§Ïî */
                 memcpy( pxMACAddress->ucBytes, xARPCache[ x ].xMACAddress.ucBytes, sizeof( MACAddress_t ) );
                 eReturn = eARPCacheHit;
             }
@@ -434,23 +434,23 @@ void vARPAgeCache( void )
 BaseType_t x;
 TickType_t xTimeNow;
 
-    /* éå†ç¼“å­˜è¡¨ */
+    /* ±éÀú»º´æ±í */
     for( x = 0; x < ipconfigARP_CACHE_ENTRIES; x++ )
     {
-        /* ç”Ÿå‘½æœªåˆ°æœŸ */
+        /* ÉúÃüÎ´µ½ÆÚ */
         if( xARPCache[ x ].ucAge > 0U )
         {
-            /* é€’å‡ç”Ÿå‘½ */
+            /* µİ¼õÉúÃü */
             ( xARPCache[ x ].ucAge )--;
 
-            /* å¦‚è‹¥æ­£åœ¨ç­‰å¾…ARPå›å¤ï¼Œé‡å‘ARPè¯·æ±‚ */
+            /* ÈçÈôÕıÔÚµÈ´ıARP»Ø¸´£¬ÖØ·¢ARPÇëÇó */
             if( xARPCache[ x ].ucValid == ( uint8_t ) pdFALSE )
             {
                 FreeRTOS_OutputARPRequest( xARPCache[ x ].ulIPAddress );
             }
             else if( xARPCache[ x ].ucAge <= ( uint8_t ) arpMAX_ARP_AGE_BEFORE_NEW_ARP_REQUEST )
             {
-                /* å¦‚è‹¥ç”Ÿå‘½å°äºé˜ˆå€¼ï¼Œä¹Ÿè¦å‘é€ARPè¯·æ±‚ */
+                /* ÈçÈôÉúÃüĞ¡ÓÚãĞÖµ£¬Ò²Òª·¢ËÍARPÇëÇó */
                 iptraceARP_TABLE_ENTRY_WILL_EXPIRE( xARPCache[ x ].ulIPAddress );
                 FreeRTOS_OutputARPRequest( xARPCache[ x ].ulIPAddress );
             }
@@ -461,7 +461,7 @@ TickType_t xTimeNow;
 
             if( xARPCache[ x ].ucAge == 0u )
             {
-                /* ç”Ÿå‘½åˆ°æœŸï¼Œæ¸…é™¤æ‰ */
+                /* ÉúÃüµ½ÆÚ£¬Çå³ıµô */
                 iptraceARP_TABLE_ENTRY_EXPIRED( xARPCache[ x ].ulIPAddress );
                 xARPCache[ x ].ulIPAddress = 0UL;
             }
@@ -469,7 +469,7 @@ TickType_t xTimeNow;
     }
 
     xTimeNow = xTaskGetTickCount ();
-    /* å‘é€å…è´¹ARPè¯·æ±‚ */
+    /* ·¢ËÍÃâ·ÑARPÇëÇó */
     if( ( xLastGratuitousARPTime == ( TickType_t ) 0 ) || ( ( xTimeNow - xLastGratuitousARPTime ) > ( TickType_t ) arpGRATUITOUS_ARP_PERIOD ) )
     {
         FreeRTOS_OutputARPRequest( *ipLOCAL_IP_ADDRESS_POINTER );
@@ -478,26 +478,26 @@ TickType_t xTimeNow;
 }
 void vARPSendGratuitous( void )
 {
-    /* å°†è®¡æ•°å™¨æ¸…é›¶å¯ä»¥ä¿ƒä½¿å…è´¹ARPçš„äº§ç”Ÿ */
+    /* ½«¼ÆÊıÆ÷ÇåÁã¿ÉÒÔ´ÙÊ¹Ãâ·ÑARPµÄ²úÉú */
     xLastGratuitousARPTime = ( TickType_t ) 0;
-    /* è¿«ä½¿IPä»»åŠ¡è°ƒç”¨vARPAgeCache().å·²å®Œæˆå…è´¹ARPçš„å‘é€ */
+    /* ÆÈÊ¹IPÈÎÎñµ÷ÓÃvARPAgeCache().ÒÑÍê³ÉÃâ·ÑARPµÄ·¢ËÍ */
     xSendEventToIPTask( eARPTimerEvent );
 }
 
-/* å‘é€ARPè¯·æ±‚ */
+/* ·¢ËÍARPÇëÇó */
 void FreeRTOS_OutputARPRequest( uint32_t ulIPAddress )
 {
 NetworkBufferDescriptor_t *pxNetworkBuffer;
 
-    /* è·å–ä¸€å—å†…å­˜ */
+    /* »ñÈ¡Ò»¿éÄÚ´æ */
     pxNetworkBuffer = pxGetNetworkBufferWithDescriptor( sizeof( ARPPacket_t ), ( TickType_t ) 0 );
 
     if( pxNetworkBuffer != NULL )
     {
-        /* å¡«å……ARPæ•°æ® */
+        /* Ìî³äARPÊı¾İ */
         pxNetworkBuffer->ulIPAddress = ulIPAddress;
         vARPGenerateRequestPacket( pxNetworkBuffer );
-        /* å¦‚æœå®šä¹‰äº†æœ€å°åŒ…å¤§å°ï¼Œåˆ™è¿›è¡Œæ•°æ®çš„å¡«å…… */
+        /* Èç¹û¶¨ÒåÁË×îĞ¡°ü´óĞ¡£¬Ôò½øĞĞÊı¾İµÄÌî³ä */
         #if defined( ipconfigETHERNET_MINIMUM_PACKET_BYTES )
         {
             if( pxNetworkBuffer->xDataLength < ( size_t ) ipconfigETHERNET_MINIMUM_PACKET_BYTES )
@@ -513,11 +513,11 @@ NetworkBufferDescriptor_t *pxNetworkBuffer;
             }
         }
         #endif
-        /* å‘é€ARPè¯·æ±‚éšåé‡Šæ”¾å†…å­˜ */
+        /* ·¢ËÍARPÇëÇóËæºóÊÍ·ÅÄÚ´æ */
         xNetworkInterfaceOutput( pxNetworkBuffer, pdTRUE );
     }
 }
-/* äº§ç”ŸARPè¯·æ±‚åŒ… */
+/* ²úÉúARPÇëÇó°ü */
 void vARPGenerateRequestPacket( NetworkBufferDescriptor_t * const pxNetworkBuffer )
 {
 ARPPacket_t *pxARPPacket;
@@ -546,13 +546,13 @@ ARPPacket_t *pxARPPacket;
 
     iptraceCREATING_ARP_REQUEST( pxNetworkBuffer->ulIPAddress );
 }
-/* æ¸…é™¤ARPç¼“å­˜è¡¨ */
+/* Çå³ıARP»º´æ±í */
 
 void FreeRTOS_ClearARP( void )
 {
     memset( xARPCache, '\0', sizeof( xARPCache ) );
 }
-/* æ‰“å°ARPç¼“å­˜è¡¨ */
+/* ´òÓ¡ARP»º´æ±í */
 
 #if( ipconfigHAS_PRINTF != 0 ) || ( ipconfigHAS_DEBUG_PRINTF != 0 )
 

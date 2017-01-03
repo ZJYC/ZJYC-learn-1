@@ -1,13 +1,13 @@
 
-/* æ ‡å‡†å¤´æ–‡ä»¶ */
+/* ±ê×¼Í·ÎÄ¼ş */
 #include <stdint.h>
 
-/*2016--12--01--11--08--51(ZJYC): FREERTOSå¤´æ–‡ä»¶   */ 
+/*2016--12--01--11--08--51(ZJYC): FREERTOSÍ·ÎÄ¼ş   */ 
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
 
-/*2016--12--01--11--08--51(ZJYC): FREERTOS+TCPå¤´æ–‡ä»¶   */ 
+/*2016--12--01--11--08--51(ZJYC): FREERTOS+TCPÍ·ÎÄ¼ş   */ 
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 #include "FreeRTOS_IP_Private.h"
@@ -18,97 +18,97 @@
 #include "NetworkInterface.h"
 #include "NetworkBufferManagement.h"
 
-/*2016--12--01--11--08--51(ZJYC): å¦‚æœDHCPæœªä½¿èƒ½åˆ™æ’é™¤æ‰€æœ‰   */ 
+/*2016--12--01--11--08--51(ZJYC): Èç¹ûDHCPÎ´Ê¹ÄÜÔòÅÅ³ıËùÓĞ   */ 
 #if( ipconfigUSE_DHCP != 0 )
 
 #if ( ipconfigUSE_DHCP != 0 ) && ( ipconfigNETWORK_MTU < 586u )
-    /*2016--12--01--11--10--21(ZJYC): DHCPå¿…é¡»èƒ½å¤Ÿæ¥æ”¶312å­—èŠ‚çš„é€‰é¡¹åŒºåŸŸï¼ŒDHCP
-    æŠ¥æ–‡çš„å›ºå®šéƒ¨åˆ†æ˜¯240å­—èŠ‚ï¼Œè€Œä¸”IP/UDPå¤´éƒ¨å ç”¨28å­—èŠ‚ï¼Œ312+240+28 = 580ï¼Ÿï¼Ÿï¼Ÿ*/ 
+    /*2016--12--01--11--10--21(ZJYC): DHCP±ØĞëÄÜ¹»½ÓÊÕ312×Ö½ÚµÄÑ¡ÏîÇøÓò£¬DHCP
+    ±¨ÎÄµÄ¹Ì¶¨²¿·ÖÊÇ240×Ö½Ú£¬¶øÇÒIP/UDPÍ·²¿Õ¼ÓÃ28×Ö½Ú£¬312+240+28 = 580£¿£¿£¿*/ 
     #error ipconfigNETWORK_MTU needs to be at least 586 to use DHCP
 #endif
 
-/*2016--12--01--14--00--49(ZJYC): DHCPåŒ…çš„å‚æ•°   */ 
+/*2016--12--01--14--00--49(ZJYC): DHCP°üµÄ²ÎÊı   */ 
 #define dhcpCLIENT_HARDWARE_ADDRESS_LENGTH      16
 #define dhcpSERVER_HOST_NAME_LENGTH             64
 #define dhcpBOOT_FILE_NAME_LENGTH               128
 
-/*2016--12--01--14--01--05(ZJYC): DHCPæ—¶é—´å‚æ•°   */ 
+/*2016--12--01--14--01--05(ZJYC): DHCPÊ±¼ä²ÎÊı   */ 
 #ifndef dhcpINITIAL_DHCP_TX_PERIOD
     #define dhcpINITIAL_TIMER_PERIOD            ( pdMS_TO_TICKS( 250 ) )
     #define dhcpINITIAL_DHCP_TX_PERIOD          ( pdMS_TO_TICKS( 5000 ) )
 #endif
 
-/*2016--12--01--14--01--24(ZJYC): DHCPé€‰é¡¹åŒºæœ‰ç”¨çš„æ ‡å¿—   */ 
-/*2016--12--02--08--39--18(ZJYC): 0 å¡«å……å­—èŠ‚ é•¿åº¦0   */ 
+/*2016--12--01--14--01--24(ZJYC): DHCPÑ¡ÏîÇøÓĞÓÃµÄ±êÖ¾   */ 
+/*2016--12--02--08--39--18(ZJYC): 0 Ìî³ä×Ö½Ú ³¤¶È0   */ 
 #define dhcpZERO_PAD_OPTION_CODE                ( 0u )
-/*2016--12--02--08--39--31(ZJYC): 1 å­ç½‘æ©ç  é•¿åº¦4   */ 
+/*2016--12--02--08--39--31(ZJYC): 1 ×ÓÍøÑÚÂë ³¤¶È4   */ 
 #define dhcpSUBNET_MASK_OPTION_CODE             ( 1u )
-/*2016--12--02--08--47--51(ZJYC): 2 æ—¶é—´åç§» é•¿åº¦4   */ 
-/*2016--12--02--08--39--59(ZJYC): 3 è·¯ç”±åœ°å€ é•¿åº¦ n*4   */ 
+/*2016--12--02--08--47--51(ZJYC): 2 Ê±¼äÆ«ÒÆ ³¤¶È4   */ 
+/*2016--12--02--08--39--59(ZJYC): 3 Â·ÓÉµØÖ· ³¤¶È n*4   */ 
 #define dhcpGATEWAY_OPTION_CODE                 ( 3u )
-/*2016--12--02--08--49--19(ZJYC): 4 æ—¶é—´æœåŠ¡å™¨ é•¿åº¦ n*4   */ 
-/*2016--12--02--08--49--42(ZJYC): 5 åç§°æœåŠ¡å™¨ é•¿åº¦ n*4   */ 
-/*2016--12--02--08--50--17(ZJYC): 6 åŸŸåæœåŠ¡å™¨ é•¿åº¦ n*4   */ 
+/*2016--12--02--08--49--19(ZJYC): 4 Ê±¼ä·şÎñÆ÷ ³¤¶È n*4   */ 
+/*2016--12--02--08--49--42(ZJYC): 5 Ãû³Æ·şÎñÆ÷ ³¤¶È n*4   */ 
+/*2016--12--02--08--50--17(ZJYC): 6 ÓòÃû·şÎñÆ÷ ³¤¶È n*4   */ 
 #define dhcpDNS_SERVER_OPTIONS_CODE             ( 6u )
-/*2016--12--02--08--50--42(ZJYC): 7 æ—¥å¿—æœåŠ¡å™¨ é•¿åº¦ n*4   */ 
-/*2016--12--02--08--52--59(ZJYC): 8 CookieæœåŠ¡å™¨ é•¿åº¦ n*4   */
-/*2016--12--02--08--53--41(ZJYC): 9 LPRæœåŠ¡å™¨ é•¿åº¦ n*4   */ 
-/*2016--12--02--08--54--34(ZJYC): 10 Impress æœåŠ¡å™¨ é•¿åº¦ n*4   */ 
-/*2016--12--02--08--55--32(ZJYC): 11 èµ„æºä½ç½®æœåŠ¡å™¨ é•¿åº¦ n*4   */ 
-/*2016--12--02--08--56--25(ZJYC): 12 ä¸»æœºå é•¿åº¦ è‡³å°‘1å­—èŠ‚  */ 
+/*2016--12--02--08--50--42(ZJYC): 7 ÈÕÖ¾·şÎñÆ÷ ³¤¶È n*4   */ 
+/*2016--12--02--08--52--59(ZJYC): 8 Cookie·şÎñÆ÷ ³¤¶È n*4   */
+/*2016--12--02--08--53--41(ZJYC): 9 LPR·şÎñÆ÷ ³¤¶È n*4   */ 
+/*2016--12--02--08--54--34(ZJYC): 10 Impress ·şÎñÆ÷ ³¤¶È n*4   */ 
+/*2016--12--02--08--55--32(ZJYC): 11 ×ÊÔ´Î»ÖÃ·şÎñÆ÷ ³¤¶È n*4   */ 
+/*2016--12--02--08--56--25(ZJYC): 12 Ö÷»úÃû ³¤¶È ÖÁÉÙ1×Ö½Ú  */ 
 #define dhcpDNS_HOSTNAME_OPTIONS_CODE           ( 12u )
-/*2016--12--02--08--57--12(ZJYC): 13 å¯åŠ¨æ–‡ä»¶å¤§å° é•¿åº¦ 2å­—èŠ‚   */ 
-/*2016--12--02--08--58--57(ZJYC): 14 è½¬å‚¨æ–‡ä»¶ é•¿åº¦ è‡³å°‘1å­—èŠ‚  */ 
-/*2016--12--02--09--05--45(ZJYC): 15 åŸŸå é•¿åº¦ è‡³å°‘1å­—èŠ‚   */ 
-/*2016--12--02--09--06--10(ZJYC): 16 äº¤æ¢æœåŠ¡å™¨ é•¿åº¦4å­—èŠ‚   */ 
-/*2016--12--02--09--08--44(ZJYC): 17 æ ¹è·¯å¾„ é•¿åº¦ è‡³å°‘1å­—èŠ‚  */ 
-/*2016--12--02--09--09--16(ZJYC): 18 æ‹“å±•è·¯å¾„ é•¿åº¦ è‡³å°‘1å­—èŠ‚  */ 
-/*2016--12--02--09--10--31(ZJYC): 50 è¯·æ±‚çš„IPåœ°å€ é•¿åº¦ 4å­—èŠ‚   */ 
+/*2016--12--02--08--57--12(ZJYC): 13 Æô¶¯ÎÄ¼ş´óĞ¡ ³¤¶È 2×Ö½Ú   */ 
+/*2016--12--02--08--58--57(ZJYC): 14 ×ª´¢ÎÄ¼ş ³¤¶È ÖÁÉÙ1×Ö½Ú  */ 
+/*2016--12--02--09--05--45(ZJYC): 15 ÓòÃû ³¤¶È ÖÁÉÙ1×Ö½Ú   */ 
+/*2016--12--02--09--06--10(ZJYC): 16 ½»»»·şÎñÆ÷ ³¤¶È4×Ö½Ú   */ 
+/*2016--12--02--09--08--44(ZJYC): 17 ¸ùÂ·¾¶ ³¤¶È ÖÁÉÙ1×Ö½Ú  */ 
+/*2016--12--02--09--09--16(ZJYC): 18 ÍØÕ¹Â·¾¶ ³¤¶È ÖÁÉÙ1×Ö½Ú  */ 
+/*2016--12--02--09--10--31(ZJYC): 50 ÇëÇóµÄIPµØÖ· ³¤¶È 4×Ö½Ú   */ 
 #define dhcpREQUEST_IP_ADDRESS_OPTION_CODE      ( 50u )
-/*2016--12--02--09--11--02(ZJYC): 51 IPåœ°å€ç§ŸæœŸ é•¿åº¦ 4å­—èŠ‚   */ 
+/*2016--12--02--09--11--02(ZJYC): 51 IPµØÖ·×âÆÚ ³¤¶È 4×Ö½Ú   */ 
 #define dhcpLEASE_TIME_OPTION_CODE              ( 51u )
-/*2016--12--02--09--11--26(ZJYC): 53 æ¶ˆæ¯ç±»å‹ é•¿åº¦ 1å­—èŠ‚   */ 
+/*2016--12--02--09--11--26(ZJYC): 53 ÏûÏ¢ÀàĞÍ ³¤¶È 1×Ö½Ú   */ 
 #define dhcpMESSAGE_TYPE_OPTION_CODE            ( 53u )
-/*2016--12--02--09--17--20(ZJYC): 54 æœåŠ¡å™¨æ ‡ç¤º 4å­—èŠ‚   */ 
+/*2016--12--02--09--17--20(ZJYC): 54 ·şÎñÆ÷±êÊ¾ 4×Ö½Ú   */ 
 #define dhcpSERVER_IP_ADDRESS_OPTION_CODE       ( 54u )
-/*2016--12--02--09--17--42(ZJYC): 55 å‚æ•°æ¸…å• è‡³å°‘1å­—èŠ‚   */ 
+/*2016--12--02--09--17--42(ZJYC): 55 ²ÎÊıÇåµ¥ ÖÁÉÙ1×Ö½Ú   */ 
 #define dhcpPARAMETER_REQUEST_OPTION_CODE       ( 55u )
-/*2016--12--02--09--18--12(ZJYC): 61 å®¢æˆ·ç«¯æ ‡ç¤º è‡³å°‘2å­—èŠ‚   */ 
+/*2016--12--02--09--18--12(ZJYC): 61 ¿Í»§¶Ë±êÊ¾ ÖÁÉÙ2×Ö½Ú   */ 
 #define dhcpCLIENT_IDENTIFIER_OPTION_CODE       ( 61u )
-/*2016--12--02--09--09--45(ZJYC): 255 ç»“æŸç¬¦   */ 
-/*2016--12--01--14--08--22(ZJYC): å››ç§DHCPæ¶ˆæ¯ç±»å‹   */ 
+/*2016--12--02--09--09--45(ZJYC): 255 ½áÊø·û   */ 
+/*2016--12--01--14--08--22(ZJYC): ËÄÖÖDHCPÏûÏ¢ÀàĞÍ   */ 
 #define dhcpMESSAGE_TYPE_DISCOVER               ( 1 )
 #define dhcpMESSAGE_TYPE_OFFER                  ( 2 )
 #define dhcpMESSAGE_TYPE_REQUEST                ( 3 )
 #define dhcpMESSAGE_TYPE_ACK                    ( 5 )
 #define dhcpMESSAGE_TYPE_NACK                   ( 6 )
 
-/*2016--12--01--14--08--22(ZJYC): éƒ¨åˆ†ä¿¡æ¯åœ¨DHCPæŠ¥æ–‡ä¸­çš„ç´¢å¼•   */ 
+/*2016--12--01--14--08--22(ZJYC): ²¿·ÖĞÅÏ¢ÔÚDHCP±¨ÎÄÖĞµÄË÷Òı   */ 
 #define dhcpCLIENT_IDENTIFIER_OFFSET            ( 5 )
 #define dhcpREQUESTED_IP_ADDRESS_OFFSET         ( 13 )
 #define dhcpDHCP_SERVER_IP_ADDRESS_OFFSET       ( 19 )
 
-/*2016--12--01--14--10--34(ZJYC): DHCPå¸¸ç”¨æ•°å€¼   */ 
+/*2016--12--01--14--10--34(ZJYC): DHCP³£ÓÃÊıÖµ   */ 
 #define dhcpREQUEST_OPCODE                      ( 1 )
 #define dhcpREPLY_OPCODE                        ( 2 )
 #define dhcpADDRESS_TYPE_ETHERNET               ( 1 )
 #define dhcpETHERNET_ADDRESS_LENGTH             ( 6 )
-/*2016--12--01--14--11--15(ZJYC): å¦‚æœç§Ÿçº¦æœªåˆ°ï¼Œä½¿ç”¨é»˜è®¤çš„2å¤©ï¼Œ48Hç”¨ticksè¡¨ç¤ºï¼Œ
-ä¸èƒ½ä½¿ç”¨pdMS_TO_TICKS()ï¼Œå› ä¸ºä¼šæº¢å‡º   */ 
+/*2016--12--01--14--11--15(ZJYC): Èç¹û×âÔ¼Î´µ½£¬Ê¹ÓÃÄ¬ÈÏµÄ2Ìì£¬48HÓÃticks±íÊ¾£¬
+²»ÄÜÊ¹ÓÃpdMS_TO_TICKS()£¬ÒòÎª»áÒç³ö   */ 
 #define dhcpDEFAULT_LEASE_TIME                  ( ( 48UL * 60UL * 60UL ) * configTICK_RATE_HZ )
 
-/*2016--12--01--14--24--12(ZJYC): ä¸èƒ½è®©ç§Ÿçº¦æ—¶é—´å¤ªçŸ­   */ 
+/*2016--12--01--14--24--12(ZJYC): ²»ÄÜÈÃ×âÔ¼Ê±¼äÌ«¶Ì   */ 
 #define dhcpMINIMUM_LEASE_TIME                  ( pdMS_TO_TICKS( 60000UL ) )    /* 60 seconds in ticks. */
 
-/*2016--12--01--14--24--43(ZJYC): æ ‡è®°é€‰é¡¹å­—æ®µç»“æŸæ ‡å¿—   */ 
+/*2016--12--01--14--24--43(ZJYC): ±ê¼ÇÑ¡Ïî×Ö¶Î½áÊø±êÖ¾   */ 
 #define dhcpOPTION_END_BYTE 0xffu
 
-/*2016--12--01--14--27--22(ZJYC): é€‰é¡¹å­—æ®µçš„ç´¢å¼•240   */ 
+/*2016--12--01--14--27--22(ZJYC): Ñ¡Ïî×Ö¶ÎµÄË÷Òı240   */ 
 #define dhcpFIRST_OPTION_BYTE_OFFSET            ( 0xf0 )
-/*2016--12--01--14--28--15(ZJYC): å½“éå†å¯å˜é•¿åº¦é€‰é¡¹å­—æ®µï¼Œä¸€ä¸‹å˜é‡ç”¨ä»¥ä¿éšœ 
-ä¸ä¼šè¶…å‡ºé€‰é¡¹å­—æ®µï¼Œé•¿åº¦ç”¨2å­—èŠ‚è¡¨ç¤ºï¼Œæœ€å°1ä¸ªå­—èŠ‚   */ 
+/*2016--12--01--14--28--15(ZJYC): µ±±éÀú¿É±ä³¤¶ÈÑ¡Ïî×Ö¶Î£¬Ò»ÏÂ±äÁ¿ÓÃÒÔ±£ÕÏ 
+²»»á³¬³öÑ¡Ïî×Ö¶Î£¬³¤¶ÈÓÃ2×Ö½Ú±íÊ¾£¬×îĞ¡1¸ö×Ö½Ú   */ 
 #define dhcpMAX_OPTION_LENGTH_OF_INTEREST       ( 2L )
-/*2016--12--01--14--29--58(ZJYC): æ ‡å‡†DHCPç«¯å£å·å’Œmagic cookieå€¼   */ 
+/*2016--12--01--14--29--58(ZJYC): ±ê×¼DHCP¶Ë¿ÚºÅºÍmagic cookieÖµ   */ 
 #if( ipconfigBYTE_ORDER == pdFREERTOS_LITTLE_ENDIAN )
     #define dhcpCLIENT_PORT 0x4400u
     #define dhcpSERVER_PORT 0x4300u
@@ -144,77 +144,77 @@ struct xDHCPMessage
 #include "pack_struct_end.h"
 typedef struct xDHCPMessage DHCPMessage_t;
 
-/*2016--12--01--14--30--49(ZJYC): DHCPçŠ¶æ€æœº   */ 
+/*2016--12--01--14--30--49(ZJYC): DHCP×´Ì¬»ú   */ 
 typedef enum
 {
-    eWaitingSendFirstDiscover = 0,  /*2016--12--01--14--31--04(ZJYC): åˆå§‹çŠ¶æ€é¦–å…ˆå‘é€Discoverï¼Œå¹¶å¤ä½æ‰€æœ‰å®šæ—¶å™¨   */ 
-    eWaitingOffer,                  /*2016--12--01--14--32--58(ZJYC): æˆ–è€…é‡æ–°å‘é€Discoverï¼Œæˆ–è€…å¦‚æœofferå³å°†åˆ°æ¥ï¼Œå‘é€ä¸€è¯·æ±‚   */
-    eWaitingAcknowledge,            /*2016--12--01--14--35--22(ZJYC): æˆ–è€…é‡æ–°å‘é€è¯·æ±‚   */ 
+    eWaitingSendFirstDiscover = 0,  /*2016--12--01--14--31--04(ZJYC): ³õÊ¼×´Ì¬Ê×ÏÈ·¢ËÍDiscover£¬²¢¸´Î»ËùÓĞ¶¨Ê±Æ÷   */ 
+    eWaitingOffer,                  /*2016--12--01--14--32--58(ZJYC): »òÕßÖØĞÂ·¢ËÍDiscover£¬»òÕßÈç¹ûoffer¼´½«µ½À´£¬·¢ËÍÒ»ÇëÇó   */
+    eWaitingAcknowledge,            /*2016--12--01--14--35--22(ZJYC): »òÕßÖØĞÂ·¢ËÍÇëÇó   */ 
     #if( ipconfigDHCP_FALL_BACK_AUTO_IP != 0 )
-        eGetLinkLayerAddress,       /*2016--12--01--14--36--12(ZJYC): å½“DHCPæ²¡æœ‰å›å¤ï¼Œå°è¯•è·å–é“¾è·¯å±‚åœ°å€168.254.x.x.   */
+        eGetLinkLayerAddress,       /*2016--12--01--14--36--12(ZJYC): µ±DHCPÃ»ÓĞ»Ø¸´£¬³¢ÊÔ»ñÈ¡Á´Â·²ãµØÖ·168.254.x.x.   */
     #endif
-    eLeasedAddress,                 /*2016--12--01--14--37--06(ZJYC): é€‚å½“çš„æ—¶åˆ»é‡æ–°å‘é€è¯·æ±‚å·²æ›´æ–°ç§Ÿçº¦   */ 
-    eNotUsingLeasedAddress          /*2016--12--01--14--37--35(ZJYC): DHCPå¤±è´¥ï¼Œé»˜è®¤åœ°å€è¢«ä½¿ç”¨   */ 
+    eLeasedAddress,                 /*2016--12--01--14--37--06(ZJYC): ÊÊµ±µÄÊ±¿ÌÖØĞÂ·¢ËÍÇëÇóÒÑ¸üĞÂ×âÔ¼   */ 
+    eNotUsingLeasedAddress          /*2016--12--01--14--37--35(ZJYC): DHCPÊ§°Ü£¬Ä¬ÈÏµØÖ·±»Ê¹ÓÃ   */ 
 } eDHCPState_t;
 
-/*2016--12--01--14--38--03(ZJYC): åœ¨DHCPçŠ¶æ€æœºä¸­å­˜å‚¨ä¿¡æ¯   */ 
+/*2016--12--01--14--38--03(ZJYC): ÔÚDHCP×´Ì¬»úÖĞ´æ´¢ĞÅÏ¢   */ 
 struct xDHCP_DATA
 {
     uint32_t ulTransactionId;
     uint32_t ulOfferedIPAddress;
     uint32_t ulDHCPServerAddress;
     uint32_t ulLeaseTime;
-    /*2016--12--01--14--39--35(ZJYC): ä¿å­˜å½“å‰å®šæ—¶å™¨çŠ¶æ€   */ 
+    /*2016--12--01--14--39--35(ZJYC): ±£´æµ±Ç°¶¨Ê±Æ÷×´Ì¬   */ 
     TickType_t xDHCPTxTime;
     TickType_t xDHCPTxPeriod;
-    /*2016--12--01--14--43--49(ZJYC): å°è¯•ä¸å¸¦ç›’å¸¦ç€å¹¿æ’­æ ‡å¿—ï¼Ÿï¼Ÿï¼Ÿ   */ 
+    /*2016--12--01--14--43--49(ZJYC): ³¢ÊÔ²»´øºĞ´ø×Å¹ã²¥±êÖ¾£¿£¿£¿   */ 
     BaseType_t xUseBroadcast;
-    /*2016--12--01--14--45--03(ZJYC): çŠ¶æ€æœºçŠ¶æ€   */ 
+    /*2016--12--01--14--45--03(ZJYC): ×´Ì¬»ú×´Ì¬   */ 
     eDHCPState_t eDHCPState;
-    /*2016--12--01--14--45--23(ZJYC): UDPå¥—æ¥å­—ï¼Œç”¨äºæ‰€æœ‰è¿›å‡ºæµé‡   */ 
+    /*2016--12--01--14--45--23(ZJYC): UDPÌ×½Ó×Ö£¬ÓÃÓÚËùÓĞ½ø³öÁ÷Á¿   */ 
     Socket_t xDHCPSocket;
 };
 
 typedef struct xDHCP_DATA DHCPData_t;
 
 #if( ipconfigDHCP_FALL_BACK_AUTO_IP != 0 )
-    /*2016--12--01--14--46--05(ZJYC): å®šä¹‰é“¾è·¯å±‚IPåœ°å€169.254.x.x   */ 
+    /*2016--12--01--14--46--05(ZJYC): ¶¨ÒåÁ´Â·²ãIPµØÖ·169.254.x.x   */ 
     #define LINK_LAYER_ADDRESS_0    169
     #define LINK_LAYER_ADDRESS_1    254
-    /*2016--12--01--14--46--31(ZJYC): å®šä¹‰é»˜è®¤çš„å­ç½‘æ©ç 255.255.0.0   */ 
+    /*2016--12--01--14--46--31(ZJYC): ¶¨ÒåÄ¬ÈÏµÄ×ÓÍøÑÚÂë255.255.0.0   */ 
     #define LINK_LAYER_NETMASK_0    255
     #define LINK_LAYER_NETMASK_1    255
     #define LINK_LAYER_NETMASK_2    0
     #define LINK_LAYER_NETMASK_3    0
 #endif
 
-/*2016--12--01--14--47--02(ZJYC): äº§ç”ŸDHCPæ¶ˆæ¯å¹¶å‘é€åˆ°DHCPå¥—æ¥å­—   */ 
+/*2016--12--01--14--47--02(ZJYC): ²úÉúDHCPÏûÏ¢²¢·¢ËÍµ½DHCPÌ×½Ó×Ö   */ 
 static void prvSendDHCPDiscover( void );
 
-/*2016--12--01--16--11--36(ZJYC): ç¿»è¯‘ä»DHCPåè®®æ ˆä¸Šæ¥å—çš„æ¶ˆæ¯   */ 
+/*2016--12--01--16--11--36(ZJYC): ·­Òë´ÓDHCPĞ­ÒéÕ»ÉÏ½ÓÊÜµÄÏûÏ¢   */ 
 static BaseType_t prvProcessDHCPReplies( BaseType_t xExpectedMessageType );
 
-/*2016--12--01--16--12--30(ZJYC): é•¿ç”ŸDHCPè¯·æ±‚æ¶ˆæ¯å¹¶å‘é€åˆ°DHCPå¥—æ¥å­—ä¸Š   */ 
+/*2016--12--01--16--12--30(ZJYC): ³¤ÉúDHCPÇëÇóÏûÏ¢²¢·¢ËÍµ½DHCPÌ×½Ó×ÖÉÏ   */ 
 static void prvSendDHCPRequest( void );
 
-/*2016--12--01--16--12--59(ZJYC): å‡†å¤‡å¼€å§‹DHCPäº¤æ˜“ï¼Œè¿™åˆå§‹åŒ–ä¸€äº›çŠ¶æ€å˜é‡ï¼Œæœ‰å¿…è¦çš„è¯åˆ›å»ºå¥—æ¥å­—   */ 
+/*2016--12--01--16--12--59(ZJYC): ×¼±¸¿ªÊ¼DHCP½»Ò×£¬Õâ³õÊ¼»¯Ò»Ğ©×´Ì¬±äÁ¿£¬ÓĞ±ØÒªµÄ»°´´½¨Ì×½Ó×Ö   */ 
 static void prvInitialiseDHCP( void );
 
-/*2016--12--01--17--01--43(ZJYC): åˆ›å»ºå‘å¤–å‘é€çš„æ•°æ®åŒ…ä¸­å…±åŒçš„éƒ¨åˆ†   */ 
+/*2016--12--01--17--01--43(ZJYC): ´´½¨ÏòÍâ·¢ËÍµÄÊı¾İ°üÖĞ¹²Í¬µÄ²¿·Ö   */ 
 static uint8_t *prvCreatePartDHCPMessage( struct freertos_sockaddr *pxAddress, BaseType_t xOpcode, const uint8_t * const pucOptionsArray, size_t *pxOptionsArraySize );
 
-/*2016--12--01--17--02--33(ZJYC): åˆ›å»ºDHCPå¥—æ¥å­—ï¼Œå¦‚æœæ²¡æœ‰åˆ›å»ºçš„è¯   */ 
+/*2016--12--01--17--02--33(ZJYC): ´´½¨DHCPÌ×½Ó×Ö£¬Èç¹ûÃ»ÓĞ´´½¨µÄ»°   */ 
 static void prvCreateDHCPSocket( void );
 
-/*2016--12--01--17--03--25(ZJYC): DHCPæ²¡æœ‰å›ç­”ï¼Œå°½å…¨åŠ›å»å¼€å§‹æœç´¢é“¾è·¯å±‚IPåœ°å€ï¼Œä½¿ç”¨éšæœºçš„æ–¹æ³•
-å‘é€ä¸€å…è´¹ARPå¹¶ç­‰å¾…æ˜¯å¦æœ‰äººå›å¤   */ 
+/*2016--12--01--17--03--25(ZJYC): DHCPÃ»ÓĞ»Ø´ğ£¬¾¡È«Á¦È¥¿ªÊ¼ËÑË÷Á´Â·²ãIPµØÖ·£¬Ê¹ÓÃËæ»úµÄ·½·¨
+·¢ËÍÒ»Ãâ·ÑARP²¢µÈ´ıÊÇ·ñÓĞÈË»Ø¸´   */ 
 #if( ipconfigDHCP_FALL_BACK_AUTO_IP != 0 )
     static void prvPrepareLinkLayerIPLookUp( void );
 #endif
 
 /*-----------------------------------------------------------*/
 
-/*2016--12--01--17--06--04(ZJYC): ä¸‹ä¸€ä¸ªDHCPäº¤æ˜“ID   */ 
+/*2016--12--01--17--06--04(ZJYC): ÏÂÒ»¸öDHCP½»Ò×ID   */ 
 static DHCPData_t xDHCPData;
 
 /*-----------------------------------------------------------*/
@@ -243,7 +243,7 @@ BaseType_t xGivingUp = pdFALSE;
     eDHCPCallbackAnswer_t eAnswer;
 #endif  /* ipconfigUSE_DHCP_HOOK */
 
-    /*2016--12--01--17--07--33(ZJYC): DHCPé‡æ–°å¼€å§‹å—   */ 
+    /*2016--12--01--17--07--33(ZJYC): DHCPÖØĞÂ¿ªÊ¼Âğ   */ 
     if( xReset != pdFALSE )
     {
         xDHCPData.eDHCPState = eWaitingSendFirstDiscover;
@@ -252,23 +252,23 @@ BaseType_t xGivingUp = pdFALSE;
     switch( xDHCPData.eDHCPState )
     {
         case eWaitingSendFirstDiscover :
-            /*2016--12--01--17--08--05(ZJYC): é—®ç”¨æˆ·ï¼šæ˜¯å¦éœ€è¦DHCP Discovery   */ 
+            /*2016--12--01--17--08--05(ZJYC): ÎÊÓÃ»§£ºÊÇ·ñĞèÒªDHCP Discovery   */ 
         #if( ipconfigUSE_DHCP_HOOK != 0 )
             eAnswer = xApplicationDHCPHook( eDHCPPhasePreDiscover, xNetworkAddressing.ulDefaultIPAddress );
             if( eAnswer == eDHCPContinue )
         #endif  /* ipconfigUSE_DHCP_HOOK */
             {
-                /*2016--12--01--17--09--25(ZJYC): åˆå§‹çŠ¶æ€ åˆ›å»ºDHCPå¥—æ¥å­—ï¼Œå®šæ—¶å™¨ç­‰ç­‰
-                å¦‚æœä»–ä»¬æ²¡æœ‰è¢«åˆ›å»ºçš„è¯*/ 
+                /*2016--12--01--17--09--25(ZJYC): ³õÊ¼×´Ì¬ ´´½¨DHCPÌ×½Ó×Ö£¬¶¨Ê±Æ÷µÈµÈ
+                Èç¹ûËûÃÇÃ»ÓĞ±»´´½¨µÄ»°*/ 
                 prvInitialiseDHCP();
-                /*2016--12--01--17--10--20(ZJYC): æŸ¥çœ‹æ˜¯å¦if prvInitialiseDHCP()å·²ç»åˆ›å»ºå¥—æ¥å­—   */ 
+                /*2016--12--01--17--10--20(ZJYC): ²é¿´ÊÇ·ñif prvInitialiseDHCP()ÒÑ¾­´´½¨Ì×½Ó×Ö   */ 
                 if( xDHCPData.xDHCPSocket == NULL )
                 {
                     xGivingUp = pdTRUE;
                     break;
                 }
                 *ipLOCAL_IP_ADDRESS_POINTER = 0UL;
-                /*2016--12--01--17--10--52(ZJYC): å‘é€ç¬¬ä¸€ä¸ªDiscoveryä¿¡æ¯   */ 
+                /*2016--12--01--17--10--52(ZJYC): ·¢ËÍµÚÒ»¸öDiscoveryĞÅÏ¢   */ 
                 if( xDHCPData.xDHCPSocket != NULL )
                 {
                     xDHCPData.xDHCPTxTime = xTaskGetTickCount();
@@ -284,7 +284,7 @@ BaseType_t xGivingUp = pdFALSE;
                     memcpy( &xNetworkAddressing, &xDefaultAddressing, sizeof( xNetworkAddressing ) );
                 }
 
-                /*2016--12--01--17--15--05(ZJYC): ç”¨æˆ·è¡¨ç¤ºDHCPæœåŠ¡ä¸ç”¨å†è¿è¡Œäº†   */ 
+                /*2016--12--01--17--15--05(ZJYC): ÓÃ»§±íÊ¾DHCP·şÎñ²»ÓÃÔÙÔËĞĞÁË   */ 
                 xGivingUp = pdTRUE;
             }
         #endif  /* ipconfigUSE_DHCP_HOOK */
@@ -294,17 +294,17 @@ BaseType_t xGivingUp = pdFALSE;
 
             xGivingUp = pdFALSE;
 
-            /*2016--12--01--17--15--40(ZJYC): ç­‰å¾…offerçš„åˆ°æ¥   */ 
+            /*2016--12--01--17--15--40(ZJYC): µÈ´ıofferµÄµ½À´   */ 
             if( prvProcessDHCPReplies( dhcpMESSAGE_TYPE_OFFER ) == pdPASS )
             {
             #if( ipconfigUSE_DHCP_HOOK != 0 )
-                /*2016--12--01--17--15--58(ZJYC): é—®ç”¨æˆ·æ˜¯å¦éœ€è¦DHCPè¯·æ±‚   */ 
+                /*2016--12--01--17--15--58(ZJYC): ÎÊÓÃ»§ÊÇ·ñĞèÒªDHCPÇëÇó   */ 
                 eAnswer = xApplicationDHCPHook( eDHCPPhasePreRequest, xDHCPData.ulOfferedIPAddress );
 
                 if( eAnswer == eDHCPContinue )
             #endif  /* ipconfigUSE_DHCP_HOOK */
                 {
-                    /*2016--12--01--17--18--07(ZJYC): å·²ç»æ”¶åˆ°ä¸€offerï¼Œç”¨æˆ·å¸Œæœ›ç»§ç»­ï¼Œç”Ÿæˆè¯·æ±‚   */ 
+                    /*2016--12--01--17--18--07(ZJYC): ÒÑ¾­ÊÕµ½Ò»offer£¬ÓÃ»§Ï£Íû¼ÌĞø£¬Éú³ÉÇëÇó   */ 
                     xDHCPData.xDHCPTxTime = xTaskGetTickCount();
                     xDHCPData.xDHCPTxPeriod = dhcpINITIAL_DHCP_TX_PERIOD;
                     prvSendDHCPRequest( );
@@ -316,14 +316,14 @@ BaseType_t xGivingUp = pdFALSE;
                 {
                     memcpy( &xNetworkAddressing, &xDefaultAddressing, sizeof( xNetworkAddressing ) );
                 }
-                /*2016--12--01--17--26--33(ZJYC): ç”¨æˆ·è¡¨ç¤ºDHCPæœåŠ¡ä¸ç”¨å†è¿è¡Œäº†   */ 
+                /*2016--12--01--17--26--33(ZJYC): ÓÃ»§±íÊ¾DHCP·şÎñ²»ÓÃÔÙÔËĞĞÁË   */ 
                 xGivingUp = pdTRUE;
             #endif  /* ipconfigUSE_DHCP_HOOK */
             }
             else if( ( xTaskGetTickCount() - xDHCPData.xDHCPTxTime ) > xDHCPData.xDHCPTxPeriod )
             {
-                /*2016--12--01--17--27--09(ZJYC): æ˜¯æ—¶å€™å‘é€ä¸‹ä¸€ä¸ªDiscoveryäº†ï¼Œå¢åŠ æ—¶é—´ï¼Œå¦‚æœè¿˜æ²¡
-                åˆ°æ”¾å¼ƒçš„æ—¶å€™ï¼Œå‘é€ä¸‹ä¸€ä¸ªDiscovery*/ 
+                /*2016--12--01--17--27--09(ZJYC): ÊÇÊ±ºò·¢ËÍÏÂÒ»¸öDiscoveryÁË£¬Ôö¼ÓÊ±¼ä£¬Èç¹û»¹Ã»
+                µ½·ÅÆúµÄÊ±ºò£¬·¢ËÍÏÂÒ»¸öDiscovery*/ 
                 xDHCPData.xDHCPTxPeriod <<= 1;
                 if( xDHCPData.xDHCPTxPeriod <= ipconfigMAXIMUM_DISCOVER_TX_PERIOD )
                 {
@@ -338,10 +338,10 @@ BaseType_t xGivingUp = pdFALSE;
                     FreeRTOS_debug_printf( ( "vDHCPProcess: giving up %lu > %lu ticks\n", xDHCPData.xDHCPTxPeriod, ipconfigMAXIMUM_DISCOVER_TX_PERIOD ) );
                     #if( ipconfigDHCP_FALL_BACK_AUTO_IP != 0 )
                     {
-                        /*2016--12--01--17--29--14(ZJYC): å¦‚æœé»˜è®¤åœ°å€ä¸º0å¹¶ä¸”ä½¿ç”¨é“¾è·¯å±‚åœ°å€ï¼Œåˆ™åªä¼š
-                        å‘é€å‡ACKã€‚å¼€å§‹æœç´¢å…è´¹é“¾è·¯å±‚åœ°å€ï¼Œä¸‹ä¸€çŠ¶æ€å°†ä¼šæ˜¯eGetLinkLayerAddress*/ 
+                        /*2016--12--01--17--29--14(ZJYC): Èç¹ûÄ¬ÈÏµØÖ·Îª0²¢ÇÒÊ¹ÓÃÁ´Â·²ãµØÖ·£¬ÔòÖ»»á
+                        ·¢ËÍ¼ÙACK¡£¿ªÊ¼ËÑË÷Ãâ·ÑÁ´Â·²ãµØÖ·£¬ÏÂÒ»×´Ì¬½«»áÊÇeGetLinkLayerAddress*/ 
                         prvPrepareLinkLayerIPLookUp();
-                        /*2016--12--01--17--32--28(ZJYC): æ‰‹åŠ¨è®¾ç½®IPåœ°å€ï¼Œæ‰€ä»¥è®¾ç½®ä¸ºä¸ä½¿ç”¨ç§Ÿçº¦åœ°å€   */ 
+                        /*2016--12--01--17--32--28(ZJYC): ÊÖ¶¯ÉèÖÃIPµØÖ·£¬ËùÒÔÉèÖÃÎª²»Ê¹ÓÃ×âÔ¼µØÖ·   */ 
                         xDHCPData.eDHCPState = eGetLinkLayerAddress;
                     }
                     #else
@@ -353,19 +353,19 @@ BaseType_t xGivingUp = pdFALSE;
             }
             break;
         case eWaitingAcknowledge :
-            /*2016--12--01--17--33--29(ZJYC): ç­‰å¾…ACKçš„åˆ°æ¥   */ 
+            /*2016--12--01--17--33--29(ZJYC): µÈ´ıACKµÄµ½À´   */ 
             if( prvProcessDHCPReplies( dhcpMESSAGE_TYPE_ACK ) == pdPASS )
             {
                 FreeRTOS_debug_printf( ( "vDHCPProcess: acked %lxip\n", FreeRTOS_ntohl( xDHCPData.ulOfferedIPAddress ) ) );
-                /*2016--12--01--17--33--44(ZJYC): DHCPå®Œæˆï¼ŒIPåœ°å€ç°åœ¨å¯ä»¥ä½¿ç”¨äº†ï¼Œç„¶åè®¾ç½®ç§Ÿçº¦è¶…æ—¶æ—¶é—´   */ 
+                /*2016--12--01--17--33--44(ZJYC): DHCPÍê³É£¬IPµØÖ·ÏÖÔÚ¿ÉÒÔÊ¹ÓÃÁË£¬È»ºóÉèÖÃ×âÔ¼³¬Ê±Ê±¼ä   */ 
                 *ipLOCAL_IP_ADDRESS_POINTER = xDHCPData.ulOfferedIPAddress;
-                /*2016--12--01--17--34--36(ZJYC): è®¾ç½®æœ¬åœ°å¹¿æ’­åœ°å€ï¼Œç±»ä¼¼äº192.168.1.255   */ 
+                /*2016--12--01--17--34--36(ZJYC): ÉèÖÃ±¾µØ¹ã²¥µØÖ·£¬ÀàËÆÓÚ192.168.1.255   */ 
                 xNetworkAddressing.ulBroadcastAddress = ( xDHCPData.ulOfferedIPAddress & xNetworkAddressing.ulNetMask ) |  ~xNetworkAddressing.ulNetMask;
                 xDHCPData.eDHCPState = eLeasedAddress;
                 iptraceDHCP_SUCCEDEED( xDHCPData.ulOfferedIPAddress );
-                /*2016--12--01--17--35--27(ZJYC): å‘é€network-upäº‹ä»¶ï¼Œå¹¶å¯åŠ¨ARPå®šæ—¶å™¨   */ 
+                /*2016--12--01--17--35--27(ZJYC): ·¢ËÍnetwork-upÊÂ¼ş£¬²¢Æô¶¯ARP¶¨Ê±Æ÷   */ 
                 vIPNetworkUpCalls( );
-                /*2016--12--01--17--38--28(ZJYC): å…³é—­å¥—æ¥å­—ï¼Œç¡®ä¿æ•°æ®åŒ…ä¸å†åœ¨ä»–ä¸Šé¢æ’é˜Ÿ   */ 
+                /*2016--12--01--17--38--28(ZJYC): ¹Ø±ÕÌ×½Ó×Ö£¬È·±£Êı¾İ°ü²»ÔÙÔÚËûÉÏÃæÅÅ¶Ó   */ 
                 vSocketClose( xDHCPData.xDHCPSocket );
                 xDHCPData.xDHCPSocket = NULL;
                 if( xDHCPData.ulLeaseTime == 0UL )
@@ -380,16 +380,16 @@ BaseType_t xGivingUp = pdFALSE;
                 {
                     /* The lease time is already valid. */
                 }
-                /*2016--12--01--18--27--36(ZJYC): æ£€æµ‹ç¢°æ’   */ 
+                /*2016--12--01--18--27--36(ZJYC): ¼ì²âÅö×²   */ 
                 vARPSendGratuitous();
                 vIPReloadDHCPTimer( xDHCPData.ulLeaseTime );
             }
             else
             {
-                /*2016--12--01--18--28--22(ZJYC): æ˜¯æ—¶å€™å‘é€å¦ä¸€ä¸ªDiscoveryï¼Ÿ   */ 
+                /*2016--12--01--18--28--22(ZJYC): ÊÇÊ±ºò·¢ËÍÁíÒ»¸öDiscovery£¿   */ 
                 if( ( xTaskGetTickCount() - xDHCPData.xDHCPTxTime ) > xDHCPData.xDHCPTxPeriod )
                 {
-                    /*2016--12--01--18--28--49(ZJYC): å¢å‡äº‹ä»¶ï¼Œå¦‚æœè¿˜æ²¡åˆ°æ”¾å¼ƒçš„æ—¶å€™ï¼Œå‘é€å¦ä¸€ä¸ªè¯·æ±‚   */ 
+                    /*2016--12--01--18--28--49(ZJYC): Ôö¼õÊÂ¼ş£¬Èç¹û»¹Ã»µ½·ÅÆúµÄÊ±ºò£¬·¢ËÍÁíÒ»¸öÇëÇó   */ 
                     xDHCPData.xDHCPTxPeriod <<= 1;
                     if( xDHCPData.xDHCPTxPeriod <= ipconfigMAXIMUM_DISCOVER_TX_PERIOD )
                     {
@@ -398,7 +398,7 @@ BaseType_t xGivingUp = pdFALSE;
                     }
                     else
                     {
-                        /*2016--12--01--18--29--25(ZJYC): å†å¼€å§‹ä¸€æ¬¡   */ 
+                        /*2016--12--01--18--29--25(ZJYC): ÔÙ¿ªÊ¼Ò»´Î   */ 
                         xDHCPData.eDHCPState = eWaitingSendFirstDiscover;
                     }
                 }
@@ -410,25 +410,25 @@ BaseType_t xGivingUp = pdFALSE;
             {
                 if( xARPHadIPClash == pdFALSE )
                 {
-                    /*2016--12--01--18--30--50(ZJYC): ARPæ£€æµ‹ä¸ç¢°æ’ï¼Œç»§ç»­ã€‚ã€‚   */ 
+                    /*2016--12--01--18--30--50(ZJYC): ARP¼ì²â²»Åö×²£¬¼ÌĞø¡£¡£   */ 
                     iptraceDHCP_SUCCEDEED( xDHCPData.ulOfferedIPAddress );
-                    /*2016--12--01--18--31--15(ZJYC): è‡ªåŠ¨IPé…ç½®å®Œæˆï¼Œé»˜è®¤é…ç½®çš„IPåœ°å€å°†ä¼šä½¿ç”¨
-                    ç°åœ¨ï¼Œè°ƒç”¨vIPNetworkUpCalls()å‘é€network-up äº‹ä»¶å¹¶å¯åŠ¨ARPå®šæ—¶å™¨*/ 
+                    /*2016--12--01--18--31--15(ZJYC): ×Ô¶¯IPÅäÖÃÍê³É£¬Ä¬ÈÏÅäÖÃµÄIPµØÖ·½«»áÊ¹ÓÃ
+                    ÏÖÔÚ£¬µ÷ÓÃvIPNetworkUpCalls()·¢ËÍnetwork-up ÊÂ¼ş²¢Æô¶¯ARP¶¨Ê±Æ÷*/ 
                     vIPNetworkUpCalls( );
                     xDHCPData.eDHCPState = eNotUsingLeasedAddress;
                 }
                 else
                 {
-                    /*2016--12--01--18--32--39(ZJYC): ARPå‘ç”Ÿç¢°æ’ï¼Œå°è¯•å¦ä¸€ä¸ªIPåœ°å€   */ 
+                    /*2016--12--01--18--32--39(ZJYC): ARP·¢ÉúÅö×²£¬³¢ÊÔÁíÒ»¸öIPµØÖ·   */ 
                     prvPrepareLinkLayerIPLookUp();
-                    /*2016--12--01--18--33--12(ZJYC): æ‰‹åŠ¨è®¾ç½®IPåœ°å€ï¼Œæ‰€ä»¥ä¸å†ä½¿ç”¨ç§Ÿçº¦åœ°å€   */ 
+                    /*2016--12--01--18--33--12(ZJYC): ÊÖ¶¯ÉèÖÃIPµØÖ·£¬ËùÒÔ²»ÔÙÊ¹ÓÃ×âÔ¼µØÖ·   */ 
                     xDHCPData.eDHCPState = eGetLinkLayerAddress;
                 }
             }
             break;
     #endif  /* ipconfigDHCP_FALL_BACK_AUTO_IP */
         case eLeasedAddress :
-            /*2016--12--01--18--33--57(ZJYC): åœ¨é€‚å½“çš„æ—¶é—´é‡æ–°å‘é€è¯·æ±‚ä»¥æ›´æ–°ç§Ÿçº¦   */ 
+            /*2016--12--01--18--33--57(ZJYC): ÔÚÊÊµ±µÄÊ±¼äÖØĞÂ·¢ËÍÇëÇóÒÔ¸üĞÂ×âÔ¼   */ 
             prvCreateDHCPSocket();
 
             if( xDHCPData.xDHCPSocket != NULL )
@@ -437,7 +437,7 @@ BaseType_t xGivingUp = pdFALSE;
                 xDHCPData.xDHCPTxPeriod = dhcpINITIAL_DHCP_TX_PERIOD;
                 prvSendDHCPRequest( );
                 xDHCPData.eDHCPState = eWaitingAcknowledge;
-                /*2016--12--01--18--34--49(ZJYC): ä»ç°åœ¨å¼€å§‹ï¼Œæˆ‘ä»¬å°†ä¼šè¢«ç»å¸¸è°ƒç”¨   */ 
+                /*2016--12--01--18--34--49(ZJYC): ´ÓÏÖÔÚ¿ªÊ¼£¬ÎÒÃÇ½«»á±»¾­³£µ÷ÓÃ   */ 
                 vIPReloadDHCPTimer( dhcpINITIAL_TIMER_PERIOD );
             }
             break;
@@ -449,9 +449,9 @@ BaseType_t xGivingUp = pdFALSE;
     }
     if( xGivingUp != pdFALSE )
     {
-        /*2016--12--01--18--37--10(ZJYC): å¯èƒ½å› ä¸ºè¶…æ—¶æˆ–è€…æ˜¯xApplicationDHCPHookè¿”å›é™¤äº†
-        eDHCPContinueä»¥å¤–çš„å…¶ä»–å€¼ï¼Œæ„å‘³ç€å–æ¶ˆDHCP*/ 
-        /*2016--12--01--18--38--20(ZJYC): æ¢å¤åˆ°é™æ€IPåœ°å€   */ 
+        /*2016--12--01--18--37--10(ZJYC): ¿ÉÄÜÒòÎª³¬Ê±»òÕßÊÇxApplicationDHCPHook·µ»Ø³ıÁË
+        eDHCPContinueÒÔÍâµÄÆäËûÖµ£¬ÒâÎ¶×ÅÈ¡ÏûDHCP*/ 
+        /*2016--12--01--18--38--20(ZJYC): »Ö¸´µ½¾²Ì¬IPµØÖ·   */ 
         taskENTER_CRITICAL();
         {
             *ipLOCAL_IP_ADDRESS_POINTER = xNetworkAddressing.ulDefaultIPAddress;
@@ -461,13 +461,13 @@ BaseType_t xGivingUp = pdFALSE;
 
         xDHCPData.eDHCPState = eNotUsingLeasedAddress;
         vIPSetDHCPTimerEnableState( pdFALSE );
-        /*2016--12--01--18--38--42(ZJYC): DHCPå¤±è´¥äº†ï¼Œé»˜è®¤é…ç½®çš„IPåœ°å€å°†ä¼šä½¿ç”¨
-        ç°åœ¨ï¼Œè°ƒç”¨vIPNetworkUpCalls()å‘é€network-up äº‹ä»¶å¹¶å¯åŠ¨ARPå®šæ—¶å™¨   */ 
+        /*2016--12--01--18--38--42(ZJYC): DHCPÊ§°ÜÁË£¬Ä¬ÈÏÅäÖÃµÄIPµØÖ·½«»áÊ¹ÓÃ
+        ÏÖÔÚ£¬µ÷ÓÃvIPNetworkUpCalls()·¢ËÍnetwork-up ÊÂ¼ş²¢Æô¶¯ARP¶¨Ê±Æ÷   */ 
         vIPNetworkUpCalls( );
-        /*2016--12--01--18--39--46(ZJYC): æ£€æµ‹å¥—æ¥å­—æ˜¯å¦çœŸçš„å»ºç«‹äº†   */ 
+        /*2016--12--01--18--39--46(ZJYC): ¼ì²âÌ×½Ó×ÖÊÇ·ñÕæµÄ½¨Á¢ÁË   */ 
         if( xDHCPData.xDHCPSocket != NULL )
         {
-            /*2016--12--01--18--40--05(ZJYC): å…³é—­å¥—æ¥å­—ï¼Œä»¥ç¡®ä¿æ•°æ®åŒ…ä¸ä¼šåœ¨å®ƒä¸Šæ’é˜Ÿ   */ 
+            /*2016--12--01--18--40--05(ZJYC): ¹Ø±ÕÌ×½Ó×Ö£¬ÒÔÈ·±£Êı¾İ°ü²»»áÔÚËüÉÏÅÅ¶Ó   */ 
             vSocketClose( xDHCPData.xDHCPSocket );
             xDHCPData.xDHCPSocket = NULL;
         }
@@ -480,28 +480,28 @@ static void prvCreateDHCPSocket( void )
 struct freertos_sockaddr xAddress;
 BaseType_t xReturn;
 TickType_t xTimeoutTime = ( TickType_t ) 0;
-    /*2016--12--01--18--40--41(ZJYC): å¦‚æœè¿˜æ²¡åˆ›å»ºçš„è¯ï¼Œåˆ›å»ºä»–   */ 
+    /*2016--12--01--18--40--41(ZJYC): Èç¹û»¹Ã»´´½¨µÄ»°£¬´´½¨Ëû   */ 
     if( xDHCPData.xDHCPSocket == NULL )
     {
         xDHCPData.xDHCPSocket = FreeRTOS_socket( FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP );
         if( xDHCPData.xDHCPSocket != FREERTOS_INVALID_SOCKET )
         {
-            /*2016--12--01--18--41--03(ZJYC): ç¡®ä¿Rxå’ŒTxè¶…æ—¶æ—¶é—´ä¸º0.å› ä¸ºDHCPåœ¨IPä»»åŠ¡ä¸­æ‰§è¡Œ   */ 
+            /*2016--12--01--18--41--03(ZJYC): È·±£RxºÍTx³¬Ê±Ê±¼äÎª0.ÒòÎªDHCPÔÚIPÈÎÎñÖĞÖ´ĞĞ   */ 
             FreeRTOS_setsockopt( xDHCPData.xDHCPSocket, 0, FREERTOS_SO_RCVTIMEO, ( void * ) &xTimeoutTime, sizeof( TickType_t ) );
             FreeRTOS_setsockopt( xDHCPData.xDHCPSocket, 0, FREERTOS_SO_SNDTIMEO, ( void * ) &xTimeoutTime, sizeof( TickType_t ) );
-            /*2016--12--01--18--42--57(ZJYC): ç»‘å®šåˆ°æ ‡å‡†DHCPå®¢æˆ·ç«¯å£0x44   */ 
+            /*2016--12--01--18--42--57(ZJYC): °ó¶¨µ½±ê×¼DHCP¿Í»§¶Ë¿Ú0x44   */ 
             xAddress.sin_port = ( uint16_t ) dhcpCLIENT_PORT;
             xReturn = vSocketBind( xDHCPData.xDHCPSocket, &xAddress, sizeof( xAddress ), pdFALSE );
             if( xReturn != 0 )
             {
-                /*2016--12--01--18--43--56(ZJYC): ç»‘å®šå¤±è´¥ï¼Œå†æ¬¡å…³é—­å¥—æ¥å­—   */ 
+                /*2016--12--01--18--43--56(ZJYC): °ó¶¨Ê§°Ü£¬ÔÙ´Î¹Ø±ÕÌ×½Ó×Ö   */ 
                 vSocketClose( xDHCPData.xDHCPSocket );
                 xDHCPData.xDHCPSocket = NULL;
             }
         }
         else
         {
-            /*2016--12--01--18--44--44(ZJYC): æŠŠå®ƒå˜ä¸º0ä¸€éæ›´æ—©çš„æ£€æµ‹åˆ°ä»–   */ 
+            /*2016--12--01--18--44--44(ZJYC): °ÑËü±äÎª0Ò»±é¸üÔçµÄ¼ì²âµ½Ëû   */ 
             xDHCPData.xDHCPSocket = NULL;
         }
     }
@@ -510,7 +510,7 @@ TickType_t xTimeoutTime = ( TickType_t ) 0;
 
 static void prvInitialiseDHCP( void )
 {
-    /*2016--12--01--18--45--11(ZJYC): åˆå§‹åŒ–DHCPå¤„ç†éœ€è¦çš„å‚æ•°   */ 
+    /*2016--12--01--18--45--11(ZJYC): ³õÊ¼»¯DHCP´¦ÀíĞèÒªµÄ²ÎÊı   */ 
     if( xDHCPData.ulTransactionId == 0ul )
     {
         xDHCPData.ulTransactionId = ipconfigRAND32();
@@ -523,7 +523,7 @@ static void prvInitialiseDHCP( void )
     xDHCPData.ulOfferedIPAddress = 0UL;
     xDHCPData.ulDHCPServerAddress = 0UL;
     xDHCPData.xDHCPTxPeriod = dhcpINITIAL_DHCP_TX_PERIOD;
-    /*2016--12--01--18--45--47(ZJYC): å¦‚æœæ²¡æœ‰åˆ™åˆ›å»ºå¥—æ¥å­—   */ 
+    /*2016--12--01--18--45--47(ZJYC): Èç¹ûÃ»ÓĞÔò´´½¨Ì×½Ó×Ö   */ 
     prvCreateDHCPSocket();
     FreeRTOS_debug_printf( ( "prvInitialiseDHCP: start after %lu ticks\n", dhcpINITIAL_TIMER_PERIOD ) );
     vIPReloadDHCPTimer( dhcpINITIAL_TIMER_PERIOD );
@@ -541,24 +541,24 @@ uint8_t *pucByte, ucOptionCode, ucLength;
 uint32_t ulProcessed, ulParameter;
 BaseType_t xReturn = pdFALSE;
 const uint32_t ulMandatoryOptions = 2ul; 
-    /*2016--12--01--18--46--22(ZJYC): DHCPæœåŠ¡å™¨åœ°å€ï¼Œæ­£ç¡®çš„DHCPä¿¡æ¯ç±»å‹å¿…é¡»åœ¨é€‰é¡¹ä¸­æ˜¾ç¤º   */ 
+    /*2016--12--01--18--46--22(ZJYC): DHCP·şÎñÆ÷µØÖ·£¬ÕıÈ·µÄDHCPĞÅÏ¢ÀàĞÍ±ØĞëÔÚÑ¡ÏîÖĞÏÔÊ¾   */ 
     lBytes = FreeRTOS_recvfrom( xDHCPData.xDHCPSocket, ( void * ) &pucUDPPayload, 0ul, FREERTOS_ZERO_COPY, &xClient, &xClientLength );
     if( lBytes > 0 )
     {
-        /*2016--12--01--18--47--30(ZJYC): æ˜ å°„åˆ°æ¥æ”¶åˆ°çš„ä¿¡æ¯   */ 
+        /*2016--12--01--18--47--30(ZJYC): Ó³Éäµ½½ÓÊÕµ½µÄĞÅÏ¢   */ 
         pxDHCPMessage = ( DHCPMessage_t * ) ( pucUDPPayload );
-        /*2016--12--01--18--48--58(ZJYC): å®Œæ•´æ€§æ£€æŸ¥   */ 
+        /*2016--12--01--18--48--58(ZJYC): ÍêÕûĞÔ¼ì²é   */ 
         if( ( pxDHCPMessage->ulDHCPCookie == ( uint32_t ) dhcpCOOKIE ) &&
             ( pxDHCPMessage->ucOpcode == ( uint8_t ) dhcpREPLY_OPCODE ) &&
             ( pxDHCPMessage->ulTransactionID == FreeRTOS_htonl( xDHCPData.ulTransactionId ) ) )
         {
-            /*2016--12--01--18--49--50(ZJYC): æ¯”å¯¹ç”¨æˆ·ç¡¬ä»¶åœ°å€   */ 
+            /*2016--12--01--18--49--50(ZJYC): ±È¶ÔÓÃ»§Ó²¼şµØÖ·   */ 
             if( memcmp( ( void * ) &( pxDHCPMessage->ucClientHardwareAddress ), ( void * ) ipLOCAL_MAC_ADDRESS, sizeof( MACAddress_t ) ) == 0 )
             {
-                /*2016--12--01--18--50--03(ZJYC): ç°åœ¨å…³é”®é€‰é¡¹ä¿¡æ¯ä¸€ä¸ªä¹Ÿæ²¡å¤„ç†å‘¢   */ 
+                /*2016--12--01--18--50--03(ZJYC): ÏÖÔÚ¹Ø¼üÑ¡ÏîĞÅÏ¢Ò»¸öÒ²Ã»´¦ÀíÄØ   */ 
                 ulProcessed = 0ul;
-                /*2016--12--01--18--50--41(ZJYC): éå†é€‰é¡¹ç›´åˆ°dhcpOPTION_END_BYTEè¢«å‘ç°ï¼Œ
-                æ³¨æ„ä¸è¦è·‘ä¸¢äº†*/ 
+                /*2016--12--01--18--50--41(ZJYC): ±éÀúÑ¡ÏîÖ±µ½dhcpOPTION_END_BYTE±»·¢ÏÖ£¬
+                ×¢Òâ²»ÒªÅÜ¶ªÁË*/ 
                 pucByte = &( pxDHCPMessage->ucFirstOptionByte );
                 pucLastByte = &( pucUDPPayload[ lBytes - dhcpMAX_OPTION_LENGTH_OF_INTEREST ] );
                 while( pucByte < pucLastByte )
@@ -566,12 +566,12 @@ const uint32_t ulMandatoryOptions = 2ul;
                     ucOptionCode = pucByte[ 0 ];
                     if( ucOptionCode == dhcpOPTION_END_BYTE )
                     {
-                        /*2016--12--01--18--51--39(ZJYC): ç¢°åˆ°äº†æœ€åä¸€ä¸ªå­—èŠ‚   */ 
+                        /*2016--12--01--18--51--39(ZJYC): Åöµ½ÁË×îºóÒ»¸ö×Ö½Ú   */ 
                         break;
                     }
                     if( ucOptionCode == dhcpZERO_PAD_OPTION_CODE )
                     {
-                        /*2016--12--01--18--52--38(ZJYC): å¡«å……å­—èŠ‚ï¼Œåé¢ä¸ä¼šå¸¦ç€é•¿åº¦   */ 
+                        /*2016--12--01--18--52--38(ZJYC): Ìî³ä×Ö½Ú£¬ºóÃæ²»»á´ø×Å³¤¶È   */ 
                         pucByte += 1;
                         continue;
                     }
@@ -579,12 +579,12 @@ const uint32_t ulMandatoryOptions = 2ul;
                     pucByte += 2;
                     /* In most cases, a 4-byte network-endian parameter follows,
                     just get it once here and use later */
-                    /*2016--12--01--18--53--04(ZJYC): å¤§éƒ¨åˆ†æƒ…å†µä¸‹ï¼Œ4å­—èŠ‚   */ 
+                    /*2016--12--01--18--53--04(ZJYC): ´ó²¿·ÖÇé¿öÏÂ£¬4×Ö½Ú   */ 
                     memcpy( ( void * ) &( ulParameter ), ( void * ) pucByte, ( size_t ) sizeof( ulParameter ) );
 
                     switch( ucOptionCode )
                     {
-                        /*2016--12--01--18--57--20(ZJYC): 0x53æ¶ˆæ¯ç±»å‹
+                        /*2016--12--01--18--57--20(ZJYC): 0x53ÏûÏ¢ÀàĞÍ
                         1-DHCPDISCOVER 
                         2-DHCPOFFER 
                         3-DHCPREQUEST 
@@ -598,14 +598,14 @@ const uint32_t ulMandatoryOptions = 2ul;
 
                             if( *pucByte == ( uint8_t ) xExpectedMessageType )
                             {
-                                /*2016--12--01--18--59--29(ZJYC): è¿™å°±æ˜¯æˆ‘ä»¬æŒ‡å®šçš„æƒ³è¦çš„ä¿¡æ¯   */ 
+                                /*2016--12--01--18--59--29(ZJYC): Õâ¾ÍÊÇÎÒÃÇÖ¸¶¨µÄÏëÒªµÄĞÅÏ¢   */ 
                                 ulProcessed++;
                             }
                             else if( *pucByte == ( uint8_t ) dhcpMESSAGE_TYPE_NACK )
                             {
                                 if( xExpectedMessageType == ( BaseType_t ) dhcpMESSAGE_TYPE_ACK )
                                 {
-                                    /*2016--12--01--19--00--02(ZJYC): è¢«æ‹’ç»äº†ï¼Œé‡æ–°å¼€å§‹å§   */ 
+                                    /*2016--12--01--19--00--02(ZJYC): ±»¾Ü¾øÁË£¬ÖØĞÂ¿ªÊ¼°É   */ 
                                     xDHCPData.eDHCPState = eWaitingSendFirstDiscover;
                                 }
                             }
@@ -614,29 +614,29 @@ const uint32_t ulMandatoryOptions = 2ul;
                                 /* Don't process other message types. */
                             }
                             break;
-                        /*2016--12--01--19--00--46(ZJYC): 1 å­ç½‘æ©ç    */ 
+                        /*2016--12--01--19--00--46(ZJYC): 1 ×ÓÍøÑÚÂë   */ 
                         case dhcpSUBNET_MASK_OPTION_CODE :
                             if( ucLength == sizeof( uint32_t ) )
                             {
                                 xNetworkAddressing.ulNetMask = ulParameter;
                             }
                             break;
-                        /*2016--12--01--19--02--10(ZJYC): 3 ç½‘å…³åœ°å€   */ 
+                        /*2016--12--01--19--02--10(ZJYC): 3 Íø¹ØµØÖ·   */ 
                         case dhcpGATEWAY_OPTION_CODE :
 
                             if( ucLength == sizeof( uint32_t ) )
                             {
-                                /*2016--12--01--19--02--44(ZJYC): ulProcessedåœ¨è¿™é‡Œä¸å¢åŠ äº†ï¼Œå› ä¸ºä»–ä¸é‡è¦   */ 
+                                /*2016--12--01--19--02--44(ZJYC): ulProcessedÔÚÕâÀï²»Ôö¼ÓÁË£¬ÒòÎªËû²»ÖØÒª   */ 
                                 xNetworkAddressing.ulGatewayAddress = ulParameter;
                             }
                             break;
-                        /*2016--12--01--19--03--32(ZJYC): 6 DNSæœåŠ¡å™¨   */ 
+                        /*2016--12--01--19--03--32(ZJYC): 6 DNS·şÎñÆ÷   */ 
                         case dhcpDNS_SERVER_OPTIONS_CODE :
-                            /*2016--12--01--19--03--52(ZJYC): ulProcessedåœ¨è¿™é‡Œå°±ä¸å¢åŠ äº†ï¼Œå› ä¸ºDNSæœåŠ¡å™¨ä¸é‡è¦
-                            åªæœ‰ç¬¬ä¸€ä¸ªDNSæœåŠ¡å™¨è¢«é‡‡çº³*/ 
+                            /*2016--12--01--19--03--52(ZJYC): ulProcessedÔÚÕâÀï¾Í²»Ôö¼ÓÁË£¬ÒòÎªDNS·şÎñÆ÷²»ÖØÒª
+                            Ö»ÓĞµÚÒ»¸öDNS·şÎñÆ÷±»²ÉÄÉ*/ 
                             xNetworkAddressing.ulDNSServerAddress = ulParameter;
                             break;
-                            /*2016--12--01--19--05--16(ZJYC): DHCPæœåŠ¡å™¨æ ‡è¯†ç¬¦   */ 
+                            /*2016--12--01--19--05--16(ZJYC): DHCP·şÎñÆ÷±êÊ¶·û   */ 
                         case dhcpSERVER_IP_ADDRESS_OPTION_CODE :
 
                             if( ucLength == sizeof( uint32_t ) )
@@ -657,17 +657,17 @@ const uint32_t ulMandatoryOptions = 2ul;
                                 }
                             }
                             break;
-                        /*2016--12--01--19--06--44(ZJYC): åœ°å€ç§ŸæœŸ   */ 
+                        /*2016--12--01--19--06--44(ZJYC): µØÖ·×âÆÚ   */ 
                         case dhcpLEASE_TIME_OPTION_CODE :
 
                             if( ucLength == sizeof( &( xDHCPData.ulLeaseTime ) ) )
                             {
-                                /*2016--12--01--19--07--28(ZJYC): ulProcessedä¸å¢åŠ ï¼Œå› ä¸ºä¸é‡è¦
-                                æœ¬æ—¶é—´ä»¥ç§’ä¸ºå•ä½ï¼Œè½¬æ¢æˆæˆ‘ä»¬çš„æ ¼å¼*/ 
+                                /*2016--12--01--19--07--28(ZJYC): ulProcessed²»Ôö¼Ó£¬ÒòÎª²»ÖØÒª
+                                ±¾Ê±¼äÒÔÃëÎªµ¥Î»£¬×ª»»³ÉÎÒÃÇµÄ¸ñÊ½*/ 
                                 xDHCPData.ulLeaseTime = FreeRTOS_ntohl( ulParameter );
-                                /*2016--12--01--19--08--26(ZJYC): ç§ŸæœŸé™¤ä»¥2ï¼Œä»¥ä¿è¯æå‰å‘é€ç»­ç§Ÿ   */ 
+                                /*2016--12--01--19--08--26(ZJYC): ×âÆÚ³ıÒÔ2£¬ÒÔ±£Ö¤ÌáÇ°·¢ËÍĞø×â   */ 
                                 xDHCPData.ulLeaseTime >>= 1UL;
-                                /*2016--12--01--19--09--09(ZJYC): è½¬æ¢ä¸ºæ»´ç­”æ•°   */ 
+                                /*2016--12--01--19--09--09(ZJYC): ×ª»»ÎªµÎ´ğÊı   */ 
                                 xDHCPData.ulLeaseTime = configTICK_RATE_HZ * xDHCPData.ulLeaseTime;
                             }
                             break;
@@ -675,7 +675,7 @@ const uint32_t ulMandatoryOptions = 2ul;
                             /* Not interested in this field. */
                             break;
                     }
-                    /*2016--12--01--19--09--40(ZJYC): è·³è¿‡æ•°æ®ä»¥å¯»æ‰¾ä¸‹ä¸€ä¸ªé€‰é¡¹   */ 
+                    /*2016--12--01--19--09--40(ZJYC): Ìø¹ıÊı¾İÒÔÑ°ÕÒÏÂÒ»¸öÑ¡Ïî   */ 
                     if( ucLength == 0u )
                     {
                         break;
@@ -685,10 +685,10 @@ const uint32_t ulMandatoryOptions = 2ul;
                         pucByte += ucLength;
                     }
                 }
-                /*2016--12--01--19--10--03(ZJYC): æ˜¯å¦æ‰€æœ‰å¼ºåˆ¶æ€§ä¿¡æ¯å·²æ”¶åˆ°ï¼Ÿ   */ 
+                /*2016--12--01--19--10--03(ZJYC): ÊÇ·ñËùÓĞÇ¿ÖÆĞÔĞÅÏ¢ÒÑÊÕµ½£¿   */ 
                 if( ulProcessed >= ulMandatoryOptions )
                 {
-                    /*2016--12--01--19--11--03(ZJYC): é‡‡ç”¨æ–°çš„åœ°å€   */ 
+                    /*2016--12--01--19--11--03(ZJYC): ²ÉÓÃĞÂµÄµØÖ·   */ 
                     xDHCPData.ulOfferedIPAddress = pxDHCPMessage->ulYourIPAddress_yiaddr;
                     FreeRTOS_printf( ( "vDHCPProcess: offer %lxip\n", FreeRTOS_ntohl( xDHCPData.ulOfferedIPAddress ) ) );
                     xReturn = pdPASS;
@@ -716,20 +716,20 @@ uint8_t *pucUDPPayloadBuffer;
 
     xRequiredBufferSize += ( 2 + xNameLength );
 #endif
-    /*2016--12--01--19--11--31(ZJYC): è·å–ä¸€ç¼“å­˜ï¼Œè¿™é‡‡ç”¨æœ€å¤§çš„å»¶è¿Ÿï¼ŒåŒæ—¶ä¹Ÿè¢«é™åˆ¶åœ¨ipconfigUDP_MAX_SEND_BLOCK_TIME_TICKS
-    æ‰€ä»¥è¿”å›å€¼éœ€è¦æ£€æŸ¥*/ 
+    /*2016--12--01--19--11--31(ZJYC): »ñÈ¡Ò»»º´æ£¬Õâ²ÉÓÃ×î´óµÄÑÓ³Ù£¬Í¬Ê±Ò²±»ÏŞÖÆÔÚipconfigUDP_MAX_SEND_BLOCK_TIME_TICKS
+    ËùÒÔ·µ»ØÖµĞèÒª¼ì²é*/ 
     do
     {
     } while( ( pucUDPPayloadBuffer = ( uint8_t * ) FreeRTOS_GetUDPPayloadBuffer( xRequiredBufferSize, portMAX_DELAY ) ) == NULL );
     pxDHCPMessage = ( DHCPMessage_t * ) pucUDPPayloadBuffer;
-    /*2016--12--01--19--12--58(ZJYC): æ¸…é›¶   */ 
+    /*2016--12--01--19--12--58(ZJYC): ÇåÁã   */ 
     memset( ( void * ) pxDHCPMessage, 0x00, sizeof( DHCPMessage_t ) );
-    /*2016--12--01--19--13--11(ZJYC): åˆ›å»ºæ¶ˆæ¯   */ 
+    /*2016--12--01--19--13--11(ZJYC): ´´½¨ÏûÏ¢   */ 
     pxDHCPMessage->ucOpcode = ( uint8_t ) xOpcode;
     pxDHCPMessage->ucAddressType = ( uint8_t ) dhcpADDRESS_TYPE_ETHERNET;
     pxDHCPMessage->ucAddressLength = ( uint8_t ) dhcpETHERNET_ADDRESS_LENGTH;
-    /*2016--12--01--19--13--19(ZJYC): ulTransactionIDç¡®å®ä¸éœ€è¦å­—èŠ‚æ¢åºï¼Œä½†æ˜¯å½“DHCP
-    è¶…æ—¶ï¼Œæœ€å¥½æ˜¯é€æ¸å¢åŠ çš„IDåŒºåŸŸ*/ 
+    /*2016--12--01--19--13--19(ZJYC): ulTransactionIDÈ·Êµ²»ĞèÒª×Ö½Ú»»Ğò£¬µ«ÊÇµ±DHCP
+    ³¬Ê±£¬×îºÃÊÇÖğ½¥Ôö¼ÓµÄIDÇøÓò*/ 
     pxDHCPMessage->ulTransactionID = FreeRTOS_htonl( xDHCPData.ulTransactionId );
     pxDHCPMessage->ulDHCPCookie = ( uint32_t ) dhcpCOOKIE;
     if( xDHCPData.xUseBroadcast != pdFALSE )
@@ -740,15 +740,15 @@ uint8_t *pucUDPPayloadBuffer;
     {
         pxDHCPMessage->usFlags = 0u;
     }
-    /*2016--12--01--19--15--34(ZJYC): å¡«å……æœ¬åœ°MACåœ°å€   */ 
+    /*2016--12--01--19--15--34(ZJYC): Ìî³ä±¾µØMACµØÖ·   */ 
     memcpy( ( void * ) &( pxDHCPMessage->ucClientHardwareAddress[ 0 ] ), ( void * ) ipLOCAL_MAC_ADDRESS, sizeof( MACAddress_t ) );
-    /*2016--12--01--19--16--00(ZJYC): å¤åˆ¶å¸¸é‡é€‰é¡¹å­—æ®µ   */ 
+    /*2016--12--01--19--16--00(ZJYC): ¸´ÖÆ³£Á¿Ñ¡Ïî×Ö¶Î   */ 
     memcpy( ( void * ) &( pucUDPPayloadBuffer[ dhcpFIRST_OPTION_BYTE_OFFSET ] ), ( void * ) pucOptionsArray, *pxOptionsArraySize );
     #if( ipconfigDHCP_REGISTER_HOSTNAME == 1 )
     {
-        /*2016--12--01--19--16--41(ZJYC): æœ‰è¿™ä¸ªé€‰é¡¹ï¼Œä¸»æœºåå¯ä»¥è¢«æ³¨å†Œåœ¨è·¯ç”±
-        æ›´æ–¹ä¾¿å¯»æ‰¾*/ 
-        /*2016--12--01--19--18--13(ZJYC): æŒ‡å‘OPTION_ENDæ‰€åœ¨åœ°ï¼Œå¹¶æ·»åŠ ä¿¡æ¯   */ 
+        /*2016--12--01--19--16--41(ZJYC): ÓĞÕâ¸öÑ¡Ïî£¬Ö÷»úÃû¿ÉÒÔ±»×¢²áÔÚÂ·ÓÉ
+        ¸ü·½±ãÑ°ÕÒ*/ 
+        /*2016--12--01--19--18--13(ZJYC): Ö¸ÏòOPTION_ENDËùÔÚµØ£¬²¢Ìí¼ÓĞÅÏ¢   */ 
         pucPtr = &( pucUDPPayloadBuffer[ dhcpFIRST_OPTION_BYTE_OFFSET + ( *pxOptionsArraySize - 1 ) ] );
         pucPtr[ 0 ] = dhcpDNS_HOSTNAME_OPTIONS_CODE;
         pucPtr[ 1 ] = ( uint8_t ) xNameLength;
@@ -757,10 +757,10 @@ uint8_t *pucUDPPayloadBuffer;
         *pxOptionsArraySize += ( 2 + xNameLength );
     }
     #endif
-    /*2016--12--01--19--18--59(ZJYC): åŠ å…¥å®¢æˆ·ç«¯æ ‡è®°   */ 
+    /*2016--12--01--19--18--59(ZJYC): ¼ÓÈë¿Í»§¶Ë±ê¼Ç   */ 
     memcpy( ( void * ) &( pucUDPPayloadBuffer[ dhcpFIRST_OPTION_BYTE_OFFSET + dhcpCLIENT_IDENTIFIER_OFFSET ] ),
         ( void * ) ipLOCAL_MAC_ADDRESS, sizeof( MACAddress_t ) );
-    /*2016--12--01--19--19--13(ZJYC): è®¾ç½®åœ°å€   */ 
+    /*2016--12--01--19--19--13(ZJYC): ÉèÖÃµØÖ·   */ 
     pxAddress->sin_addr = ipBROADCAST_IP_ADDRESS;
     pxAddress->sin_port = ( uint16_t ) dhcpSERVER_PORT;
 
@@ -774,27 +774,27 @@ uint8_t *pucUDPPayloadBuffer;
 struct freertos_sockaddr xAddress;
 static const uint8_t ucDHCPRequestOptions[] =
 {
-    /*2016--12--01--19--19--34(ZJYC): ä¸è¦å†ä¸æ”¹å˜dhcpCLIENT_IDENTIFIER_OFFSETï¼Œ
-    dhcpREQUESTED_IP_ADDRESS_OFFSET å’Œ dhcpDHCP_SERVER_IP_ADDRESS_OFFSETçš„æƒ…å†µä¸‹æ›´æ”¹é¡ºåº*/ 
-    dhcpMESSAGE_TYPE_OPTION_CODE, 1, dhcpMESSAGE_TYPE_REQUEST,      /*2016--12--01--19--20--52(ZJYC): æ¶ˆæ¯ç±»å‹   */ 
-    dhcpCLIENT_IDENTIFIER_OPTION_CODE, 6, 0, 0, 0, 0, 0, 0,         /*2016--12--01--19--21--01(ZJYC): ç”¨æˆ·æ ‡è¯†   */ 
-    dhcpREQUEST_IP_ADDRESS_OPTION_CODE, 4, 0, 0, 0, 0,              /*2016--12--01--19--21--17(ZJYC): éœ€è¦çš„IPåœ°å€   */ 
-    dhcpSERVER_IP_ADDRESS_OPTION_CODE, 4, 0, 0, 0, 0,               /*2016--12--01--19--21--30(ZJYC): DHCPæœåŠ¡å™¨åœ°å€   */ 
+    /*2016--12--01--19--19--34(ZJYC): ²»ÒªÔÙ²»¸Ä±ädhcpCLIENT_IDENTIFIER_OFFSET£¬
+    dhcpREQUESTED_IP_ADDRESS_OFFSET ºÍ dhcpDHCP_SERVER_IP_ADDRESS_OFFSETµÄÇé¿öÏÂ¸ü¸ÄË³Ğò*/ 
+    dhcpMESSAGE_TYPE_OPTION_CODE, 1, dhcpMESSAGE_TYPE_REQUEST,      /*2016--12--01--19--20--52(ZJYC): ÏûÏ¢ÀàĞÍ   */ 
+    dhcpCLIENT_IDENTIFIER_OPTION_CODE, 6, 0, 0, 0, 0, 0, 0,         /*2016--12--01--19--21--01(ZJYC): ÓÃ»§±êÊ¶   */ 
+    dhcpREQUEST_IP_ADDRESS_OPTION_CODE, 4, 0, 0, 0, 0,              /*2016--12--01--19--21--17(ZJYC): ĞèÒªµÄIPµØÖ·   */ 
+    dhcpSERVER_IP_ADDRESS_OPTION_CODE, 4, 0, 0, 0, 0,               /*2016--12--01--19--21--30(ZJYC): DHCP·şÎñÆ÷µØÖ·   */ 
     dhcpOPTION_END_BYTE
 };
 size_t xOptionsLength = sizeof( ucDHCPRequestOptions );
     pucUDPPayloadBuffer = prvCreatePartDHCPMessage( &xAddress, dhcpREQUEST_OPCODE, ucDHCPRequestOptions, &xOptionsLength );
-    /*2016--12--01--19--22--09(ZJYC): å¤åˆ¶è¿›å»è¯·æ±‚çš„åœ°å€   */ 
+    /*2016--12--01--19--22--09(ZJYC): ¸´ÖÆ½øÈ¥ÇëÇóµÄµØÖ·   */ 
     memcpy( ( void * ) &( pucUDPPayloadBuffer[ dhcpFIRST_OPTION_BYTE_OFFSET + dhcpREQUESTED_IP_ADDRESS_OFFSET ] ),
         ( void * ) &( xDHCPData.ulOfferedIPAddress ), sizeof( xDHCPData.ulOfferedIPAddress ) );
-    /*2016--12--01--19--22--23(ZJYC): å¤åˆ¶æœåŠ¡å™¨åœ°å€   */ 
+    /*2016--12--01--19--22--23(ZJYC): ¸´ÖÆ·şÎñÆ÷µØÖ·   */ 
     memcpy( ( void * ) &( pucUDPPayloadBuffer[ dhcpFIRST_OPTION_BYTE_OFFSET + dhcpDHCP_SERVER_IP_ADDRESS_OFFSET ] ),
         ( void * ) &( xDHCPData.ulDHCPServerAddress ), sizeof( xDHCPData.ulDHCPServerAddress ) );
     FreeRTOS_debug_printf( ( "vDHCPProcess: reply %lxip\n", FreeRTOS_ntohl( xDHCPData.ulOfferedIPAddress ) ) );
     iptraceSENDING_DHCP_REQUEST();
     if( FreeRTOS_sendto( xDHCPData.xDHCPSocket, pucUDPPayloadBuffer, ( sizeof( DHCPMessage_t ) + xOptionsLength ), FREERTOS_ZERO_COPY, &xAddress, sizeof( xAddress ) ) == 0 )
     {
-        /*2016--12--01--19--22--42(ZJYC): å‘é€å¤±è´¥   */ 
+        /*2016--12--01--19--22--42(ZJYC): ·¢ËÍÊ§°Ü   */ 
         FreeRTOS_ReleaseUDPPayloadBuffer( pucUDPPayloadBuffer );
     }
 }
@@ -806,10 +806,10 @@ uint8_t *pucUDPPayloadBuffer;
 struct freertos_sockaddr xAddress;
 static const uint8_t ucDHCPDiscoverOptions[] =
 {
-    /*2016--12--01--19--23--14(ZJYC): ä¸è¦å†ä¸æ”¹å˜dhcpCLIENT_IDENTIFIER_OFFSETçš„æƒ…å†µä¸‹æ”¹å˜é¡ºåº   */ 
-    dhcpMESSAGE_TYPE_OPTION_CODE, 1, dhcpMESSAGE_TYPE_DISCOVER,                 /*2016--12--01--19--23--39(ZJYC): æ¶ˆæ¯ç±»å‹   */ 
-    dhcpCLIENT_IDENTIFIER_OPTION_CODE, 6, 0, 0, 0, 0, 0, 0,                     /*2016--12--01--19--23--49(ZJYC): ç”¨æˆ·æ ‡è¯†   */ 
-    dhcpPARAMETER_REQUEST_OPTION_CODE, 3, dhcpSUBNET_MASK_OPTION_CODE, dhcpGATEWAY_OPTION_CODE, dhcpDNS_SERVER_OPTIONS_CODE,    /*2016--12--01--19--24--07(ZJYC): è¯·æ±‚é€‰é¡¹   */ 
+    /*2016--12--01--19--23--14(ZJYC): ²»ÒªÔÙ²»¸Ä±ädhcpCLIENT_IDENTIFIER_OFFSETµÄÇé¿öÏÂ¸Ä±äË³Ğò   */ 
+    dhcpMESSAGE_TYPE_OPTION_CODE, 1, dhcpMESSAGE_TYPE_DISCOVER,                 /*2016--12--01--19--23--39(ZJYC): ÏûÏ¢ÀàĞÍ   */ 
+    dhcpCLIENT_IDENTIFIER_OPTION_CODE, 6, 0, 0, 0, 0, 0, 0,                     /*2016--12--01--19--23--49(ZJYC): ÓÃ»§±êÊ¶   */ 
+    dhcpPARAMETER_REQUEST_OPTION_CODE, 3, dhcpSUBNET_MASK_OPTION_CODE, dhcpGATEWAY_OPTION_CODE, dhcpDNS_SERVER_OPTIONS_CODE,    /*2016--12--01--19--24--07(ZJYC): ÇëÇóÑ¡Ïî   */ 
     dhcpOPTION_END_BYTE
 };
 size_t xOptionsLength = sizeof( ucDHCPDiscoverOptions );
@@ -821,7 +821,7 @@ size_t xOptionsLength = sizeof( ucDHCPDiscoverOptions );
 
     if( FreeRTOS_sendto( xDHCPData.xDHCPSocket, pucUDPPayloadBuffer, ( sizeof( DHCPMessage_t ) + xOptionsLength ), FREERTOS_ZERO_COPY, &xAddress, sizeof( xAddress ) ) == 0 )
     {
-        /*2016--12--01--19--24--32(ZJYC): å‘é€å¤±è´¥   */ 
+        /*2016--12--01--19--24--32(ZJYC): ·¢ËÍÊ§°Ü   */ 
         FreeRTOS_ReleaseUDPPayloadBuffer( pucUDPPayloadBuffer );
     }
 }
@@ -832,30 +832,30 @@ size_t xOptionsLength = sizeof( ucDHCPDiscoverOptions );
     static void prvPrepareLinkLayerIPLookUp( void )
     {
     uint8_t ucLinkLayerIPAddress[ 2 ];
-        /*2016--12--01--19--24--45(ZJYC): DHCPæœåŠ¡å›å¤å¤±è´¥ä¹‹åï¼Œå‡†å¤‡å°½åŠ›å»è·å–é“¾è·¯å±‚åœ°å€ï¼Œ
-        ï¼Œä½¿ç”¨éšæœºçš„æ–¹æ³•*/ 
+        /*2016--12--01--19--24--45(ZJYC): DHCP·şÎñ»Ø¸´Ê§°ÜÖ®ºó£¬×¼±¸¾¡Á¦È¥»ñÈ¡Á´Â·²ãµØÖ·£¬
+        £¬Ê¹ÓÃËæ»úµÄ·½·¨*/ 
         xDHCPData.xDHCPTxTime = xTaskGetTickCount();
         ucLinkLayerIPAddress[ 0 ] = ( uint8_t )1 + ( uint8_t )( ipconfigRAND32() % 0xFDu );     /* get value 1..254 for IP-address 3rd byte of IP address to try. */
         ucLinkLayerIPAddress[ 1 ] = ( uint8_t )1 + ( uint8_t )( ipconfigRAND32() % 0xFDu );     /* get value 1..254 for IP-address 4th byte of IP address to try. */
         xNetworkAddressing.ulGatewayAddress = FreeRTOS_htonl( 0xA9FE0203 );
-        /*2016--12--01--19--25--52(ZJYC): å‡†å¤‡xDHCPDataæ•°æ®   */ 
+        /*2016--12--01--19--25--52(ZJYC): ×¼±¸xDHCPDataÊı¾İ   */ 
         xDHCPData.ulOfferedIPAddress =
             FreeRTOS_inet_addr_quick( LINK_LAYER_ADDRESS_0, LINK_LAYER_ADDRESS_1, ucLinkLayerIPAddress[ 0 ], ucLinkLayerIPAddress[ 1 ] );
         xDHCPData.ulLeaseTime = dhcpDEFAULT_LEASE_TIME;
-        /*2016--12--01--19--26--39(ZJYC): ä¸è¦å…³å¿ƒç§ŸæœŸï¼Œ   */ 
+        /*2016--12--01--19--26--39(ZJYC): ²»Òª¹ØĞÄ×âÆÚ£¬   */ 
         xNetworkAddressing.ulNetMask =
             FreeRTOS_inet_addr_quick( LINK_LAYER_NETMASK_0, LINK_LAYER_NETMASK_1, LINK_LAYER_NETMASK_2, LINK_LAYER_NETMASK_3 );
-        /*2016--12--01--19--27--09(ZJYC): DHCPå®Œæˆï¼ŒIPåœ°å€ç°åœ¨è¿˜ä¸èƒ½ä½¿ç”¨
-        è®¾ç½®ç§Ÿçº¦è¶…æ—¶æ—¶é—´*/ 
+        /*2016--12--01--19--27--09(ZJYC): DHCPÍê³É£¬IPµØÖ·ÏÖÔÚ»¹²»ÄÜÊ¹ÓÃ
+        ÉèÖÃ×âÔ¼³¬Ê±Ê±¼ä*/ 
         *ipLOCAL_IP_ADDRESS_POINTER = xDHCPData.ulOfferedIPAddress;
-        /*2016--12--01--19--27--53(ZJYC): è®¾ç½®æœ¬åœ°å¹¿æ’­åœ°å€ï¼Œç±»ä¼¼äº192.168.1.255   */ 
+        /*2016--12--01--19--27--53(ZJYC): ÉèÖÃ±¾µØ¹ã²¥µØÖ·£¬ÀàËÆÓÚ192.168.1.255   */ 
         xNetworkAddressing.ulBroadcastAddress = ( xDHCPData.ulOfferedIPAddress & xNetworkAddressing.ulNetMask ) |  ~xNetworkAddressing.ulNetMask;
-        /*2016--12--01--19--28--23(ZJYC): å…³é—­å¥—æ¥å­—ç¡®ä¿ä¸æ’é˜Ÿï¼Œå› ä¸ºDHCPå¤±è´¥æ‰€ä»¥ä¸å†éœ€å¥—æ¥å­—ã€‚ä½†æ˜¯ä»ç„¶éœ€è¦å®šæ—¶å™¨ä»¥è¿›è¡ŒARPæ£€æŸ¥   */ 
+        /*2016--12--01--19--28--23(ZJYC): ¹Ø±ÕÌ×½Ó×ÖÈ·±£²»ÅÅ¶Ó£¬ÒòÎªDHCPÊ§°ÜËùÒÔ²»ÔÙĞèÌ×½Ó×Ö¡£µ«ÊÇÈÔÈ»ĞèÒª¶¨Ê±Æ÷ÒÔ½øĞĞARP¼ì²é   */ 
         vSocketClose( xDHCPData.xDHCPSocket );
         xDHCPData.xDHCPSocket = NULL;
         xDHCPData.xDHCPTxPeriod = pdMS_TO_TICKS( 3000ul + ( ipconfigRAND32() & 0x3fful ) ); 
-        /*2016--12--01--19--29--42(ZJYC): æ¯ 3 + 0-1024mS)åšä¸€æ¬¡ARPæ£€æŸ¥  */ 
-        /*2016--12--01--19--30--07(ZJYC): å¤ä½ARPç¢°æ’æœºåˆ¶   */ 
+        /*2016--12--01--19--29--42(ZJYC): Ã¿ 3 + 0-1024mS)×öÒ»´ÎARP¼ì²é  */ 
+        /*2016--12--01--19--30--07(ZJYC): ¸´Î»ARPÅö×²»úÖÆ   */ 
         xARPHadIPClash = pdFALSE;
         vARPSendGratuitous();
     }

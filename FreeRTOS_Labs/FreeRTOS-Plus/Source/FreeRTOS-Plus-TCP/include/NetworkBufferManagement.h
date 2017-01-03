@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-/* å…¬å¼€API */
+/* ¹«¿ªAPI */
 BaseType_t xNetworkBuffersInitialise( void );
 NetworkBufferDescriptor_t *pxGetNetworkBufferWithDescriptor( size_t xRequestedSizeBytes, TickType_t xBlockTimeTicks );
 NetworkBufferDescriptor_t *pxNetworkBufferGetFromISR( size_t xRequestedSizeBytes );
@@ -15,13 +15,13 @@ BaseType_t vNetworkBufferReleaseFromISR( NetworkBufferDescriptor_t * const pxNet
 uint8_t *pucGetNetworkBuffer( size_t *pxRequestedSizeBytes );
 void vReleaseNetworkBuffer( uint8_t *pucEthernetBuffer );
 
-/* è·å–å½“å‰ç©ºé—²ç½‘ç»œç¼“å­˜æ•° */
+/* »ñÈ¡µ±Ç°¿ÕÏĞÍøÂç»º´æÊı */
 UBaseType_t uxGetNumberOfFreeNetworkBuffers( void );
 
-/* è·å–æœ€å°ç©ºé—²ç½‘ç»œç¼“å­˜æ•°. */
+/* »ñÈ¡×îĞ¡¿ÕÏĞÍøÂç»º´æÊı. */
 UBaseType_t uxGetMinimumFreeNetworkBuffers( void );
 
-/* æŠŠä¸€ä¸ªç¼“å­˜å¤åˆ¶åˆ°ä¸€ä¸ªæ›´å¤§çš„ç¼“å­˜ */
+/* °ÑÒ»¸ö»º´æ¸´ÖÆµ½Ò»¸ö¸ü´óµÄ»º´æ */
 NetworkBufferDescriptor_t *pxDuplicateNetworkBufferWithDescriptor( NetworkBufferDescriptor_t * const pxNetworkBuffer,
 	BaseType_t xNewLength);
 

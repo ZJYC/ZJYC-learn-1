@@ -79,19 +79,19 @@ use of FreeRTOS.*/
 #endif /* configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES */
 
 
-/* ä¸€ä¸ªåŸºæœ¬çš„åˆ—è¡¨é¡¹å†…å®¹å¦‚ä¸‹ */
+/* Ò»¸ö»ù±¾µÄÁÐ±íÏîÄÚÈÝÈçÏÂ */
 struct xLIST_ITEM
 {
     listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE           /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-    configLIST_VOLATILE TickType_t xItemValue;          /*< åˆ—è¡¨å€¼ */
-    struct xLIST_ITEM * configLIST_VOLATILE pxNext;     /*< åŽä¸€ä¸ªåˆ—è¡¨é¡¹ */
-    struct xLIST_ITEM * configLIST_VOLATILE pxPrevious; /*< å‰ä¸€ä¸ªåˆ—è¡¨é¡¹ */
-    void * pvOwner;                                     /*< è¢«è°æ‹¥æœ‰ */
-    void * configLIST_VOLATILE pvContainer;             /*< æŒ‡æ˜Žåˆ—è¡¨é¡¹æ‰€åœ¨çš„åˆ—è¡¨ */
+    configLIST_VOLATILE TickType_t xItemValue;          /*< ÁÐ±íÖµ */
+    struct xLIST_ITEM * configLIST_VOLATILE pxNext;     /*< ºóÒ»¸öÁÐ±íÏî */
+    struct xLIST_ITEM * configLIST_VOLATILE pxPrevious; /*< Ç°Ò»¸öÁÐ±íÏî */
+    void * pvOwner;                                     /*< ±»Ë­ÓµÓÐ */
+    void * configLIST_VOLATILE pvContainer;             /*< Ö¸Ã÷ÁÐ±íÏîËùÔÚµÄÁÐ±í */
     listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE          /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 };
 typedef struct xLIST_ITEM ListItem_t;
-/* æœ€å°åˆ—è¡¨é¡¹ */
+/* ×îÐ¡ÁÐ±íÏî */
 struct xMINI_LIST_ITEM
 {
     listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE
@@ -100,56 +100,56 @@ struct xMINI_LIST_ITEM
     struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;
 };
 typedef struct xMINI_LIST_ITEM MiniListItem_t;
-/* åˆ—è¡¨å†…å®¹å¦‚ä¸‹ */
+/* ÁÐ±íÄÚÈÝÈçÏÂ */
 typedef struct xLIST
 {
     listFIRST_LIST_INTEGRITY_CHECK_VALUE
     configLIST_VOLATILE UBaseType_t                 uxNumberOfItems;
-    ListItem_t *                                    configLIST_VOLATILE pxIndex;           /* ç”¨äºŽéåŽ†åˆ—è¡¨ */
-    MiniListItem_t                                  xListEnd;                            /* æ€»æ˜¯æ”¾åœ¨æœ€åŽç”¨åšæ ‡å¿— */
+    ListItem_t *                                    configLIST_VOLATILE pxIndex;           /* ÓÃÓÚ±éÀúÁÐ±í */
+    MiniListItem_t                                  xListEnd;                            /* ×ÜÊÇ·ÅÔÚ×îºóÓÃ×ö±êÖ¾ */
     listSECOND_LIST_INTEGRITY_CHECK_VALUE
 } List_t;
 
-/* è®¾ç½®åˆ—è¡¨é¡¹çš„æ‹¥æœ‰è€… */
+/* ÉèÖÃÁÐ±íÏîµÄÓµÓÐÕß */
 #define listSET_LIST_ITEM_OWNER( pxListItem, pxOwner )      ( ( pxListItem )->pvOwner = ( void * ) ( pxOwner ) )
 
-/* èŽ·å¾—åˆ—è¡¨é¡¹çš„æ‹¥æœ‰è€… */
+/* »ñµÃÁÐ±íÏîµÄÓµÓÐÕß */
 #define listGET_LIST_ITEM_OWNER( pxListItem )   ( ( pxListItem )->pvOwner )
 
-/* è®¾ç½®åˆ—è¡¨é¡¹çš„å€¼ */
+/* ÉèÖÃÁÐ±íÏîµÄÖµ */
 #define listSET_LIST_ITEM_VALUE( pxListItem, xValue )   ( ( pxListItem )->xItemValue = ( xValue ) )
 
-/* èŽ·å–åˆ—è¡¨é¡¹çš„å€¼ */
+/* »ñÈ¡ÁÐ±íÏîµÄÖµ */
 #define listGET_LIST_ITEM_VALUE( pxListItem )   ( ( pxListItem )->xItemValue )
 
-/* èŽ·å–åˆ—è¡¨é¡¹é¦–çš„å€¼ */
+/* »ñÈ¡ÁÐ±íÏîÊ×µÄÖµ */
 #define listGET_ITEM_VALUE_OF_HEAD_ENTRY( pxList )  ( ( ( pxList )->xListEnd ).pxNext->xItemValue )
 
-/* è¿”å›žåˆ—è¡¨é¡¹é¦– */
+/* ·µ»ØÁÐ±íÏîÊ× */
 #define listGET_HEAD_ENTRY( pxList )    ( ( ( pxList )->xListEnd ).pxNext )
 
-/* èŽ·å–ä¸‹ä¸€ä¸ªåˆ—è¡¨é¡¹ */
+/* »ñÈ¡ÏÂÒ»¸öÁÐ±íÏî */
 #define listGET_NEXT( pxListItem )  ( ( pxListItem )->pxNext )
 
-/* èŽ·å–æœ€åŽä¸€ä¸ªåˆ—è¡¨é¡¹ */
+/* »ñÈ¡×îºóÒ»¸öÁÐ±íÏî */
 #define listGET_END_MARKER( pxList )    ( ( ListItem_t const * ) ( &( ( pxList )->xListEnd ) ) )
 
-/* åˆ¤æ–­åˆ—è¡¨é¡¹æ˜¯å¦ä¸ºç©º */
+/* ÅÐ¶ÏÁÐ±íÏîÊÇ·ñÎª¿Õ */
 #define listLIST_IS_EMPTY( pxList ) ( ( BaseType_t ) ( ( pxList )->uxNumberOfItems == ( UBaseType_t ) 0 ) )
 
-/* åˆ—è¡¨é¡¹ä¸ªæ•° */
+/* ÁÐ±íÏî¸öÊý */
 #define listCURRENT_LIST_LENGTH( pxList )   ( ( pxList )->uxNumberOfItems )
 
 /*
 ****************************************************
-*  å‡½æ•°å         : listGET_OWNER_OF_NEXT_ENTRY
-*  å‡½æ•°æè¿°       : è¿”å›žä¸‹ä¸€ä¸ªåˆ—è¡¨é¡¹çš„æ‹¥æœ‰è€…
-*  å‚æ•°           : 
-                    pxListï¼šæ­¤åˆ—è¡¨é¡¹
-                    pxTCBï¼šå¾…è¿”å›žçš„
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : listGET_OWNER_OF_NEXT_ENTRY
+*  º¯ÊýÃèÊö       : ·µ»ØÏÂÒ»¸öÁÐ±íÏîµÄÓµÓÐÕß
+*  ²ÎÊý           : 
+                    pxList£º´ËÁÐ±íÏî
+                    pxTCB£º´ý·µ»ØµÄ
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 #define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                        \
@@ -167,115 +167,115 @@ List_t * const pxConstList = ( pxList );                                        
 
 /*
 ****************************************************
-*  å‡½æ•°å         : listGET_OWNER_OF_HEAD_ENTRY
-*  å‡½æ•°æè¿°       : èŽ·å–æ”¶ä¸åˆ—è¡¨é¡¹çš„æ‹¥æœ‰è€…
-*  å‚æ•°           : pxListåˆ—è¡¨
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : listGET_OWNER_OF_HEAD_ENTRY
+*  º¯ÊýÃèÊö       : »ñÈ¡ÊÕ²»ÁÐ±íÏîµÄÓµÓÐÕß
+*  ²ÎÊý           : pxListÁÐ±í
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 #define listGET_OWNER_OF_HEAD_ENTRY( pxList )  ( (&( ( pxList )->xListEnd ))->pxNext->pvOwner )
 
 /*
 ****************************************************
-*  å‡½æ•°å         : listIS_CONTAINED_WITHIN
-*  å‡½æ•°æè¿°       : åˆ¤æ–­åˆ—è¡¨é¡¹æ˜¯å¦å±žäºŽæŸä¸€ä¸ªåˆ—è¡¨
-*  å‚æ•°           : 
-                    pxListï¼šåˆ—è¡¨
-                    pxListItemï¼šåˆ—è¡¨é¡¹
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : listIS_CONTAINED_WITHIN
+*  º¯ÊýÃèÊö       : ÅÐ¶ÏÁÐ±íÏîÊÇ·ñÊôÓÚÄ³Ò»¸öÁÐ±í
+*  ²ÎÊý           : 
+                    pxList£ºÁÐ±í
+                    pxListItem£ºÁÐ±íÏî
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 #define listIS_CONTAINED_WITHIN( pxList, pxListItem ) ( ( BaseType_t ) ( ( pxListItem )->pvContainer == ( void * ) ( pxList ) ) )
 
 /*
 ****************************************************
-*  å‡½æ•°å         : listLIST_ITEM_CONTAINER
-*  å‡½æ•°æè¿°       : èŽ·å–åˆ—è¡¨é¡¹æ‰€åœ¨çš„åˆ—è¡¨
-*  å‚æ•°           : pxListItemï¼šåˆ—è¡¨é¡¹
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : listLIST_ITEM_CONTAINER
+*  º¯ÊýÃèÊö       : »ñÈ¡ÁÐ±íÏîËùÔÚµÄÁÐ±í
+*  ²ÎÊý           : pxListItem£ºÁÐ±íÏî
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 #define listLIST_ITEM_CONTAINER( pxListItem ) ( ( pxListItem )->pvContainer )
 
 /*
 ****************************************************
-*  å‡½æ•°å         : listLIST_IS_INITIALISED
-*  å‡½æ•°æè¿°       : ç®€å•çš„åˆ¤åˆ«åˆ—è¡¨æ˜¯å¦è¢«åˆå§‹åŒ–ï¼ŒpxList->xListEnd.xItemValue == portMAX_DELAY
-*  å‚æ•°           : pxListï¼šåˆ—è¡¨
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : listLIST_IS_INITIALISED
+*  º¯ÊýÃèÊö       : ¼òµ¥µÄÅÐ±ðÁÐ±íÊÇ·ñ±»³õÊ¼»¯£¬pxList->xListEnd.xItemValue == portMAX_DELAY
+*  ²ÎÊý           : pxList£ºÁÐ±í
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 #define listLIST_IS_INITIALISED( pxList ) ( ( pxList )->xListEnd.xItemValue == portMAX_DELAY )
 
 /*
 ****************************************************
-*  å‡½æ•°å         : vListInitialise
-*  å‡½æ•°æè¿°       : å¿…é¡»åœ¨åˆ—è¡¨ä½¿ç”¨å‰è°ƒç”¨ï¼Œåˆå§‹åŒ–åˆ—è¡¨ç»“æž„ä½“æˆå‘˜ï¼Œ
-                    å¹¶æ’å…¥xListEndä½œä¸ºåˆ—è¡¨å°¾éƒ¨æ ‡è®°
-*  å‚æ•°           : pxListï¼šè¢«åˆå§‹åŒ–çš„åˆ—è¡¨
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : vListInitialise
+*  º¯ÊýÃèÊö       : ±ØÐëÔÚÁÐ±íÊ¹ÓÃÇ°µ÷ÓÃ£¬³õÊ¼»¯ÁÐ±í½á¹¹Ìå³ÉÔ±£¬
+                    ²¢²åÈëxListEnd×÷ÎªÁÐ±íÎ²²¿±ê¼Ç
+*  ²ÎÊý           : pxList£º±»³õÊ¼»¯µÄÁÐ±í
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 void vListInitialise( List_t * const pxList ) PRIVILEGED_FUNCTION;
 
 /*
 ****************************************************
-*  å‡½æ•°å         : vListInitialiseItem
-*  å‡½æ•°æè¿°       : åœ¨åˆ—è¡¨é¡¹ä½¿ç”¨ä¹‹å‰å¿…é¡»è°ƒç”¨æ­¤å‡½æ•°ï¼Œè¿™å°†åˆ—è¡¨é¡¹çš„æ‹¥æœ‰è€…ç½®ä½null
-                    æ‰€ä»¥åˆ—è¡¨é¡¹ä¸å±žäºŽä»»ä½•åˆ—è¡¨ã€‚
-*  å‚æ•°           : pxItemï¼šè¢«åˆå§‹åŒ–çš„åˆ—è¡¨
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : vListInitialiseItem
+*  º¯ÊýÃèÊö       : ÔÚÁÐ±íÏîÊ¹ÓÃÖ®Ç°±ØÐëµ÷ÓÃ´Ëº¯Êý£¬Õâ½«ÁÐ±íÏîµÄÓµÓÐÕßÖÃÎ»null
+                    ËùÒÔÁÐ±íÏî²»ÊôÓÚÈÎºÎÁÐ±í¡£
+*  ²ÎÊý           : pxItem£º±»³õÊ¼»¯µÄÁÐ±í
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 void vListInitialiseItem( ListItem_t * const pxItem ) PRIVILEGED_FUNCTION;
 
 /*
 ****************************************************
-*  å‡½æ•°å         : vListInsert
-*  å‡½æ•°æè¿°       : å°†åˆ—è¡¨é¡¹æ’å…¥åˆ°åˆ—è¡¨ä¸­ï¼Œç”±å…¶åˆ—è¡¨é¡¹å€¼æŽ’åº
-*  å‚æ•°           : pxListï¼šåˆ—è¡¨
-                    pxNewListItemï¼šåˆ—è¡¨é¡¹
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : vListInsert
+*  º¯ÊýÃèÊö       : ½«ÁÐ±íÏî²åÈëµ½ÁÐ±íÖÐ£¬ÓÉÆäÁÐ±íÏîÖµÅÅÐò
+*  ²ÎÊý           : pxList£ºÁÐ±í
+                    pxNewListItem£ºÁÐ±íÏî
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 void vListInsert( List_t * const pxList, ListItem_t * const pxNewListItem ) PRIVILEGED_FUNCTION;
 
 /*
 ****************************************************
-*  å‡½æ•°å         : vListInsertEnd
-*  å‡½æ•°æè¿°       : æŠŠåˆ—è¡¨é¡¹æ”¾åœ¨åˆ—è¡¨æœ€åŽï¼Œä¹Ÿå°±æ˜¯æ”¾åœ¨pxIndexæŒ‡å‘çš„åœ°æ–¹ï¼Œè¿™ä¹Ÿå°±æ„å‘³ç€
-                    éåŽ†è¿‡ç¨‹ä¸­ï¼Œæœ¬æ¬¡æ–°æ’å…¥çš„åˆ—è¡¨é¡¹ä¼šæœ€åŽä¸€ä¸ªè¿”å›ž
-*  å‚æ•°           : pxListï¼šåˆ—è¡¨
-                    pxNewListItemï¼šåˆ—è¡¨é¡¹
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : vListInsertEnd
+*  º¯ÊýÃèÊö       : °ÑÁÐ±íÏî·ÅÔÚÁÐ±í×îºó£¬Ò²¾ÍÊÇ·ÅÔÚpxIndexÖ¸ÏòµÄµØ·½£¬ÕâÒ²¾ÍÒâÎ¶×Å
+                    ±éÀú¹ý³ÌÖÐ£¬±¾´ÎÐÂ²åÈëµÄÁÐ±íÏî»á×îºóÒ»¸ö·µ»Ø
+*  ²ÎÊý           : pxList£ºÁÐ±í
+                    pxNewListItem£ºÁÐ±íÏî
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 void vListInsertEnd( List_t * const pxList, ListItem_t * const pxNewListItem ) PRIVILEGED_FUNCTION;
 
 /*
 ****************************************************
-*  å‡½æ•°å         : uxListRemove
-*  å‡½æ•°æè¿°       : åˆ é™¤åˆ—è¡¨é¡¹ï¼Œåˆ—è¡¨é¡¹å«æœ‰æŒ‡å‘åˆ—è¡¨çš„æˆå‘˜ã€‚
-*  å‚æ•°           : pxItemToRemoveï¼šè¦è¢«åˆ é™¤çš„åˆ—è¡¨é¡¹
-*  è¿”å›žå€¼         : 
-*  ä½œè€…           : -5A4A5943-
-*  åŽ†å²ç‰ˆæœ¬       : 
+*  º¯ÊýÃû         : uxListRemove
+*  º¯ÊýÃèÊö       : É¾³ýÁÐ±íÏî£¬ÁÐ±íÏîº¬ÓÐÖ¸ÏòÁÐ±íµÄ³ÉÔ±¡£
+*  ²ÎÊý           : pxItemToRemove£ºÒª±»É¾³ýµÄÁÐ±íÏî
+*  ·µ»ØÖµ         : 
+*  ×÷Õß           : -5A4A5943-
+*  ÀúÊ·°æ±¾       : 
 *****************************************************
 */
 UBaseType_t uxListRemove( ListItem_t * const pxItemToRemove ) PRIVILEGED_FUNCTION;
