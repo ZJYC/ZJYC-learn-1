@@ -126,9 +126,7 @@ static SemaphoreHandle_t xNetworkBufferSemaphore = NULL;
 BaseType_t xNetworkBuffersInitialise( void )
 {
 BaseType_t xReturn, x;
-
-	/* Only initialise the buffers and their associated kernel objects if they
-	have not been initialised before. */
+	/* 如果之前没有初始化过，只初始化缓冲区和相关的内核对象 */
 	if( xNetworkBufferSemaphore == NULL )
 	{
 		xNetworkBufferSemaphore = xSemaphoreCreateCounting( ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS, ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS );
@@ -152,17 +150,14 @@ BaseType_t xReturn, x;
 		if( xNetworkBufferSemaphore != NULL )
 		{
 			vListInitialise( &xFreeBuffersList );
-
-			/* Initialise all the network buffers.  No storage is allocated to
-			the buffers yet. */
+			/* 初始化所有网络缓存，到现在为止缓存 还没有申请存储 */
 			for( x = 0; x < ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS; x++ )
 			{
-				/* Initialise and set the owner of the buffer list items. */
+				/* 初始化并设置拥有者 */
 				xNetworkBufferDescriptors[ x ].pucEthernetBuffer = NULL;
 				vListInitialiseItem( &( xNetworkBufferDescriptors[ x ].xBufferListItem ) );
 				listSET_LIST_ITEM_OWNER( &( xNetworkBufferDescriptors[ x ].xBufferListItem ), &xNetworkBufferDescriptors[ x ] );
-
-				/* Currently, all buffers are available for use. */
+				/* 目前，所有缓存可以使用 */
 				vListInsert( &xFreeBuffersList, &( xNetworkBufferDescriptors[ x ].xBufferListItem ) );
 			}
 
