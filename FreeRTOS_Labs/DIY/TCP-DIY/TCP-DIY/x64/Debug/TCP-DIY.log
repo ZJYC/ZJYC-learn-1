@@ -1,0 +1,21 @@
+﻿生成启动时间为 2017/4/24 23:13:06。
+     1>项目“C:\Users\Zhaojingyangchun\Documents\GitHub\ZJYC-learn-1\FreeRTOS_Labs\DIY\TCP-DIY\TCP-DIY\TCP-DIY.vcxproj”在节点 2 上(Rebuild 个目标)。
+     1>ClCompile:
+         E:\DangerWithYou\VS2013\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /sdl /Od /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TC /errorReport:prompt ARP.c
+         ARP.c
+     1>ARP.c(10): warning C4047: “函数”:“int”与“void *”的间接级别不同
+     1>ARP.c(10): warning C4024: “memset”: 形参和实参 2 的类型不同
+     1>ARP.c(9): warning C4101: “i”: 未引用的局部变量
+     1>ARP.c(57): warning C4133: “函数”: 从“MAC *”到“IP *”的类型不兼容
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\arp.c(11): warning C4716: “ARP_Init”: 必须返回一个值
+         E:\DangerWithYou\VS2013\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /sdl /Od /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt Main.cpp
+         Main.cpp
+       Link:
+         E:\DangerWithYou\VS2013\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Zhaojingyangchun\Documents\GitHub\ZJYC-learn-1\FreeRTOS_Labs\DIY\TCP-DIY\x64\Debug\TCP-DIY.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Zhaojingyangchun\Documents\GitHub\ZJYC-learn-1\FreeRTOS_Labs\DIY\TCP-DIY\x64\Debug\TCP-DIY.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Zhaojingyangchun\Documents\GitHub\ZJYC-learn-1\FreeRTOS_Labs\DIY\TCP-DIY\x64\Debug\TCP-DIY.lib" /MACHINE:X64 x64\Debug\ARP.obj
+         x64\Debug\Main.obj
+         TCP-DIY.vcxproj -> C:\Users\Zhaojingyangchun\Documents\GitHub\ZJYC-learn-1\FreeRTOS_Labs\DIY\TCP-DIY\x64\Debug\TCP-DIY.exe
+     1>已完成生成项目“C:\Users\Zhaojingyangchun\Documents\GitHub\ZJYC-learn-1\FreeRTOS_Labs\DIY\TCP-DIY\TCP-DIY\TCP-DIY.vcxproj”(Rebuild 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:01.28
