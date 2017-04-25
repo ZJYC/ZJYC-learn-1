@@ -1,6 +1,8 @@
 
 
 #include "ARP.h"
+#include "IP.h"
+#include "Ethernet.h"
 
 ARP_Cache ArpCache[ARP_CACHE_CAPACITY] = { 0x00 };
 
@@ -90,6 +92,50 @@ uint8_t ARP_TickTask(void)
 			}
 		}
 	}
+}
+
+uint8_t ARP_ProcessPacket(NeteworkBuff * pNeteorkBuff)
+{
+	ARP_Header * pARP_Header = (ARP_Header *)pNeteorkBuff->Buff;
+
+	if (pARP_Header->HardwareType == ARP_HardwareType && pARP_Header->HardwareLen == ARP_HardwareLen &&
+		pARP_Header->ProtocolType == ARP_ProtocolType && pARP_Header->ProtocolLen == ARP_ProtocolLen)
+	{
+		if (pARP_Header->Opcode == ARP_OpcodeRequest)
+		{
+			memcpy((uint8_t*)&pARP_Header->DstIP, (uint8_t*)&pARP_Header->SrcIP,sizeof(IP));
+			memcpy((uint8_t*)&pARP_Header->DstMAC, (uint8_t*)&pARP_Header->SrcMAC, sizeof(MAC));
+			memcpy((uint8_t*)&pARP_Header->SrcIP, (uint8_t*)&LocalIP, sizeof(IP));
+			memcpy((uint8_t*)&pARP_Header->SrcMAC, (uint8_t*)&LocalMAC, sizeof(MAC));
+			pARP_Header->Opcode = ARP_OpcodeRespond;
+			pNeteorkBuff->BuffLen = ARP_HeaderLen;
+			EthernetSend(pNeteorkBuff);
+		}
+		if (pARP_Header->Opcode == ARP_OpcodeRespond)
+		{
+			ARP_AddItem(&pARP_Header->SrcIP, &pARP_Header->SrcMAC);
+		}
+	}
+}
+
+uint8_t ARP_SendRequest(NeteworkBuff * pNeteorkBuff,IP * TargetIP)
+{
+	Ethernet_Header * pEth_Header = (Ethernet_Header*)pNeteorkBuff->Buff;
+	ARP_Header * pARP_Header = (ARP_Header*)&pEth_Header->Buff;
+	/* ETH »áÔÚµ×²ã½»»»*/
+	memcpy((uint8_t*)&pEth_Header->SrcMAC, (uint8_t*)&BrocastMAC, sizeof(MAC));
+	memcpy((uint8_t*)&pEth_Header->DstMAC, (uint8_t*)&LocalMAC, sizeof(MAC));
+	/* ARP */
+	memcpy((uint8_t*)&pARP_Header->DstIP, (uint8_t*)TargetIP, sizeof(IP));
+	memcpy((uint8_t*)&pARP_Header->DstMAC, (uint8_t*)&ZeroMAC, sizeof(MAC));
+	memcpy((uint8_t*)&pARP_Header->SrcIP, (uint8_t*)&LocalIP, sizeof(IP));
+	memcpy((uint8_t*)&pARP_Header->SrcMAC, (uint8_t*)&LocalMAC, sizeof(MAC));
+	pARP_Header->HardwareLen = ARP_HardwareLen;
+	pARP_Header->HardwareType = ARP_HardwareType;
+	pARP_Header->Opcode = ARP_OpcodeRequest;
+	pARP_Header->ProtocolLen = ARP_ProtocolLen;
+	pARP_Header->ProtocolType = ARP_ProtocolType;
+	EthernetSend(pNeteorkBuff);
 }
 
 

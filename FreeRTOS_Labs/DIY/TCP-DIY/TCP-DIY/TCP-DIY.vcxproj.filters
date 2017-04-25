@@ -21,12 +21,24 @@
     <ClCompile Include="Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Ethernet.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IP.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ARP.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DataTypeDef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Ethernet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IP.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
