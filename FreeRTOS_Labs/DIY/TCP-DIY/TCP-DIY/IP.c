@@ -28,9 +28,9 @@ uint16_t IP_AllowPacket(IP_Header * pIP_Header)
 {
 	if (IP_CheckSum(pIP_Header) == IP_PacketDelete)return IP_PacketDelete;
 
-	pIP_Header->VLT.U16 = DIY_ntohs(pIP_Header->VLT.U16);
-	pIP_Header->TP.U16 = DIY_ntohs(pIP_Header->TP.U16);
-	if (pIP_Header->VLT.Version != IP_VersionIPV4)return IP_PacketDelete;
+	pIP_Header->U_VL.U_VL_ALL = DIY_ntohc(pIP_Header->U_VL.U_VL_ALL);
+	pIP_Header->U_TP.U_TP_ALL = DIY_ntohs(pIP_Header->U_TP.U_TP_ALL);
+	if (pIP_Header->U_VL.S_VL_ALL.Version != IP_VersionIPV4)return IP_PacketDelete;
 	if (pIP_Header->DstIP.U32 == LocalIP.U32)return IP_PacketPass;
 	if (pIP_Header->DstIP.U32 == BrocastIP.U32)return IP_PacketPass;
 	return IP_PacketDelete;
@@ -40,12 +40,16 @@ uint16_t IP_ProcessPacket(IP_Header * pIP_Header)
 {
 	if (IP_AllowPacket(pIP_Header) == IP_PacketPass)
 	{
-		switch (pIP_Header->TP.Protocol)
+		switch (pIP_Header->U_TP.S_TP_ALL.Protocol)
 		{
 			case IP_Protocol_ICMP:/*ICMP_ProcessPacket(pNeteworkBuff); */break;
 			case IP_Protocol_IGMP:/*IGMP_ProcessPacket(pNeteworkBuff); */break;
 			case IP_Protocol_TCP:/*TCP_ProcessPacket(pNeteworkBuff); */break;
-			case IP_Protocol_UDP:UDP_ProcessPacket((UDP_Header *)&pIP_Header->Buff); break;
+			case IP_Protocol_UDP:
+			{
+
+				UDP_ProcessPacket((UDP_Header *)&pIP_Header->Buff); break; 
+			}
 			default:break;
 		}
 	}

@@ -4,7 +4,7 @@
 
 
 
-
+/*
 uint16_t prvGetCheckSum(uint16_t *data, uint32_t nums)
 {
 	uint32_t index = 0;
@@ -13,15 +13,30 @@ uint16_t prvGetCheckSum(uint16_t *data, uint32_t nums)
 
 	for (index = 0; index < nums; index++)
 	{
-		sum += data[index];
+		sum += DIY_ntohs(data[index]);
 	}
 
-	checkSum = (unsigned short int)(sum & 0xffff) + (unsigned short int)(sum >> 16);
+	checkSum = (uint16_t)(sum & 0xffff) + (uint16_t)(sum >> 16);
 
 	return ~checkSum;
 }
+*/
+uint16_t prvGetCheckSum(uint16_t *data, uint32_t nums)
+{
+	uint32_t cksum = 0;
+	while (nums>1)
+	{
+		cksum += *data++;
+		nums -= 1;
+	}
+	if (nums)
+	{
+		cksum += *(uint8_t *)data;
+	}
+	while (cksum >> 16)cksum = (cksum >> 16) + (cksum & 0xffff);
 
-
+	return (uint16_t)(~cksum);
+}
 
 
 

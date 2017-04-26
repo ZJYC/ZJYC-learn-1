@@ -12,8 +12,8 @@
 #define DIY_htons(x)	(((x) & 0x00FF) << 8 | ((x) & 0xFF00) >> 8)
 #define DIY_ntohs(x)	(((x) & 0x00FF) << 8 | ((x) & 0xFF00) >> 8)
 
-
-
+#define DIY_htonc(x)	(((x) & 0xF0) >> 4 | ((x) & 0x0F) << 4)
+#define DIY_ntohc(x)	(((x) & 0xF0) >> 4 | ((x) & 0x0F) << 4)
 
 
 

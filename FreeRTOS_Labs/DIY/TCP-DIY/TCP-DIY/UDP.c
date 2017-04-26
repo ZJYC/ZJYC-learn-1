@@ -1,10 +1,10 @@
 
-#include "UDP.h"
 #include "Ethernet.h"
 #include "Basic.h"
 #include "Socket.h"
 #include "IP.h"
 #include "Basic.h"
+#include "UDP.h"
 
 RES UDP_Send(Socket * pSocket, uint8_t * Data, uint32_t Len)
 {
@@ -35,10 +35,10 @@ RES prvUDP_GeneratePacket(Socket * pSocket, uint8_t * Data, uint32_t Len)
 RES UDP_ProcessPacket(UDP_Header * pUDP_Header)
 {
 	Socket * pSocket;
-	uint16_t CheckSum = pUDP_Header->CheckSum;
+	uint16_t CheckSum = DIY_ntohs(pUDP_Header->CheckSum);
 
 	if (CheckSum != prvUDP_GenerateCheckSum(pUDP_Header))return RES_UDPPacketDeny;
-	pSocket = prvSocket_GetSocketByPort(pUDP_Header->SrcPort);
+	pSocket = prvSocket_GetSocketByPort(DIY_ntohs(pUDP_Header->SrcPort));
 	if (pSocket == NULL)return RES_UDPPacketDeny;
 	switch (0)
 	{
@@ -47,15 +47,35 @@ RES UDP_ProcessPacket(UDP_Header * pUDP_Header)
 
 }
 
-uint16_t prvUDP_GenerateCheckSum(UDP_Header * pUDP_Header)
+RES UDP_PreProcessPacket(IP_Header * pIP_Header)
 {
-	uint16_t * Buff = (uint16_t*)pUDP_Header;
-	uint32_t Len = prvAlign(pUDP_Header->DataLen, 16) + UDP_HEADE_LEN;
-	pUDP_Header->CheckSum = 0;
-	pUDP_Header->CheckSum = prvGetCheckSum(Buff, Len/2);
+	uint32_t PseudoHeader[3] = { 0x00 };
+	uint16_t PayloadLen = 0;
+	UDP_Header * pUDP_Header = (UDP_Header*)&pIP_Header->Buff;
+	Socket * pSocket = prvSocket_GetSocketByPort(DIY_ntohs(pUDP_Header->SrcPort));
+	if (pSocket == NULL)return RES_UDPPacketDeny;
+	PayloadLen = pUDP_Header->DataLen + UDP_HEADE_LEN;
+	PseudoHeader[0] = pIP_Header->SrcIP.U32;
+	PseudoHeader[1] = pIP_Header->DstIP.U32;
+	PseudoHeader[2] = 0x00 << 24 + IP_Protocol_UDP << 16 + PayloadLen;
+	PseudoHeader[2] = DIY_ntohl(PseudoHeader[2]);
+
 }
 
+uint16_t prvUDP_GenerateCheckSum(UDP_Header * pUDP_Header)
+{
+	uint16_t TempDebug = 0;
+	uint16_t * Buff = (uint16_t*)pUDP_Header;
+	uint32_t Len = prvAlign(DIY_ntohs(pUDP_Header->DataLen), 16) + UDP_HEADE_LEN;
+	pUDP_Header->CheckSum = 0;
+	TempDebug = prvGetCheckSum(Buff, Len / 2);
+	pUDP_Header->CheckSum = TempDebug;
+}
 
+uint16_t prvUDP_GetCheckSum(uint16_t*PseudoHeader, uint16_t PseudoHeaderLen, uint16_t*Data, uint32_t DataLen)
+{
+
+}
 
 
 
