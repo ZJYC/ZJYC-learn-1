@@ -27,6 +27,18 @@
     <ClCompile Include="IP.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TCP.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UDP.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Socket.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Basic.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ARP.h">
@@ -39,6 +51,21 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="IP.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TCP.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="UDP.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Socket.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="All.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

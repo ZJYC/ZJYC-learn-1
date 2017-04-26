@@ -2,57 +2,72 @@
 #include "Ethernet.h"
 #include "IP.h"
 #include "ARP.h"
+#include "Basic.h"
 
 /* 
 	关于网络缓存中的Len属性
 	暂定：发送时逐级增加。接收时逐级减少
-
+	我们假设硬件自动计算以太网的CRC以及前导字段
+	何时动用字序（数据类型转换，非原子操作）
 */
 
-NeteworkBuff NeteorkBuffTemp ={100,{0}};
+NeteworkBuff NeteorkBuffTemp ={ 
+	0x52,
+	{ 0x0c,0x12,0x62,0xb8,0x5a,0x98,0x90,0x2b,0x34,0xce,0xc9,0x02,0x08,0x00,0x45,0x00,0x00,0x44,0x77,0xbf,0x00,0x00,0x40,0x11,0x00,0x00,0xc0,0xa8,0x78,0x23,0x01,0x02,0x03,0x04,0x16,0x2e,0x04,0xd2,0x00,0x30,0x3d,0x13,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x34,0x34,0x34,0x34,0x34,0x34,0x34,0x34,0x34, }
+};
 
-uint16_t EthernetSend(NeteworkBuff * pNeteorkBuff)
+RES EthernetSend(NeteworkBuff * pNeteorkBuff)
 {
-	/* 此处应交换MAC地址，并重新计算CRC */
+	/* MAC交换 */
+	Ethernet_Header * pEthernet_Header = (Ethernet_Header*)pNeteorkBuff->Buff;
+	MAC Temp = pEthernet_Header->DstMAC;
+	pEthernet_Header->DstMAC = pEthernet_Header->SrcMAC;
+	pEthernet_Header->SrcMAC = Temp;
+	/* 长度增加 */
 	pNeteorkBuff->BuffLen += EthernetHeaderLen;
-	pNeteorkBuff = pNeteorkBuff;
+	/* 硬件自动计算CRC... */
+	return RES_True;
 }
-
-uint16_t EthernetRecv(NeteworkBuff * pNeteorkBuff)
+RES EthernetRecv(NeteworkBuff * pNeteorkBuff)
 {
 	Ethernet_Header * pEth_Header = (Ethernet_Header*)pNeteorkBuff->Buff;
+	ARP_Header * pARP_Header;
+	IP_Header * pIP_Header;
 
-	if (EthernetFilter(pNeteorkBuff) == EthernetPacketPass)
+	/* 硬件自动计算CRC */
+	if (EthernetFilter(pNeteorkBuff) == RES_EthernetPacketPass)
 	{
-		if (pEth_Header->Type == EthernetType_ARP)
+		if (pEth_Header->Type == DIY_ntohs(EthernetType_ARP))
 		{
-			ARP_ProcessPacket(pNeteorkBuff);
+			pARP_Header = (ARP_Header*)&pEth_Header->Buff;
+			ARP_ProcessPacket(pARP_Header);
 		}
-		if (pEth_Header->Type == EthernetType_IP)
+		if (pEth_Header->Type == DIY_ntohs(EthernetType_IP))
 		{
-			IP_ProcessPacket(pNeteorkBuff);
+			pIP_Header = (IP_Header*)&pEth_Header->Buff;
+			IP_ProcessPacket(pIP_Header);
 		}
 	}
 }
 
-uint16_t EthernetFilter(NeteworkBuff * pNeteorkBuff)
+RES EthernetFilter(NeteworkBuff * pNeteorkBuff)
 {
 	Ethernet_Header * pEth_Header = (Ethernet_Header*)pNeteorkBuff->Buff;
 
 	if (memcmp((uint8_t*)&pEth_Header->DstMAC,(uint8_t*)&LocalMAC,sizeof(MAC)) == 0)
 	{
-		return EthernetPacketPass;
+		return RES_EthernetPacketPass;
 	}
 	else
 	if (memcmp((uint8_t*)&pEth_Header->DstMAC, (uint8_t*)&BrocastMAC, sizeof(MAC)) == 0)
 	{
-		return EthernetPacketPass;
+		return RES_EthernetPacketPass;
 	}
 	else
 	{
-		return EthernetPacketDelete;
+		return RES_EthernetPacketDeny;
 	}
-	return EthernetPacketDelete;
+	return RES_EthernetPacketDeny;
 }
 
 

@@ -147,15 +147,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ARP.c" />
+    <ClCompile Include="Basic.c" />
     <ClCompile Include="Ethernet.c" />
     <ClCompile Include="IP.c" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Socket.c" />
+    <ClCompile Include="TCP.c" />
+    <ClCompile Include="UDP.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="All.h" />
     <ClInclude Include="ARP.h" />
+    <ClInclude Include="Basic.h" />
     <ClInclude Include="DataTypeDef.h" />
     <ClInclude Include="Ethernet.h" />
     <ClInclude Include="IP.h" />
+    <ClInclude Include="Socket.h" />
+    <ClInclude Include="TCP.h" />
+    <ClInclude Include="UDP.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -24,18 +24,12 @@ typedef struct Ethernet_Header_
 	uint8_t Buff;
 }Ethernet_Header;
 
-typedef struct NeteworkBuff_
-{
-	uint16_t BuffLen;
-	uint8_t Buff[2048];
-}NeteworkBuff;
 
+RES EthernetSend(NeteworkBuff * pNeteorkBuff);
+RES EthernetRecv(NeteworkBuff * pNeteorkBuff);
+RES EthernetFilter(NeteworkBuff * pNeteorkBuff);
 
-uint16_t EthernetSend(NeteworkBuff * pNeteorkBuff);
-uint16_t EthernetRecv(NeteworkBuff * pNeteorkBuff);
-uint16_t EthernetFilter(NeteworkBuff * pNeteorkBuff);
-
-
+extern NeteworkBuff NeteorkBuffTemp;
 
 
 

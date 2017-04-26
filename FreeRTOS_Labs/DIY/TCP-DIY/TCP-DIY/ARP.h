@@ -16,7 +16,6 @@ extern "C" {
 #endif
 
 #include "DataTypeDef.h"
-#include "Ethernet.h"
 
 #define ARP_CACHE_CAPACITY	100
 #define ARP_TTL_MAX			0xff
@@ -58,7 +57,7 @@ uint8_t ARP_GetIP_ByMAC(MAC * mac, IP * ip, uint8_t * IndexOfCache);
 uint8_t ARP_GetMAC_ByIP(IP * ip, MAC * mac, uint8_t * IndexOfCache);
 uint8_t ARP_AddItem(IP * ip, MAC * mac);
 uint8_t ARP_TickTask(void);
-uint8_t ARP_ProcessPacket(NeteworkBuff * pNeteorkBuff);
+uint8_t ARP_ProcessPacket(ARP_Header * pARP_Header);
 uint8_t ARP_SendRequest(NeteworkBuff * pNeteorkBuff, IP * TargetIP);
 
 #ifdef __cplusplus

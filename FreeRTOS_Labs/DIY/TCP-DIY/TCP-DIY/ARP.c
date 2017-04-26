@@ -94,10 +94,8 @@ uint8_t ARP_TickTask(void)
 	}
 }
 
-uint8_t ARP_ProcessPacket(NeteworkBuff * pNeteorkBuff)
+uint8_t ARP_ProcessPacket(ARP_Header * pARP_Header)
 {
-	ARP_Header * pARP_Header = (ARP_Header *)pNeteorkBuff->Buff;
-
 	if (pARP_Header->HardwareType == ARP_HardwareType && pARP_Header->HardwareLen == ARP_HardwareLen &&
 		pARP_Header->ProtocolType == ARP_ProtocolType && pARP_Header->ProtocolLen == ARP_ProtocolLen)
 	{
@@ -108,8 +106,8 @@ uint8_t ARP_ProcessPacket(NeteworkBuff * pNeteorkBuff)
 			memcpy((uint8_t*)&pARP_Header->SrcIP, (uint8_t*)&LocalIP, sizeof(IP));
 			memcpy((uint8_t*)&pARP_Header->SrcMAC, (uint8_t*)&LocalMAC, sizeof(MAC));
 			pARP_Header->Opcode = ARP_OpcodeRespond;
-			pNeteorkBuff->BuffLen = ARP_HeaderLen;
-			EthernetSend(pNeteorkBuff);
+			//pNeteorkBuff->BuffLen = ARP_HeaderLen;
+			//EthernetSend(pNeteorkBuff);
 		}
 		if (pARP_Header->Opcode == ARP_OpcodeRespond)
 		{
