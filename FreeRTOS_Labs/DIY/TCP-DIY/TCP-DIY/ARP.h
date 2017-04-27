@@ -30,6 +30,13 @@ typedef struct ARP_Cache_
 	MAC MAC;
 }ARP_Cache;
 
+typedef struct ARP_FCB_
+{
+	ARP_Cache Cache[ARP_CACHE_CAPACITY];
+	MAC EthDst;
+	MAC EthSrc;
+}ARP_FCB;
+
 #define ARP_HardwareType	0x0001
 #define ARP_ProtocolType	0x0800
 #define ARP_HardwareLen		6
@@ -48,7 +55,7 @@ typedef struct ARP_Header_
 	MAC SrcMAC;
 	IP  SrcIP;
 	MAC DstMAC;
-	MAC DstIP;
+	IP DstIP;
 }ARP_Header;
 
 
@@ -57,8 +64,9 @@ uint8_t ARP_GetIP_ByMAC(MAC * mac, IP * ip, uint8_t * IndexOfCache);
 uint8_t ARP_GetMAC_ByIP(IP * ip, MAC * mac, uint8_t * IndexOfCache);
 uint8_t ARP_AddItem(IP * ip, MAC * mac);
 uint8_t ARP_TickTask(void);
-uint8_t ARP_ProcessPacket(ARP_Header * pARP_Header);
+RES ARP_ProcessPacket(ARP_Header * pARP_Header);
 uint8_t ARP_SendRequest(NeteworkBuff * pNeteorkBuff, IP * TargetIP);
+uint8_t ARP_FillRespond(ARP_Header * pARP_Header);
 
 #ifdef __cplusplus
 }

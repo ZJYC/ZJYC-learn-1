@@ -22,7 +22,7 @@ typedef struct Socket_
 
 uint16_t prvSocket_GetRandomPortNum(void);
 Socket * prvSocket_GetSocketByPort(uint16_t Port);
-
+Socket * prvSocket_Socket(Socket * Socket_New, ADDR * pADDR, uint8_t Procotol);
 
 
 

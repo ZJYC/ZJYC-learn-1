@@ -11,10 +11,55 @@
 	何时动用字序（数据类型转换，非原子操作）
 */
 
-NeteworkBuff NeteorkBuffTemp ={ 
-	0x52,
-	{ 0x0c,0x12,0x62,0xb8,0x5a,0x98,0x90,0x2b,0x34,0xce,0xc9,0x02,0x08,0x00,0x45,0x00,0x00,0x44,0x77,0xbf,0x00,0x00,0x40,0x11,0x00,0x00,0xc0,0xa8,0x78,0x23,0x01,0x02,0x03,0x04,0x16,0x2e,0x04,0xd2,0x00,0x30,0x3d,0x13,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x34,0x34,0x34,0x34,0x34,0x34,0x34,0x34,0x34, }
+NeteworkBuff NeteorkBuffOnly4Eth ={ 
+	0x2d,
+	{ 0x0c,0x12,0x62,0xb8,0x5a,0x98,0x90,0x2b,0x34,0xce,0xc9,0x02,0x08,0x00,0x45,0x00,0x00,0x1f,0x21,0x3f,0x00,0x00,0x40,0x11,0x1c,0xa0,0xc0,0xa8,0x78,0x41,0x01,0x02,0x03,0x04,0x16,0x2e,0x04,0xd2,0x00,0x0b,0x43,0xb6,0x31,0x32,0x33, }
 };
+/*
+****************************************************
+*  Function       : EthernetDeriverSend
+*  Description    : ethernet lowest layer send data
+*  Params         : pointer of pNeteorkBuff
+*  Return         : Reserved
+*  Author         : -5A4A5943-
+*  History        :
+*****************************************************
+*/
+uint16_t EthernetDriverSend(NeteworkBuff * pNeteorkBuff)
+{
+	pNeteorkBuff->BuffLen = pNeteorkBuff->BuffLen;
+
+	return pNeteorkBuff->BuffLen;
+}
+/*
+****************************************************
+*  Function       : EthernetDriverRecv
+*  Description    : When data coming,Driver will all this function
+*  Params         : Data:Coming data.Len:Data length
+*  Return         : Reserved
+*  Author         : -5A4A5943-
+*  History        :
+*****************************************************
+*/
+uint16_t EthernetDriverRecv(uint8_t * Data,uint32_t Len)
+{
+	uint8_t * pNeteorkBuffOnly4Eth = (uint8_t*)&NeteorkBuffOnly4Eth;
+	NeteworkBuff * pNeteworkBuff = &NeteorkBuffOnly4Eth;
+	memcpy((uint8_t*)Data, pNeteorkBuffOnly4Eth, Len + 2);
+	EthernetRecv(pNeteworkBuff);
+	return NULL;
+}
+
+RES EthernetReturnPacket(NeteworkBuff * pNeteorkBuff)
+{
+	Ethernet_Header * pEthernet_Header = (Ethernet_Header*)pNeteorkBuff->Buff;
+	/* Exchange Dst and Src MAC */
+	MAC Temp = pEthernet_Header->DstMAC;
+	pEthernet_Header->DstMAC = pEthernet_Header->SrcMAC;
+	pEthernet_Header->SrcMAC = Temp;
+	/* send the packet */
+	EthernetDriverSend(pNeteorkBuff);
+}
 
 RES EthernetSend(NeteworkBuff * pNeteorkBuff)
 {
@@ -33,6 +78,8 @@ RES EthernetRecv(NeteworkBuff * pNeteorkBuff)
 	Ethernet_Header * pEth_Header = (Ethernet_Header*)pNeteorkBuff->Buff;
 	ARP_Header * pARP_Header;
 	IP_Header * pIP_Header;
+	RES res = RES_True;
+
 
 	/* 硬件自动计算CRC */
 	if (EthernetFilter(pNeteorkBuff) == RES_EthernetPacketPass)
@@ -40,11 +87,16 @@ RES EthernetRecv(NeteworkBuff * pNeteorkBuff)
 		if (pEth_Header->Type == DIY_ntohs(EthernetType_ARP))
 		{
 			pARP_Header = (ARP_Header*)&pEth_Header->Buff;
-			ARP_ProcessPacket(pARP_Header);
+			res = ARP_ProcessPacket(pARP_Header);
+			if (res == RES_ARPHasRespond)
+			{
+				EthernetReturnPacket(pNeteorkBuff);
+			}
 		}
 		if (pEth_Header->Type == DIY_ntohs(EthernetType_IP))
 		{
 			pIP_Header = (IP_Header*)&pEth_Header->Buff;
+			if (ARP_PreProcesspacket() != RES_ARPPacketPass)return RES_False;
 			IP_ProcessPacket(pIP_Header);
 		}
 	}

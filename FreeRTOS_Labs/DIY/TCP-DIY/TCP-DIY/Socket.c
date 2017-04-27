@@ -28,7 +28,7 @@ Socket * prvSocket_GetSocketByPort(uint16_t Port)
 	}
 }
 
-void * prvSocket_Socket(Socket * Socket_New,ADDR * pADDR,uint8_t Procotol)
+Socket * prvSocket_Socket(Socket * Socket_New,ADDR * pADDR,uint8_t Procotol)
 {
 	Socket * pSocket = &Socket_Header;
 
@@ -38,16 +38,27 @@ void * prvSocket_Socket(Socket * Socket_New,ADDR * pADDR,uint8_t Procotol)
 	Socket_New->addr = *pADDR;
 	Socket_New->Next = NULL;
 	Socket_New->Procotol = Procotol;
-	Socket_New->pNeteworkBuff = &NeteorkBuffTemp;
-	while (True)if (pSocket->Next != NULL)pSocket = pSocket->Next;
+	//Socket_New->pNeteworkBuff = &NeteorkBuffTemp;
+	while (True)
+	{
+		if (pSocket->Next != NULL)
+		{
+			pSocket = pSocket->Next;
+		}
+		else
+		{
+			break;
+		}
+	}
 	pSocket->Next = Socket_New;
+	return Socket_New;
 }
 
 RES prvSocketSend(Socket * pSocket, uint8_t * Data, uint32_t Len)
 {
 	if (pSocket->Procotol == IP_Protocol_UDP)
 	{
-		prvUDP_GeneratePacket(pSocket, Data, Len);
+		prvUDP_FillPacket(pSocket, Data, Len);
 	}
 
 }

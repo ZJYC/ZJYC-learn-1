@@ -28,7 +28,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -151,6 +151,7 @@
     <ClCompile Include="Ethernet.c" />
     <ClCompile Include="IP.c" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="NetworkBuff.c" />
     <ClCompile Include="Socket.c" />
     <ClCompile Include="TCP.c" />
     <ClCompile Include="UDP.c" />
@@ -162,6 +163,7 @@
     <ClInclude Include="DataTypeDef.h" />
     <ClInclude Include="Ethernet.h" />
     <ClInclude Include="IP.h" />
+    <ClInclude Include="NetworkBuff.h" />
     <ClInclude Include="Socket.h" />
     <ClInclude Include="TCP.h" />
     <ClInclude Include="UDP.h" />

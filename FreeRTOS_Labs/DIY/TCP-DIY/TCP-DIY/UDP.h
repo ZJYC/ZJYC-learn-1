@@ -9,6 +9,7 @@ extern "C" {
 #include "DataTypeDef.h"
 #include "Socket.h"
 #include "UDP.h"
+#include "IP.h"
 
 #define UDP_HEADE_LEN	8
 
@@ -24,8 +25,9 @@ typedef struct UDP_Header_
 #pragma pack ()
 
 RES UDP_ProcessPacket(UDP_Header * pUDP_Header);
-RES prvUDP_GeneratePacket(Socket * pSocket, uint8_t * Data, uint32_t Len);
-uint16_t prvUDP_GenerateCheckSum(UDP_Header * pUDP_Header);
+uint16_t prvUDP_GetCheckSum(uint16_t*PseudoHeader, uint16_t PseudoLenBytes, uint16_t*Data, uint32_t DataLenBytes);
+RES UDP_PreProcessPacket(IP_Header * pIP_Header);
+RES prvUDP_FillPacket(Socket * pSocket, uint8_t * Data, uint32_t Len);
 
 #ifdef __cplusplus
 }

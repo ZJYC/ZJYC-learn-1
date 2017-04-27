@@ -21,15 +21,15 @@ uint16_t prvGetCheckSum(uint16_t *data, uint32_t nums)
 	return ~checkSum;
 }
 */
-uint16_t prvGetCheckSum(uint16_t *data, uint32_t nums)
+uint16_t prvGetCheckSum(uint16_t *data, uint32_t LenBytes)
 {
 	uint32_t cksum = 0;
-	while (nums>1)
+	while (LenBytes > 1)
 	{
 		cksum += *data++;
-		nums -= 1;
+		LenBytes -= 2;
 	}
-	if (nums)
+	if (LenBytes)
 	{
 		cksum += *(uint8_t *)data;
 	}

@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 #include "DataTypeDef.h"
-
+#include "Socket.h"
 
 #define IP_VersionIPV4	4
 #define	IP_Flags_DF		2
@@ -86,6 +86,7 @@ extern MAC ZeroMAC;
 
 uint16_t IP_ProcessPacket(IP_Header * pIP_Header);
 uint16_t prvIP_GenerateCheckSum(IP_Header * pIP_Header);
+uint16_t prvIP_GeneratePacket(Socket * pSocket);
 
 #ifdef __cplusplus
 }

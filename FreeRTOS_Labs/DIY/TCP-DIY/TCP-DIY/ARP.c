@@ -4,12 +4,16 @@
 #include "IP.h"
 #include "Ethernet.h"
 
-ARP_Cache ArpCache[ARP_CACHE_CAPACITY] = { 0x00 };
+ARP_FCB ARP_FCB_MAIN = { 0x00 };
+
+uint8_t ARP_Buff[24] = { 0x00 };
+
+NeteworkBuff * pNeteworkBuffOnly4ARP = (NeteworkBuff*)ARP_Buff;
 
 uint8_t ARP_Init(void)
 {
 	uint8_t i;
-	memset((uint8_t*)&ArpCache, NULL, sizeof(ArpCache));
+	memset((uint8_t*)&ARP_FCB_MAIN, NULL, sizeof(ARP_FCB_MAIN));
 }
 
 uint8_t ARP_GetIP_ByMAC(MAC * mac,IP * ip, uint8_t * IndexOfCache)
@@ -20,11 +24,11 @@ uint8_t ARP_GetIP_ByMAC(MAC * mac,IP * ip, uint8_t * IndexOfCache)
 
 	for ( i = 0; i < ARP_CACHE_CAPACITY; i++)
 	{
-		Buf1 = (uint8_t*)&ArpCache[i].MAC;
+		Buf1 = (uint8_t*)&ARP_FCB_MAIN.Cache[i].MAC;
 
-		if (ArpCache[i].Used == ARP_True && memcmp(Buf1, Buf2, sizeof(MAC)) == 0)
+		if (ARP_FCB_MAIN.Cache[i].Used == ARP_True && memcmp(Buf1, Buf2, sizeof(MAC)) == 0)
 		{
-			if (ip != NULL)*ip = ArpCache[i].IP;
+			if (ip != NULL)*ip = ARP_FCB_MAIN.Cache[i].IP;
 			if (IndexOfCache != NULL)*IndexOfCache = i;
 			return ARP_True;
 		}
@@ -40,11 +44,11 @@ uint8_t ARP_GetMAC_ByIP(IP * ip,MAC * mac,uint8_t * IndexOfCache)
 
 	for (i = 0; i < ARP_CACHE_CAPACITY; i++)
 	{
-		Buf1 = (uint8_t*)&ArpCache[i].IP;
+		Buf1 = (uint8_t*)&ARP_FCB_MAIN.Cache[i].IP;
 
-		if (ArpCache[i].Used == ARP_True && memcmp(Buf1, Buf2, sizeof(IP)) == 0)
+		if (ARP_FCB_MAIN.Cache[i].Used == ARP_True && memcmp(Buf1, Buf2, sizeof(IP)) == 0)
 		{
-			if (mac != NULL)*mac = ArpCache[i].MAC;
+			if (mac != NULL)*mac = ARP_FCB_MAIN.Cache[i].MAC;
 			if (IndexOfCache != NULL)*IndexOfCache = i;
 			return ARP_True;
 		}
@@ -58,19 +62,19 @@ uint8_t ARP_AddItem(IP * ip, MAC * mac)
 
 	if (ARP_GetMAC_ByIP(mac, NULL, &IndexOfCache) == ARP_True)
 	{
-		ArpCache[IndexOfCache].TTL = ARP_TTL_MAX;
+		ARP_FCB_MAIN.Cache[IndexOfCache].TTL = ARP_TTL_MAX;
 		return ARP_True;
 	}
 	else
 	{
 		for ( i = 0; i < ARP_CACHE_CAPACITY; i++)
 		{
-			if (ArpCache[i].Used == ARP_False)
+			if (ARP_FCB_MAIN.Cache[i].Used == ARP_False)
 			{
-				ArpCache[i].Used = ARP_True;
-				memcpy((uint8_t*)&ArpCache[i].IP, ip, sizeof(IP));
-				memcpy((uint8_t*)&ArpCache[i].MAC, mac, sizeof(MAC));
-				ArpCache[i].TTL = ARP_TTL_MAX;
+				ARP_FCB_MAIN.Cache[i].Used = ARP_True;
+				memcpy((uint8_t*)&ARP_FCB_MAIN.Cache[i].IP, ip, sizeof(IP));
+				memcpy((uint8_t*)&ARP_FCB_MAIN.Cache[i].MAC, mac, sizeof(MAC));
+				ARP_FCB_MAIN.Cache[i].TTL = ARP_TTL_MAX;
 				return ARP_True;
 			}
 		}
@@ -83,37 +87,68 @@ uint8_t ARP_TickTask(void)
 	uint8_t i;
 	for (i = 0; i < ARP_CACHE_CAPACITY; i++)
 	{
-		if (ArpCache[i].Used == ARP_True)
+		if (ARP_FCB_MAIN.Cache[i].Used == ARP_True)
 		{
-			ArpCache[i].TTL -= 1;
-			if (ArpCache[i].TTL <= 0)
+			ARP_FCB_MAIN.Cache[i].TTL -= 1;
+			if (ARP_FCB_MAIN.Cache[i].TTL <= 0)
 			{
-				ArpCache[i].Used = ARP_False;
+				ARP_FCB_MAIN.Cache[i].Used = ARP_False;
 			}
 		}
 	}
 }
 
-uint8_t ARP_ProcessPacket(ARP_Header * pARP_Header)
+uint16_t ARP_PreProcesspacket(NeteworkBuff * pNeteorkBuff)
+{
+	Ethernet_Header*pEthernet_Header = (Ethernet_Header*)pNeteorkBuff->Buff;
+	ARP_Header * pARP_Header = (ARP_Header*)&pEthernet_Header->Buff;
+
+	ARP_FCB_MAIN.EthDst = pEthernet_Header->DstMAC;
+	ARP_FCB_MAIN.EthSrc = pEthernet_Header->SrcMAC;
+
+	if (pARP_Header->HardwareType == ARP_HardwareType && pARP_Header->HardwareLen == ARP_HardwareLen &&
+		pARP_Header->ProtocolType == ARP_ProtocolType && pARP_Header->ProtocolLen == ARP_ProtocolLen)
+	{
+		return RES_ARPPacketPass;
+	}
+	return RES_ARPPacketDeny;
+}
+
+RES ARP_ProcessPacket(ARP_Header * pARP_Header)
 {
 	if (pARP_Header->HardwareType == ARP_HardwareType && pARP_Header->HardwareLen == ARP_HardwareLen &&
 		pARP_Header->ProtocolType == ARP_ProtocolType && pARP_Header->ProtocolLen == ARP_ProtocolLen)
 	{
 		if (pARP_Header->Opcode == ARP_OpcodeRequest)
 		{
-			memcpy((uint8_t*)&pARP_Header->DstIP, (uint8_t*)&pARP_Header->SrcIP,sizeof(IP));
-			memcpy((uint8_t*)&pARP_Header->DstMAC, (uint8_t*)&pARP_Header->SrcMAC, sizeof(MAC));
-			memcpy((uint8_t*)&pARP_Header->SrcIP, (uint8_t*)&LocalIP, sizeof(IP));
-			memcpy((uint8_t*)&pARP_Header->SrcMAC, (uint8_t*)&LocalMAC, sizeof(MAC));
-			pARP_Header->Opcode = ARP_OpcodeRespond;
-			//pNeteorkBuff->BuffLen = ARP_HeaderLen;
-			//EthernetSend(pNeteorkBuff);
+			ARP_AddItem(&pARP_Header->SrcIP, &pARP_Header->SrcMAC);
+			ARP_FillRespond(pARP_Header);
+			return RES_ARPHasRespond;
 		}
 		if (pARP_Header->Opcode == ARP_OpcodeRespond)
 		{
 			ARP_AddItem(&pARP_Header->SrcIP, &pARP_Header->SrcMAC);
+			return RES_ARPPacketProcessed;
 		}
 	}
+	return RES_False;
+}
+
+uint8_t ARP_FillRespond(ARP_Header * pARP_Header)
+{
+	//Ethernet_Header * pEthernet_Header = (Ethernet_Header*)pNeteorkBuff->Buff;
+	//ARP_Header * pARP_Header = (ARP_Header*)&pEthernet_Header->Buff;
+	MAC TargetMac = { 0 };
+	ARP_GetMAC_ByIP(&pARP_Header->SrcIP,&TargetMac,NULL);
+	pARP_Header->DstIP.U32 = pARP_Header->SrcIP.U32;
+	pARP_Header->DstMAC = TargetMac;
+	pARP_Header->SrcIP.U32 = LocalIP.U32;
+	pARP_Header->SrcMAC = LocalMAC;
+	pARP_Header->HardwareLen = ARP_HardwareLen;
+	pARP_Header->HardwareType = ARP_HardwareType;
+	pARP_Header->Opcode = ARP_OpcodeRespond;
+	pARP_Header->ProtocolLen = ARP_ProtocolLen;
+	pARP_Header->ProtocolType = ARP_ProtocolType;
 }
 
 uint8_t ARP_SendRequest(NeteworkBuff * pNeteorkBuff,IP * TargetIP)

@@ -13,6 +13,10 @@ extern "C" {
 #define uint8_t unsigned char
 #define uint16_t unsigned short
 #define uint32_t unsigned int
+
+#include "NetworkBuff.h"
+
+
 #ifndef NULL
 	#define NULL	0x00
 #endif
@@ -40,18 +44,16 @@ typedef struct ADDR_
 	uint16_t LocalPort;
 }ADDR;
 
-typedef struct NeteworkBuff_
-{
-	uint16_t BuffLen;
-	uint8_t Buff[2048];
-}NeteworkBuff;
-
 #pragma pack ()
 
 typedef enum RES_
 {
 	RES_True = 0,
 	RES_False,
+	RES_ARPPacketPass,
+	RES_ARPPacketDeny,
+	RES_ARPHasRespond,
+	RES_ARPPacketProcessed,
 	RES_EthernetPacketPass,
 	RES_EthernetPacketDeny,
 	RES_IPPacketDeny,
