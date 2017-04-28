@@ -6,16 +6,6 @@
 
 Socket Socket_Header = { NULL };
 
-uint16_t prvSocket_GetRandomPortNum(void)
-{
-	uint16_t i;
-
-	for (i = PortStart; i < PortEnd; i++)
-	{
-		if (prvSocket_GetSocketByPort(i) == NULL)return i;
-	}
-}
-
 Socket * prvSocket_GetSocketByPort(uint16_t Port)
 {
 	Socket * pSocket = &Socket_Header;
@@ -25,6 +15,16 @@ Socket * prvSocket_GetSocketByPort(uint16_t Port)
 		if (pSocket->addr.LocalPort == Port)return pSocket;
 		if (pSocket->Next != NULL)pSocket = pSocket->Next;
 		else return NULL;
+	}
+}
+
+uint16_t prvSocket_GetRandomPortNum(void)
+{
+	uint16_t i;
+
+	for (i = PortStart; i < PortEnd; i++)
+	{
+		if (prvSocket_GetSocketByPort(i) == NULL)return i;
 	}
 }
 

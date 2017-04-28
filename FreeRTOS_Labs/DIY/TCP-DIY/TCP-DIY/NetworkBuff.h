@@ -4,25 +4,21 @@
 
 #include "DataTypeDef.h"
 
+#define NetworkBuffDirRx	0
+#define NetworkBuffDirTx	1
+
 typedef struct NeteworkBuff_
 {
 	struct NeteworkBuff_ * Next;
+	uint8_t Ready;
 	uint32_t BuffLen;
 	uint8_t Buff;
 }NeteworkBuff;
 
-
-
-
-
-
-
-
-
-
-
-
-
+void Network_Init(void);
+NeteworkBuff * Network_New(uint8_t Direction, uint32_t Len);
+void Network_Del(NeteworkBuff * UselessBuff);
+NeteworkBuff * Network_GetOne(uint8_t Direction);
 
 #endif
 

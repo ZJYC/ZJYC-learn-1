@@ -13,8 +13,8 @@ extern "C" {
 typedef struct Socket_
 {
 	struct Socket_ * Next;
-	ADDR addr;
 	uint8_t Procotol;
+	ADDR addr;
 	NeteworkBuff * pNeteworkBuff;
 }Socket;
 

@@ -24,10 +24,7 @@ typedef struct UDP_Header_
 }UDP_Header;
 #pragma pack ()
 
-RES UDP_ProcessPacket(UDP_Header * pUDP_Header);
-uint16_t prvUDP_GetCheckSum(uint16_t*PseudoHeader, uint16_t PseudoLenBytes, uint16_t*Data, uint32_t DataLenBytes);
-RES UDP_PreProcessPacket(IP_Header * pIP_Header);
-RES prvUDP_FillPacket(Socket * pSocket, uint8_t * Data, uint32_t Len);
+void UDP_ProcessPacket(NeteworkBuff * pNeteorkBuff);
 
 #ifdef __cplusplus
 }

@@ -17,7 +17,7 @@ extern "C" {
 
 #include "DataTypeDef.h"
 
-#define ARP_CACHE_CAPACITY	100
+#define ARP_CACHE_CAPACITY	50
 #define ARP_TTL_MAX			0xff
 #define ARP_True			0xff
 #define ARP_False			0x00
@@ -29,13 +29,6 @@ typedef struct ARP_Cache_
 	IP IP;
 	MAC MAC;
 }ARP_Cache;
-
-typedef struct ARP_FCB_
-{
-	ARP_Cache Cache[ARP_CACHE_CAPACITY];
-	MAC EthDst;
-	MAC EthSrc;
-}ARP_FCB;
 
 #define ARP_HardwareType	0x0001
 #define ARP_ProtocolType	0x0800
@@ -59,14 +52,13 @@ typedef struct ARP_Header_
 }ARP_Header;
 
 
-uint8_t ARP_Init(void);
+void ARP_Init(void);
 uint8_t ARP_GetIP_ByMAC(MAC * mac, IP * ip, uint8_t * IndexOfCache);
 uint8_t ARP_GetMAC_ByIP(IP * ip, MAC * mac, uint8_t * IndexOfCache);
-uint8_t ARP_AddItem(IP * ip, MAC * mac);
-uint8_t ARP_TickTask(void);
-RES ARP_ProcessPacket(ARP_Header * pARP_Header);
-uint8_t ARP_SendRequest(NeteworkBuff * pNeteorkBuff, IP * TargetIP);
-uint8_t ARP_FillRespond(ARP_Header * pARP_Header);
+void ARP_AddItem(IP * ip, MAC * mac);
+void ARP_TickTask(void);
+void ARP_ProcessPacket(NeteworkBuff * pNeteorkBuff);
+void ARP_SendRequest(IP * TargetIP);
 
 #ifdef __cplusplus
 }

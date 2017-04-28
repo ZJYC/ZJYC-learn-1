@@ -19,6 +19,10 @@ MAC BrocastMAC = {0xFF,0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 MAC ZeroMAC = {0x00,0x00, 0x00, 0x00, 0x00, 0x00};
 IP  BrocastIP = {192,168,120,255};
 
+static uint16_t prvIP_GetIdentify(void)
+{
+	return 8511;
+}
 /*
 ****************************************************
 *  Function       : prvIP_GetCheckSum
@@ -31,7 +35,7 @@ IP  BrocastIP = {192,168,120,255};
 					Available now
 *****************************************************
 */
-uint16_t prvIP_GetCheckSum(IP_Header * pIP_Header)
+static uint16_t prvIP_GetCheckSum(IP_Header * pIP_Header)
 {
 	uint16_t Checksum = DIY_ntohs(pIP_Header->CheckSum);
 	uint16_t HeaderLen = 0, TempDebug = 0;
@@ -74,7 +78,7 @@ uint16_t prvIP_GetCheckSum(IP_Header * pIP_Header)
 					in the future I will add some new feature.This is just a simple framework.
 *****************************************************
 */
-uint16_t prvIP_PreProcessPacket(IP_Header * pIP_Header)
+static RES prvIP_PreProcessPacket(IP_Header * pIP_Header)
 {
 	uint16_t Checksum = DIY_ntohs(pIP_Header->CheckSum);
 	if (Checksum != prvIP_GetCheckSum(pIP_Header))return IP_PacketDelete;
@@ -98,8 +102,11 @@ uint16_t prvIP_PreProcessPacket(IP_Header * pIP_Header)
 					Add a tunnel to UDP procotol
 *****************************************************
 */
-uint16_t IP_ProcessPacket(IP_Header * pIP_Header)
+void IP_ProcessPacket(NeteworkBuff * pNeteorkBuff)
 {
+	Ethernet_Header * pEth_Header = (Ethernet_Header*)&pNeteorkBuff->Buff;
+	IP_Header * pIP_Header = (IP_Header*)&pEth_Header->Buff;
+
 	if (prvIP_PreProcessPacket(pIP_Header) == IP_PacketPass)
 	{
 		switch (pIP_Header->U_TP.S_TP_ALL.Protocol)
@@ -109,13 +116,11 @@ uint16_t IP_ProcessPacket(IP_Header * pIP_Header)
 			case IP_Protocol_TCP:/*TCP_ProcessPacket(pNeteworkBuff); */break;
 			case IP_Protocol_UDP:
 			{
-				if (UDP_PreProcessPacket(pIP_Header) == RES_UDPPacketDeny)return RES_False;
 				UDP_ProcessPacket((UDP_Header *)&pIP_Header->Buff); break; 
 			}
 			default:break;
 		}
 	}
-	return 0;
 }
 
 /*
@@ -130,12 +135,19 @@ uint16_t IP_ProcessPacket(IP_Header * pIP_Header)
 					Just a simple successful implement,Will add new feature in the future.
 *****************************************************
 */
-uint16_t prvIP_FillPacket(Socket * pSocket)
+void prvIP_FillPacket(NeteworkBuff * pNeteworkBuff, IP * RemoteIP,uint8_t Protocol)
 {
-	NeteworkBuff * pNeteworkBuff = pSocket->pNeteworkBuff;
 	Ethernet_Header * pEthernet_Header = (Ethernet_Header*)pNeteworkBuff->Buff;
 	IP_Header * pIP_Header = (IP_Header*)&pEthernet_Header->Buff;
-
+	MAC Temp;
+	/* ARP */
+	ARP_GetMAC_ByIP(RemoteIP,&Temp,0);
+	/* £¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿ */
+	/* ETH */
+	pEthernet_Header->DstMAC = Temp;
+	pEthernet_Header->SrcMAC = LocalMAC;
+	pEthernet_Header->Type = EthernetType_IP;
+	/* IP */
 	pIP_Header->U_VL.U_VL_ALL = DIY_ntohc(pIP_Header->U_VL.U_VL_ALL);
 	pIP_Header->U_TP.U_TP_ALL = DIY_ntohs(pIP_Header->U_TP.U_TP_ALL);
 	pIP_Header->U_FO.U_FO_ALL = DIY_ntohs(pIP_Header->U_FO.U_FO_ALL);
@@ -143,12 +155,14 @@ uint16_t prvIP_FillPacket(Socket * pSocket)
 	pIP_Header->U_VL.S_VL_ALL.Version = IP_VersionIPV4;
 	pIP_Header->U_VL.S_VL_ALL.HeaderLen = IP_HeaderLen/4;
 	pIP_Header->TOS = 0;
-	pIP_Header->Identify = DIY_ntohs(8511);
+	pIP_Header->Identify = prvIP_GetIdentify();
+	pIP_Header->Identify = DIY_ntohs(pIP_Header->Identify);
 	pIP_Header->U_FO.S_FO_ALL.Flags = 0;
 	pIP_Header->U_FO.S_FO_ALL.Offset = 0;
 	pIP_Header->U_TP.S_TP_ALL.TTL = IP_TTL_MAX;
-	pIP_Header->DstIP.U32 = pSocket->addr.RemoteIP.U32;
-	pIP_Header->SrcIP.U32 = pSocket->addr.LocalIP.U32;
+	pIP_Header->U_TP.S_TP_ALL.Protocol = Protocol;
+	pIP_Header->DstIP.U32 = RemoteIP->U32;
+	pIP_Header->SrcIP.U32 = LocalIP.U32;
 
 	pIP_Header->U_VL.U_VL_ALL = DIY_ntohc(pIP_Header->U_VL.U_VL_ALL);
 	pIP_Header->U_TP.U_TP_ALL = DIY_ntohs(pIP_Header->U_TP.U_TP_ALL);
@@ -156,17 +170,4 @@ uint16_t prvIP_FillPacket(Socket * pSocket)
 
 	pIP_Header->CheckSum = prvIP_GetCheckSum(pIP_Header);
 	pIP_Header->CheckSum = DIY_htons(pIP_Header->CheckSum);
-	return 0;
 }
-
-uint32_t DIY_GetIPAddress(void)
-{
-	return LocalIP.U32;
-}
-
-void DIY_SetIPAddress(uint32_t NewIP)
-{
-	LocalIP.U32 = NewIP;
-}
-
-

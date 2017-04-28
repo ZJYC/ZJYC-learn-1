@@ -73,21 +73,13 @@ typedef struct IP_Header_
 }IP_Header;
 #pragma pack ()
 
-
-
-
-
-
-
 extern MAC LocalMAC;
 extern IP  LocalIP;
 extern MAC BrocastMAC;
 extern MAC ZeroMAC;
 
-uint16_t IP_ProcessPacket(IP_Header * pIP_Header);
-uint16_t prvIP_GenerateCheckSum(IP_Header * pIP_Header);
-uint16_t prvIP_GeneratePacket(Socket * pSocket);
-
+void IP_ProcessPacket(NeteworkBuff * pNeteorkBuff);
+void prvIP_FillPacket(NeteworkBuff * pNeteworkBuff, IP * RemoteIP, uint8_t Protocol);
 #ifdef __cplusplus
 }
 #endif

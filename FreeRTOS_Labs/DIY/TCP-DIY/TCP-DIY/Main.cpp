@@ -26,7 +26,7 @@ void APP_Prepare(void)
 int main(void)
 {
 	uint8_t Data[3] = { '1','2','3' };
-
+	Network_Init();
 	APP_Prepare();
 	ARP_Init();
 	//EthernetRecv(&NeteorkBuffTemp);
