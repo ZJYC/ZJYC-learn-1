@@ -54,7 +54,7 @@ typedef struct ARP_Header_
 
 void ARP_Init(void);
 uint8_t ARP_GetIP_ByMAC(MAC * mac, IP * ip, uint8_t * IndexOfCache);
-uint8_t ARP_GetMAC_ByIP(IP * ip, MAC * mac, uint8_t * IndexOfCache);
+uint8_t ARP_GetMAC_ByIP(IP * ip, MAC * mac, uint8_t * IndexOfCache, uint8_t SendRequest);
 void ARP_AddItem(IP * ip, MAC * mac);
 void ARP_TickTask(void);
 void ARP_ProcessPacket(NeteworkBuff * pNeteorkBuff);

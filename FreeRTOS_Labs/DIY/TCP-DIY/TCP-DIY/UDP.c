@@ -39,7 +39,7 @@ static RES UDP_PreProcessPacket(NeteworkBuff * pNeteorkBuff)
 	UDP_Header * pUDP_Header = (UDP_Header*)&pIP_Header->Buff;
 	uint32_t PseudoHeader[3] = { 0x00 };
 	uint16_t PayloadLen = 0, CheckSum = 0, CheckTemp = 0;
-	Socket * pSocket = prvSocket_GetSocketByPort(DIY_ntohs(pUDP_Header->DstPort));
+	Socket * pSocket = Socket_GetSocketByPort(DIY_ntohs(pUDP_Header->DstPort));
 	if (pSocket == NULL)return RES_UDPPacketDeny;
 
 	CheckSum = DIY_ntohs(pUDP_Header->CheckSum);
@@ -68,14 +68,16 @@ void prvUDP_FillPacket(NeteworkBuff * pNeteorkBuff, IP * RemoteIP,uint16_t DstPo
 	pUDP_Header->SrcPort = DIY_htons(SrcPort);
 	memcpy(pUDP_Payload, Data, Len);
 	PayloadLen = DIY_ntohs(pUDP_Header->DataLen);
-	PseudoHeader[0] = pIP_Header->SrcIP.U32;
-	PseudoHeader[1] = pIP_Header->DstIP.U32;
+	PseudoHeader[0] = LocalIP.U32;
+	PseudoHeader[1] = RemoteIP->U32;
 	PseudoHeader[2] = IP_Protocol_UDP << 16 | PayloadLen;
 	PseudoHeader[2] = DIY_ntohl(PseudoHeader[2]);
 	pUDP_Header->CheckSum = 0;
 	pUDP_Header->CheckSum = prvUDP_GetCheckSum((uint16_t*)PseudoHeader,12,(uint16_t*)pUDP_Header, PayloadLen);
 	pUDP_Header->CheckSum = DIY_htons(pUDP_Header->CheckSum);
-	/* 到现在为止UDP填充完毕 */
+	/* IP */
+	pIP_Header->TotalLen = IP_HeaderLen + DIY_htons(pUDP_Header->DataLen);
+	pIP_Header->TotalLen = DIY_htons(pIP_Header->TotalLen);
 	prvIP_FillPacket(pNeteorkBuff, RemoteIP,IP_Protocol_UDP);
 }
 

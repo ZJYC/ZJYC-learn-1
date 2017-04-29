@@ -13,15 +13,15 @@
 	每一层只负责他们自己的属性并加入到<NeteorkBuffTemp>中
 */
 
-MAC LocalMAC = { 0x90,0x2b,0x34,0xce,0xc9,0x02 };
-IP  LocalIP = {192,168,120,65};
+MAC LocalMAC = { 1,2,3,4,5,6 };
+IP  LocalIP = {1,2,3,4};
 MAC BrocastMAC = {0xFF,0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 MAC ZeroMAC = {0x00,0x00, 0x00, 0x00, 0x00, 0x00};
 IP  BrocastIP = {192,168,120,255};
 
 static uint16_t prvIP_GetIdentify(void)
 {
-	return 8511;
+	return 1;
 }
 /*
 ****************************************************
@@ -116,7 +116,7 @@ void IP_ProcessPacket(NeteworkBuff * pNeteorkBuff)
 			case IP_Protocol_TCP:/*TCP_ProcessPacket(pNeteworkBuff); */break;
 			case IP_Protocol_UDP:
 			{
-				UDP_ProcessPacket((UDP_Header *)&pIP_Header->Buff); break; 
+				UDP_ProcessPacket(pNeteorkBuff); break;
 			}
 			default:break;
 		}
@@ -137,16 +137,9 @@ void IP_ProcessPacket(NeteworkBuff * pNeteorkBuff)
 */
 void prvIP_FillPacket(NeteworkBuff * pNeteworkBuff, IP * RemoteIP,uint8_t Protocol)
 {
-	Ethernet_Header * pEthernet_Header = (Ethernet_Header*)pNeteworkBuff->Buff;
+	Ethernet_Header * pEthernet_Header = (Ethernet_Header*)&pNeteworkBuff->Buff;
 	IP_Header * pIP_Header = (IP_Header*)&pEthernet_Header->Buff;
 	MAC Temp;
-	/* ARP */
-	ARP_GetMAC_ByIP(RemoteIP,&Temp,0);
-	/* ？？？？？？？？？？？？？？？？？？？？？？？？？？ */
-	/* ETH */
-	pEthernet_Header->DstMAC = Temp;
-	pEthernet_Header->SrcMAC = LocalMAC;
-	pEthernet_Header->Type = EthernetType_IP;
 	/* IP */
 	pIP_Header->U_VL.U_VL_ALL = DIY_ntohc(pIP_Header->U_VL.U_VL_ALL);
 	pIP_Header->U_TP.U_TP_ALL = DIY_ntohs(pIP_Header->U_TP.U_TP_ALL);
@@ -170,4 +163,6 @@ void prvIP_FillPacket(NeteworkBuff * pNeteworkBuff, IP * RemoteIP,uint8_t Protoc
 
 	pIP_Header->CheckSum = prvIP_GetCheckSum(pIP_Header);
 	pIP_Header->CheckSum = DIY_htons(pIP_Header->CheckSum);
+	/* ETH */
+	Ethernet_FillPacket(pNeteworkBuff, EthernetType_IP, RemoteIP);
 }

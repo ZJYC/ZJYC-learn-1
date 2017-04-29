@@ -20,14 +20,9 @@ typedef struct Socket_
 
 #pragma pack ()
 
-uint16_t prvSocket_GetRandomPortNum(void);
-Socket * prvSocket_GetSocketByPort(uint16_t Port);
-Socket * prvSocket_Socket(Socket * Socket_New, ADDR * pADDR, uint8_t Procotol);
-
-
-
-
-
+Socket * prvSocket_New(ADDR * pADDR, uint8_t Procotol);
+void Socket_Send(Socket * pSocket, uint8_t * Data, uint32_t Len);
+Socket * Socket_GetSocketByPort(uint16_t Port);
 
 #ifdef __cplusplus
 }

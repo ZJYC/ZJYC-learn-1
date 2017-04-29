@@ -34,7 +34,7 @@ uint8_t ARP_GetIP_ByMAC(MAC * mac,IP * ip, uint8_t * IndexOfCache)
 	return ARP_False;
 }
 
-uint8_t ARP_GetMAC_ByIP(IP * ip,MAC * mac,uint8_t * IndexOfCache)
+uint8_t ARP_GetMAC_ByIP(IP * ip, MAC * mac, uint8_t * IndexOfCache, uint8_t SendRequest)
 {
 	uint8_t i, *Buf1, *Buf2;
 
@@ -51,7 +51,7 @@ uint8_t ARP_GetMAC_ByIP(IP * ip,MAC * mac,uint8_t * IndexOfCache)
 			return ARP_True;
 		}
 	}
-	ARP_SendRequest(ip);
+	if (SendRequest != NULL)ARP_SendRequest(ip);
 	return ARP_False;
 }
 
@@ -59,7 +59,7 @@ void ARP_AddItem(IP * ip, MAC * mac)
 {
 	uint8_t IndexOfCache = 0,i;
 
-	if (ARP_GetMAC_ByIP(mac, NULL, &IndexOfCache) == ARP_True)
+	if (ARP_GetMAC_ByIP(mac, NULL, &IndexOfCache,NULL) == ARP_True)
 	{
 		pARP_Cache[IndexOfCache].TTL = ARP_TTL_MAX;
 	}
@@ -73,6 +73,7 @@ void ARP_AddItem(IP * ip, MAC * mac)
 				memcpy((uint8_t*)&pARP_Cache[i].IP, ip, sizeof(IP));
 				memcpy((uint8_t*)&pARP_Cache[i].MAC, mac, sizeof(MAC));
 				pARP_Cache[i].TTL = ARP_TTL_MAX;
+				return;
 			}
 		}
 	}

@@ -46,15 +46,14 @@ static void prvNetwork_Remove(NeteworkBuff * UselessBuff)
 
 NeteworkBuff * Network_New(uint8_t Direction,uint32_t Len)
 {
-	uint32_t ActuallLen = Len + 16;
+	uint32_t ActuallLen = Len + sizeof(NeteworkBuff);
 	NeteworkBuff * pNeteworkBuff = 0x00;
 	uint8_t * MemHeader = MM_Ops.Malloc(ActuallLen);
 
 	if (MemHeader != NULL)
 	{
 		pNeteworkBuff = (NeteworkBuff*)MemHeader;
-		if (Direction == NetworkBuffDirRx)prvNetwork_Insert(&pNeteworkBuffRxHead, pNeteworkBuff);
-		if (Direction == NetworkBuffDirTx)prvNetwork_Insert(&pNeteworkBuffTxHead, pNeteworkBuff);
+		prvNetwork_Insert(Direction, pNeteworkBuff);
 		pNeteworkBuff->Ready = NULL;
 		pNeteworkBuff->BuffLen = Len;
 		return pNeteworkBuff;

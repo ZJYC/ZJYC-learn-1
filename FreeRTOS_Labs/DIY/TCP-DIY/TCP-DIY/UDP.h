@@ -25,7 +25,7 @@ typedef struct UDP_Header_
 #pragma pack ()
 
 void UDP_ProcessPacket(NeteworkBuff * pNeteorkBuff);
-
+void prvUDP_FillPacket(NeteworkBuff * pNeteorkBuff, IP * RemoteIP, uint16_t DstPort, uint16_t SrcPort, uint8_t * Data, uint32_t Len);
 #ifdef __cplusplus
 }
 #endif
