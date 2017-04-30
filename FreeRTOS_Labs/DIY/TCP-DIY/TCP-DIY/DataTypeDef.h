@@ -59,7 +59,9 @@ typedef enum RES_
 	RES_IPPacketDeny,
 	RES_IPPacketPass,
 	RES_UDPPacketDeny,
-	RES_UDPPacketPass
+	RES_UDPPacketPass,
+	RES_TCPPacketDeny,
+	RES_TCPPacketPass
 }RES;
 
 

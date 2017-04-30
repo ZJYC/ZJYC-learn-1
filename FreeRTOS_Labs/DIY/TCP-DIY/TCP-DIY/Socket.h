@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 #include "DataTypeDef.h"
+#include "TCP.h"
 
 #pragma pack (1)
 
@@ -16,6 +17,7 @@ typedef struct Socket_
 	uint8_t Procotol;
 	ADDR addr;
 	NeteworkBuff * pNeteworkBuff;
+	TCP_Control * pTCP_Control;
 }Socket;
 
 #pragma pack ()

@@ -48,6 +48,9 @@
     <ClCompile Include="TCP_Task.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TCP_WIN.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ARP.h">
@@ -84,6 +87,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TCP_Task.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TCP_WIN.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

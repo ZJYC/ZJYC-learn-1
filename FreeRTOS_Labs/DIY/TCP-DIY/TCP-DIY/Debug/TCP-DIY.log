@@ -1,5 +1,29 @@
-﻿生成启动时间为 2017/4/29 14:42:19。
+﻿生成启动时间为 2017/4/30 11:16:01。
+     1>项目“C:\Users\Zhaojingyangchun\Documents\GitHub\ZJYC-learn-1\FreeRTOS_Labs\DIY\TCP-DIY\TCP-DIY\TCP-DIY.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         E:\DangerWithYou\VS2013\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TC /analyze- /errorReport:prompt ARP.c Ethernet.c IP.c Socket.c TCP.c UDP.c
+         UDP.c
+         TCP.c
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\tcp.c(114): error C2059: 语法错误:“)”
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\tcp.c(119): error C2059: 语法错误:“}”
+         Socket.c
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\socket.c(41): warning C4047: “==”:“int”与“void *”的间接级别不同
+         IP.c
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\ip.c(142): warning C4101: “Temp”: 未引用的局部变量
+         Ethernet.c
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\ethernet.c(66): warning C4098: “Ethernet_ProcessPacket”:“void”函数返回值
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\ethernet.c(70): warning C4013: “prvEthernetFilter”未定义；假设外部返回 int
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\ethernet.c(108): warning C4047: “函数”:“unsigned char”与“void *”的间接级别不同
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\ethernet.c(108): warning C4024: “ARP_GetMAC_ByIP”: 形参和实参 4 的类型不同
+         ARP.c
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\arp.c(12): warning C4101: “i”: 未引用的局部变量
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\arp.c(54): warning C4047: “!=”:“int”与“void *”的间接级别不同
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\arp.c(62): warning C4133: “函数”: 从“MAC *”到“IP *”的类型不兼容
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\arp.c(62): warning C4047: “函数”:“unsigned char”与“void *”的间接级别不同
+     1>c:\users\zhaojingyangchun\documents\github\zjyc-learn-1\freertos_labs\diy\tcp-diy\tcp-diy\arp.c(62): warning C4024: “ARP_GetMAC_ByIP”: 形参和实参 4 的类型不同
+         正在生成代码...
+     1>已完成生成项目“C:\Users\Zhaojingyangchun\Documents\GitHub\ZJYC-learn-1\FreeRTOS_Labs\DIY\TCP-DIY\TCP-DIY\TCP-DIY.vcxproj”(Build 个目标)的操作 - 失败。
 
-生成成功。
+生成失败。
 
-已用时间 00:00:00.01
+已用时间 00:00:02.28

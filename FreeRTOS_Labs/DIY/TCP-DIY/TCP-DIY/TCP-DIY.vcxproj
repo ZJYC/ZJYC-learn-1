@@ -156,6 +156,7 @@
     <ClCompile Include="Socket.c" />
     <ClCompile Include="TCP.c" />
     <ClCompile Include="TCP_Task.cpp" />
+    <ClCompile Include="TCP_WIN.c" />
     <ClCompile Include="UDP.c" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +171,7 @@
     <ClInclude Include="Socket.h" />
     <ClInclude Include="TCP.h" />
     <ClInclude Include="TCP_Task.h" />
+    <ClInclude Include="TCP_WIN.h" />
     <ClInclude Include="UDP.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
