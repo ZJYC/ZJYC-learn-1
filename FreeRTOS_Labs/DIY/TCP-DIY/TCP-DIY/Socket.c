@@ -54,6 +54,18 @@ Socket * prvSocket_New(ADDR * pADDR,uint8_t Procotol)
 		else break;
 	}
 	pSocketHeader->Next = pSocketNew;
+	if (Procotol == IP_Protocol_UDP)pSocketNew->pTCP_Control = 0x00;
+	if (Procotol == IP_Protocol_TCP)
+	{
+		pSocketNew->pTCP_Control = (TCP_Control*)MM_Ops.Malloc(sizeof(TCP_Control));
+		if (pSocketNew->pTCP_Control)
+		{
+			memset((uint8_t*)pSocketNew->pTCP_Control, 0x00, sizeof(TCP_Control));
+			pSocketNew->pTCP_Control->LocalPort = pSocketNew->addr.LocalPort;
+			pSocketNew->pTCP_Control->RemotePort = pSocketNew->addr.RemotePort;
+			pSocketNew->pTCP_Control->RemoteIP.U32 = pSocketNew->addr.RemoteIP.U32;
+		}
+	}
 	return pSocketNew;
 }
 
