@@ -57,17 +57,21 @@ Socket * prvSocket_New(ADDR * pADDR,uint8_t Procotol)
 	return pSocketNew;
 }
 
+
 void Socket_Send(Socket * pSocket, uint8_t * Data, uint32_t Len)
 {
 	if (pSocket == NULL)return;
 
 	if (pSocket->Procotol == IP_Protocol_UDP)
 	{
-		NeteworkBuff * pNeteworkBuff = Network_New(NetworkBuffDirTx, EthernetHeaderLen + IP_HeaderLen + UDP_HEADE_LEN + Len);
+		NeteworkBuff * pNeteworkBuff = Network_New(NetworkBuffDirTx, UDP_GetPacketSize(Len));
 		prvUDP_FillPacket(pNeteworkBuff, &pSocket->addr.RemoteIP, pSocket->addr.RemotePort, pSocket->addr.LocalPort, Data, Len);
 		Ethernet_TransmitPacket(pNeteworkBuff);
 	}
+	if (pSocket->Procotol == IP_Protocol_TCP)
+	{
 
+	}
 }
 
 

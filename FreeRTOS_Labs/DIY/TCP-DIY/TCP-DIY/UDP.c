@@ -96,7 +96,10 @@ void UDP_ProcessPacket(NeteworkBuff * pNeteorkBuff)
 
 }
 
-
+uint32_t UDP_GetPacketSize(uint32_t DataLen)
+{
+	return EthernetHeaderLen + IP_HeaderLen + IP_GetOptionSize() + UDP_HEADE_LEN + DataLen;
+}
 
 
 

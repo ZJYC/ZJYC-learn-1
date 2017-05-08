@@ -80,6 +80,7 @@ extern MAC ZeroMAC;
 
 void IP_ProcessPacket(NeteworkBuff * pNeteorkBuff);
 void prvIP_FillPacket(NeteworkBuff * pNeteworkBuff, IP * RemoteIP, uint8_t Protocol);
+uint32_t IP_GetOptionSize(void);
 #ifdef __cplusplus
 }
 #endif

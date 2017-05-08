@@ -166,3 +166,9 @@ void prvIP_FillPacket(NeteworkBuff * pNeteworkBuff, IP * RemoteIP,uint8_t Protoc
 	/* ETH */
 	Ethernet_FillPacket(pNeteworkBuff, EthernetType_IP, RemoteIP);
 }
+
+uint32_t IP_GetOptionSize(void)
+{
+	return 0;
+}
+
