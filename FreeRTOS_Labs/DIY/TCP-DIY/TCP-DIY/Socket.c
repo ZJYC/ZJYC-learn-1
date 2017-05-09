@@ -69,6 +69,23 @@ Socket * prvSocket_New(ADDR * pADDR,uint8_t Procotol)
 	return pSocketNew;
 }
 
+void Socket_Listen(Socket * pSocket)
+{
+	if (pSocket->Procotol == IP_Protocol_TCP)
+	{
+		TCP_Control * pTCP_Control = pSocket->pTCP_Control;
+		pTCP_Control->State = TCP_STATE_LISTEN;
+	}
+}
+
+void Socket_Connect(Socket * pSocket)
+{
+	if (pSocket->Procotol == IP_Protocol_TCP)
+	{
+		TCP_Control * pTCP_Control = pSocket->pTCP_Control;
+		TCP_Connect(pTCP_Control);
+	}
+}
 
 void Socket_Send(Socket * pSocket, uint8_t * Data, uint32_t Len)
 {

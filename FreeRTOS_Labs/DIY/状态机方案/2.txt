@@ -1,0 +1,97 @@
+
+
+
+
+套接字对于TCP的API：
+
+Connect
+Listen
+send
+Recv
+Bind
+Accept
+
+
+HandShakeFinished -- HSF
+
+->prvTCP_CheckSumRx() -> prvTCP_SN_ACK_Rx() -> prvTCP_OptionWinsizeRx() -> prvTCP_DataRx() -> prvTCP_StateMachine() 
+
+prvTCP_FlagsRx()
+    if State == LISTEN:
+        if RxFlags != SYN:return;
+    if State == SYN_RECV:
+        if RxFlags != ACK:return;
+    if State == SYN_SENT:
+        if RxFlags != SYN+ACK:return;
+        
+prvTCP_SN_ACK_Rx()
+    if LocalSN_Informed:
+        if RxACK != LocalSN:return
+    if RemoteSN_Knowed:
+        if RxSN != RemoteSN:return;
+    if !RemoteSN_Knowed:
+        RemoteSN_Knowed = 1;
+        RemoteSN = RxSN
+    
+prvTCP_OptionWinsizeRx()
+    ProcessOption()
+    ProcessWinSize()
+prvTCP_DataRx()
+    GetData();
+    if DataLenRx:RemoteSN += DataLenRx;
+    
+prvTCP_StateMachine()
+    if State == CLOSED:
+        State == SYN_SENT:
+        Respond = 1;
+        break;
+    if State == LISTEN:
+        State = SYN_RECV;
+        Respond = 1;
+        break;
+    if State == SYN_RECV:
+        State = ESTABLISHED;
+        HSF = 1;
+        Respond = 0;
+        break;
+    if State == SYN_SENT:
+        State = ESTABLISHED;
+        Respond = 1;
+        break;
+    if State == ESTABLISHED:
+        ?????
+prvTCP_DataTx()
+    SetData();
+    //if DataLenTx:LocalSN += DataLenTx;
+prvTCP_OptionWinsizeRx()
+    SetOption();
+    SetWinSize();
+prvTCP_SN_ACK_Tx()
+    SN = LocalSN;
+    LocalSN += DataLenTx;
+    if RemoteSN_Knowed : ACK = RemoteSN;
+    
+    if State < ESTABLISHED:
+        LocalSN += 1;
+        RemoteSN += 1;
+    if State == ESTABLISHED && HSF == 0:
+        LocalSN += 1;
+    LocalSN_Informed = 1
+    
+prvTCP_FlagsTx()
+    if State == SYN_RECV:
+        Flags |= SYN+ACK;
+    if State == ESTABLISHED && HSF == 0:
+        HSF = 1;
+        Flags |= ACK;
+    if State == SYN_SENT:
+        Flags |= SYN;
+    if DataLenTx:Flags |= PSH
+    
+    
+    
+    
+    
+    
+    
+    

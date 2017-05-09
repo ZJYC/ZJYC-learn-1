@@ -61,7 +61,8 @@ typedef enum RES_
 	RES_UDPPacketDeny,
 	RES_UDPPacketPass,
 	RES_TCPPacketDeny,
-	RES_TCPPacketPass
+	RES_TCPPacketPass,
+	RES_TCPPacketRespond
 }RES;
 
 
